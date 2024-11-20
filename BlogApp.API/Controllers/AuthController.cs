@@ -1,5 +1,7 @@
 ﻿using BlogApp.Application.DTOs;
+using BlogApp.Application.Helpers;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +59,11 @@ namespace BlogApp.API.Controllers
 
             await _userManager.AddToRoleAsync(user, UserRoles.User);
 
-            return Ok(new { Message = "User created successfully." });
+            return Ok(new Response(
+                new { Message = "User created successfully." },
+                null,
+                HttpStatusCode.OK));
         }
     }
+
 }
