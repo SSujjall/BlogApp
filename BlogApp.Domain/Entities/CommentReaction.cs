@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlogApp.Domain.Entities
 {
-    public class UserRoles
+    public class CommentReaction
     {
-        public const string Admin = "Admin";
-        public const string User = "User";
     }
 }

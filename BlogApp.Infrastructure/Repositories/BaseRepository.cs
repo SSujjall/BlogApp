@@ -1,9 +1,12 @@
 ﻿using BlogApp.Application.Helpers;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,41 +14,53 @@ namespace BlogApp.Infrastructure.Repositories
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _dbContext;
 
-        public BaseRepository(AppDbContext context)
+        public BaseRepository(AppDbContext dbContext)
         {
-            _context = context;
+            _dbContext = dbContext;
         }
 
-        public Task<T> Add(T entity)
+        public async Task<T> Add(T entity)
         {
-            throw new NotImplementedException();
+            var result = await _dbContext.Set<T>().AddAsync(entity);
+            _dbContext.SaveChanges();
+            return result.Entity;
         }
 
-        public Task Delete(T entity)
+        public async Task Delete(T entity)
         {
-            throw new NotImplementedException();
+            _dbContext.Remove(entity);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<T>> GetAll(GetRequest<T>? request)
+        public async Task<T> FindByConditionAsync(Expression<Func<T, bool>> expression)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Set<T>().FirstOrDefaultAsync(expression);
         }
 
-        public Task<T>? GetById(object entityId)
+        public async Task<IEnumerable<T>> GetAll(GetRequest<T>? request)
         {
-            throw new NotImplementedException();
+            var result = await _dbContext.Set<T>().ToListAsync();
+            return result;
         }
 
-        public Task SaveChangesAsync()
+        public async Task<T>? GetById(object entityId)
         {
-            throw new NotImplementedException();
+            var result = await _dbContext.FindAsync<T>(entityId);
+            return result;
         }
 
-        public Task<T> Update(T entity)
+        public async Task SaveChangesAsync()
         {
-            throw new NotImplementedException();
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<T> Update(T entity)
+        {
+            var result = _dbContext.Update(entity);
+            await SaveChangesAsync();
+            return result.Entity;
         }
     }
 }

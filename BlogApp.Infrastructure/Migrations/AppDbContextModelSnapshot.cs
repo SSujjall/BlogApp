@@ -51,8 +51,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "70538d21-b4e6-4a01-bded-49977e433ac4",
-                            ConcurrencyStamp = "70538d21-b4e6-4a01-bded-49977e433ac4",
+                            Id = "4ce6fa3e-db0e-4bd8-a993-d3a5d15b1b0c",
+                            ConcurrencyStamp = "4ce6fa3e-db0e-4bd8-a993-d3a5d15b1b0c",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -221,8 +221,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "430bf0eb-54c3-47bb-9f9c-1cf0793c44c0",
-                            RoleId = "70538d21-b4e6-4a01-bded-49977e433ac4"
+                            UserId = "79c8fa44-4844-465f-9a15-57ac74883f3a",
+                            RoleId = "4ce6fa3e-db0e-4bd8-a993-d3a5d15b1b0c"
                         });
                 });
 
@@ -254,17 +254,17 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "430bf0eb-54c3-47bb-9f9c-1cf0793c44c0",
+                            Id = "79c8fa44-4844-465f-9a15-57ac74883f3a",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "5cd66456-d623-4ec6-891f-625afb56a2b0",
+                            ConcurrencyStamp = "dfc72fb5-4e3d-441f-870b-0ab743f74139",
                             Email = "admin@user.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@USER.COM",
                             NormalizedUserName = "ADMIN@USER.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBKoiC9UbnD2FY+nquBT5irr88yMYbAf/X1VrzqABAiCo5qv+WZwjCAKFfzeDw52IA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMYtGlC2o40Ol9tM+Btq9FggeHqYYlP78bZbz6v3Bj0ndqgwdo/C2pqFqNqJujtaow==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "fe950ab6-74ad-4356-9894-285f5106dcaa",
+                            SecurityStamp = "abc87195-786c-4651-8936-a64f8fe9a46f",
                             TwoFactorEnabled = false,
                             UserName = "admin@user.com"
                         });

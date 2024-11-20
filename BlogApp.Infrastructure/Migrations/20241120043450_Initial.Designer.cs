@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240630062905_second")]
-    partial class second
+    [Migration("20241120043450_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,8 +54,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7c997d63-f1a7-4c87-a552-bb599ea536ad",
-                            ConcurrencyStamp = "7c997d63-f1a7-4c87-a552-bb599ea536ad",
+                            Id = "4ce6fa3e-db0e-4bd8-a993-d3a5d15b1b0c",
+                            ConcurrencyStamp = "4ce6fa3e-db0e-4bd8-a993-d3a5d15b1b0c",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -224,8 +224,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "996fcf89-4920-43ef-a957-1106e3eb91a0",
-                            RoleId = "7c997d63-f1a7-4c87-a552-bb599ea536ad"
+                            UserId = "79c8fa44-4844-465f-9a15-57ac74883f3a",
+                            RoleId = "4ce6fa3e-db0e-4bd8-a993-d3a5d15b1b0c"
                         });
                 });
 
@@ -257,17 +257,17 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "996fcf89-4920-43ef-a957-1106e3eb91a0",
+                            Id = "79c8fa44-4844-465f-9a15-57ac74883f3a",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "67482450-2776-44cd-a3ae-1854efd6462b",
+                            ConcurrencyStamp = "dfc72fb5-4e3d-441f-870b-0ab743f74139",
                             Email = "admin@user.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@USER.COM",
                             NormalizedUserName = "ADMIN@USER.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAJsqocunneR81meRQnKdYIpMGNVKWA0rdkLQtxX8r2+zaNEARX3L7VVFsF9dHOCdA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMYtGlC2o40Ol9tM+Btq9FggeHqYYlP78bZbz6v3Bj0ndqgwdo/C2pqFqNqJujtaow==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "5805960c-c3d1-4b54-9c37-86bf6fa7b8db",
+                            SecurityStamp = "abc87195-786c-4651-8936-a64f8fe9a46f",
                             TwoFactorEnabled = false,
                             UserName = "admin@user.com"
                         });
