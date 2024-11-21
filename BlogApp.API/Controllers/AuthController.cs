@@ -1,5 +1,6 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers;
+using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
 using Microsoft.AspNetCore.Http;
@@ -13,13 +14,13 @@ namespace BlogApp.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AuthController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthController(IAuthService authService, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
-            _userManager = userManager;
+            _authService = authService;
             _roleManager = roleManager;
             _configuration = configuration;
         }
@@ -27,43 +28,49 @@ namespace BlogApp.API.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterUser(RegisterDTO registerDto)
         {
-            var userExists = await _userManager.FindByNameAsync(registerDto.Username);
+            var result = await _authService.RegisterUser(registerDto);
 
-            if (userExists != null)
+            if (result != null)
             {
-                return BadRequest(new { Message = "User Exists", registerDto.Username });
+                return BadRequest(new Response(
+                    null,
+                    new Dictionary<string, string>
+                    {
+                        { "message", "Username already exists." }
+                    },
+                    HttpStatusCode.BadRequest));
             }
-
-            var user = new User()
-            {
-                UserName = registerDto.Username,
-                Email = registerDto.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-            };
-
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
-
-            if (!result.Succeeded)
-            {
-                return BadRequest(new { Message = "Failed to create user" });
-            }
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-            {
-                var role = new IdentityRole(UserRoles.User)
-                {
-                    ConcurrencyStamp = Guid.NewGuid().ToString() // Ensure concurrency stamp
-                };
-                await _roleManager.CreateAsync(role);
-            }
-
-            await _userManager.AddToRoleAsync(user, UserRoles.User);
 
             return Ok(new Response(
                 new { Message = "User created successfully." },
                 null,
                 HttpStatusCode.OK));
         }
-    }
 
+        [HttpPost("Login")]
+        public async Task<IActionResult> LoginUser(LoginDTO model)
+        {
+            var token = await _authService.LoginUser(model);
+
+            if (token == null)
+            {
+                return BadRequest(new Response(
+                    null,
+                    new Dictionary<string, string>
+                    {
+                        { "message", "Invalid username or password." }
+                    },
+                    HttpStatusCode.BadRequest));
+            }
+
+            return Ok(new Response(
+                new
+                {
+                    Message = "User validated successfully",
+                    Token = token
+                },
+                null,
+                HttpStatusCode.OK));
+        }
+    }
 }

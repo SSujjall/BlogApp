@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,5 +21,8 @@ namespace BlogApp.Domain.Entities
         public string Description { get; set; }
         public string ImageUrl { get; set; }
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+
+        // Virtual navigation property
+        public virtual Blogs Blogs { get; set; } = null!;
     }
 }
