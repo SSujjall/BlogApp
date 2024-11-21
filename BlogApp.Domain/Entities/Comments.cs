@@ -27,5 +27,7 @@ namespace BlogApp.Domain.Entities
         // Navigation Properties
         public virtual Blogs Blogs { get; set; }
         public virtual User User { get; set; }
+        public virtual ICollection<CommentReaction> Reactions { get; set; } = new List<CommentReaction>();
+        public virtual ICollection<CommentHistory> History { get; set; } = new List<CommentHistory>();
     }
 }

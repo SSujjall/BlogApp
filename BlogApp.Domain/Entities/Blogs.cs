@@ -15,7 +15,7 @@ namespace BlogApp.Domain.Entities
         public int BlogId { get; set; }
 
         [ForeignKey(nameof(User))]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
@@ -25,6 +25,9 @@ namespace BlogApp.Domain.Entities
         public DateOnly UpdatedAt { get; set; }
 
         // Navigation Properties
-        public virtual User User { get; set; }
+        public virtual User User { get; set; } = null!;
+        public virtual ICollection<Comments> Comments { get; set; } = new List<Comments>();
+        public virtual ICollection<BlogReaction> Reactions { get; set; } = new List<BlogReaction>();
+        public virtual ICollection<BlogHistory> History { get; set; } = new List<BlogHistory>();
     }
 }

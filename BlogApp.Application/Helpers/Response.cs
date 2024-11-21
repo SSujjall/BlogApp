@@ -11,14 +11,14 @@ namespace BlogApp.Application.Helpers
     {
         public HttpStatusCode StatusCode { get; set; }
         public object Data { get; set; }
-        public List<string> Errors { get; set; }
+        public Dictionary<string, string> Errors { get; set; }
         
         //Constructor
-        public Response(object? data, List<string>? errors = null, HttpStatusCode statusCode = HttpStatusCode.OK)
+        public Response(object? data, Dictionary<string, string>? errors = null, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             StatusCode = statusCode;
             Data = data;
-            Errors = errors == null ? new List<string>() : errors;
+            Errors = errors == null ? new Dictionary<string, string>() : errors;
         }
     }
 }
