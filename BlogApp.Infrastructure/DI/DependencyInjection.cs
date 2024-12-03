@@ -42,9 +42,11 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAuthRepository, AuthRepository>();
+            services.AddTransient<IBlogRepository, BlogRepository>();
 
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IBlogService, BlogService>();
 
             return services;
         }

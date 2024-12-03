@@ -25,7 +25,7 @@ namespace BlogApp.API.Controllers
             _configuration = configuration;
         }
 
-        [HttpPost("Register")]
+        [HttpPost("register")]
         public async Task<IActionResult> RegisterUser(RegisterDTO registerDto)
         {
             var result = await _authService.RegisterUser(registerDto);
@@ -47,7 +47,7 @@ namespace BlogApp.API.Controllers
                 HttpStatusCode.OK));
         }
 
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<IActionResult> LoginUser(LoginDTO model)
         {
             var token = await _authService.LoginUser(model);

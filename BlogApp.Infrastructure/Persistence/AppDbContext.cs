@@ -1,13 +1,8 @@
 ﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Persistence
 {
@@ -22,39 +17,52 @@ namespace BlogApp.Infrastructure.Persistence
         {
             base.OnModelCreating(builder);
 
-            var adminUserId = Guid.NewGuid().ToString();
+            var superadminUserId = Guid.NewGuid().ToString();
+            var superadminRoleId = Guid.NewGuid().ToString();
             var adminRoleId = Guid.NewGuid().ToString();
 
+            // seed superadmin role
             builder.Entity<IdentityRole>().HasData(new IdentityRole
             {
-                Name = "Admin",
-                NormalizedName = "ADMIN",
+                Name = BlogApp.Domain.Shared.UserRoles.Superadmin.ToString(),
+                NormalizedName = BlogApp.Domain.Shared.UserRoles.Superadmin.ToString().ToUpper(),
+                Id = superadminRoleId,
+                ConcurrencyStamp = superadminRoleId
+            });
+
+            // seed admin role
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Name = BlogApp.Domain.Shared.UserRoles.Admin.ToString(),
+                NormalizedName = BlogApp.Domain.Shared.UserRoles.Admin.ToString().ToUpper(),
                 Id = adminRoleId,
                 ConcurrencyStamp = adminRoleId
             });
 
+            // create new superadmin 
             var adminUser = new User()
             {
-                Id = adminUserId,
-                Email = "admin@user.com",
-                UserName = "admin@user.com",
-                NormalizedEmail = "ADMIN@USER.COM",
-                NormalizedUserName = "ADMIN@USER.COM",
+                Id = superadminUserId,
+                Email = "superadmin@blog.com",
+                UserName = "Superadmin",
+                NormalizedEmail = "SUPERADMIN@BLOG.COM",
+                NormalizedUserName = "SUPERADMIN",
                 EmailConfirmed = true,
                 SecurityStamp = Guid.NewGuid().ToString("D"),
             };
 
             var passwordHash = new PasswordHasher<User>();
-            const string password = "Admin@123";
+            const string password = "Superadmin@123";
 
             adminUser.PasswordHash = passwordHash.HashPassword(adminUser, password);
 
             builder.Entity<User>().HasData(adminUser);
 
+            // set the superadmin role to the superadmin user
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
             {
-                RoleId = adminRoleId,
-                UserId = adminUserId
+                RoleId = superadminRoleId,
+                UserId = superadminUserId
             });
 
             // Blog configuration

@@ -68,16 +68,16 @@ namespace BlogApp.Infrastructure.Services
             }
 
             // Ensure the role exists
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User.ToString()))
             {
-                var role = new IdentityRole(UserRoles.User)
+                var role = new IdentityRole(UserRoles.User.ToString())
                 {
                     ConcurrencyStamp = Guid.NewGuid().ToString()
                 };
                 await _roleManager.CreateAsync(role);
             }
 
-            await _userManager.AddToRoleAsync(user, UserRoles.User);
+            await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
 
             return null;
         }

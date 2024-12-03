@@ -20,6 +20,9 @@ namespace BlogApp.Domain.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public string ImageUrl { get; set; }
+        public int PopularityScore { get; set; }
+        public int UpVoteCount { get; set; }
+        public int DownVoteCount { get; set; }
         public bool IsDeleted { get; set; }
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateOnly UpdatedAt { get; set; }
