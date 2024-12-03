@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApp.Domain.Shared
+namespace BlogApp.Application.Interface.IServices
 {
-    public enum UserRoles
+    public interface IBlogService
     {
-        Superadmin,
-        Admin,
-        User
     }
 }

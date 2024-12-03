@@ -4,6 +4,7 @@ using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241203094534_Roles updated")]
+    partial class Rolesupdated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -302,17 +305,10 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "d91e3363-7708-4b0a-87c4-9dcd779437c8",
-                            ConcurrencyStamp = "d91e3363-7708-4b0a-87c4-9dcd779437c8",
+                            Id = "c9274285-72de-482d-aeba-3897e196b605",
+                            ConcurrencyStamp = "c9274285-72de-482d-aeba-3897e196b605",
                             Name = "Superadmin",
                             NormalizedName = "SUPERADMIN"
-                        },
-                        new
-                        {
-                            Id = "d30cb2d3-58ec-4350-ac98-222b2e8f2fa9",
-                            ConcurrencyStamp = "d30cb2d3-58ec-4350-ac98-222b2e8f2fa9",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
                         });
                 });
 
@@ -479,8 +475,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "8edceed0-ac71-4761-a5f6-58f589f39d13",
-                            RoleId = "d91e3363-7708-4b0a-87c4-9dcd779437c8"
+                            UserId = "db73e4ec-2ce5-4007-b2b9-aedeca1714da",
+                            RoleId = "c9274285-72de-482d-aeba-3897e196b605"
                         });
                 });
 
@@ -512,17 +508,17 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8edceed0-ac71-4761-a5f6-58f589f39d13",
+                            Id = "db73e4ec-2ce5-4007-b2b9-aedeca1714da",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "f69494dd-18f0-4415-b14a-be1739b4c710",
+                            ConcurrencyStamp = "cf5ddd0e-9941-4eb8-b9e5-a05c884b861d",
                             Email = "superadmin@blog.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "SUPERADMIN@BLOG.COM",
                             NormalizedUserName = "SUPERADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFSr2a9dY7NuNRGbr3j98v0rLwE0gYwD/K3I8zlQ3rdWKsZqYDPWGrvfw4Qhl/edqA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGA/i2fSOToRACRtf38pcpa6KO1enJHpdefbnj9GwWLY4Tu/+3NCHLyec1Gd2ucAOA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "fcdc9995-eff4-473f-97d1-6b60f31fdd08",
+                            SecurityStamp = "0a17155a-cc7a-4a93-9670-c49ca5f5b00f",
                             TwoFactorEnabled = false,
                             UserName = "Superadmin"
                         });
