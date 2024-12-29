@@ -18,7 +18,7 @@ namespace BlogApp.Application.Helpers
         {
             StatusCode = statusCode;
             Data = data;
-            Errors = errors == null ? new Dictionary<string, string>() : errors;
+            Errors = errors ?? new Dictionary<string, string>();
         }
     }
 }
