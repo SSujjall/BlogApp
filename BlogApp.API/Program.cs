@@ -64,6 +64,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var jwtSection = builder.Configuration.GetSection("JWT");
 builder.Services.Configure<JWTSettings>(jwtSection);
 
+// settings the values of cloudinary from configuration to the cloudinary config class
+var cloudinarySection = builder.Configuration.GetSection("CloudinarySettings");
+builder.Services.Configure<CloudinaryConfig>(cloudinarySection);
+
 builder.Services.AddInfrastructure(builder.Configuration);
 
 
