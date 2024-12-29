@@ -1,5 +1,4 @@
 ﻿using BlogApp.Domain.Entities;
-using BlogApp.Domain.Shared;
 using BlogApp.Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

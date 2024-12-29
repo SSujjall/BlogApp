@@ -1,14 +1,8 @@
 ﻿using BlogApp.Application.Helpers;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Repositories
 {

@@ -1,9 +1,6 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers;
 using BlogApp.Application.Interface.IServices;
-using BlogApp.Domain.Entities;
-using BlogApp.Domain.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

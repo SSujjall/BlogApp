@@ -1,20 +1,15 @@
 ﻿using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Repositories
 {
     public class BlogRepository : BaseRepository<Blogs>, IBlogRepository
     {
-        private readonly AppDbContext _appDbContext;
+        private readonly AppDbContext _dbContext;
         public BlogRepository(AppDbContext dbContext) : base(dbContext)
         {
-            _appDbContext = dbContext;
+            _dbContext = dbContext;
         }
     }
 }
