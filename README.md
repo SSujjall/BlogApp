@@ -1,1 +1,76 @@
-Blog app created using .NET 8 Web API (RESTful) and React.js
+# Blog Application
+
+This is a full-stack Blog Application built using the following technologies:
+
+- **Backend**: .NET 8 Web API with Entity Framework Core, Dapper, and ADO.NET
+- **Frontend**: React with Vite, Tailwind CSS, and Axios
+
+## Features
+
+- User authentication and authorization
+- CRUD operations for blogs
+- Responsive design using Tailwind CSS
+- API integration with Axios
+- Multiple database access strategies: EF Core, Dapper, and ADO.NET
+
+---
+
+## Prerequisites
+
+Before running the application, ensure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (LTS recommended)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [.NET SDK 8](https://dotnet.microsoft.com/)
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+
+---
+
+## Installation
+
+### Backend Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/blog-app.git
+   cd blog-app/backend
+   ```
+
+2. Restore .NET dependencies:
+   ```bash
+   dotnet restore
+   ```
+
+3. Update `appsettings.json` with your database connection string:
+   ```json
+   "ConnectionStrings": {
+       "DefaultConnection": "Your-SQL-Server-Connection-String"
+   }
+   ```
+
+4. Apply EF Core migrations:
+   ```bash
+   dotnet ef database update
+   ```
+
+5. Run the backend:
+   ```bash
+   dotnet run
+   ```
+
+### Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd ../frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+---
