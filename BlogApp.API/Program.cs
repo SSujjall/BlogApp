@@ -8,14 +8,12 @@ using Microsoft.OpenApi.Models;
 using BlogApp.Domain.Configs;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddInfrastructure(builder.Configuration);
+
 var configuration = builder.Configuration;
 
-// Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddAuthorization(); // THIS IS NEEDED FOR [AUTHORIZE] to WORK!!!!!!!!!!!
 // JWT
 builder.Services.AddAuthentication(options =>
 {
@@ -79,8 +77,11 @@ builder.Services.Configure<JWTSettings>(jwtSection);
 var cloudinarySection = builder.Configuration.GetSection("CloudinarySettings");
 builder.Services.Configure<CloudinaryConfig>(cloudinarySection);
 
-builder.Services.AddInfrastructure(builder.Configuration);
 
+// Add services to the container.
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
