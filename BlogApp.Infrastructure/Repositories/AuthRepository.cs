@@ -13,26 +13,26 @@ namespace BlogApp.Infrastructure.Repositories
 {
     public class AuthRepository : IAuthRepository
     {
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<Users> _userManager;
 
-        public AuthRepository(UserManager<User> userManager)
+        public AuthRepository(UserManager<Users> userManager)
         {
             _userManager = userManager;
         }
 
-        public async Task<bool> CreateNewUser(User user, string password)
+        public async Task<bool> CreateNewUser(Users user, string password)
         {
             var result = await _userManager.CreateAsync(user, password);
             return result.Succeeded ? true : false;
         }
 
-        public async Task<User> FindByUsername(string username)
+        public async Task<Users> FindByUsername(string username)
         {
             var userExists = await _userManager.FindByNameAsync(username);
             return userExists;
         }
 
-        public async Task<string> GetUserRole(User user)
+        public async Task<string> GetUserRole(Users user)
         {
             var userRoles = await _userManager.GetRolesAsync(user);
             return userRoles.FirstOrDefault();

@@ -35,7 +35,30 @@ namespace BlogApp.Infrastructure.Repositories
 
         public async Task<IEnumerable<T>> GetAll(GetRequest<T>? request)
         {
-            var result = await _dbContext.Set<T>().ToListAsync();
+            var query = _dbContext.Set<T>().AsQueryable();
+
+            // Apply filter if provided
+            if (request?.Filter != null)
+            {
+                query = query.Where(request.Filter);
+            }
+            // Apply ordering if provided
+            if (request?.OrderBy != null)
+            {
+                query = request.OrderBy(query);
+            }
+            // Apply pagination if provided
+            if (request?.Skip.HasValue == true)
+            {
+                query = query.Skip(request.Skip.Value);
+            }
+            if (request?.Take.HasValue == true)
+            {
+                query = query.Take(request.Take.Value);
+            }
+
+            // Execute the query and return the results
+            var result = await query.ToListAsync();
             return result;
         }
 

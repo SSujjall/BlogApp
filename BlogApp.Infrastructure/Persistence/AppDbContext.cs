@@ -24,7 +24,7 @@ namespace BlogApp.Infrastructure.Persistence
             DbSeeder.SeedConfigurationToDB(builder);
         }
 
-        public DbSet<User> Users { get; set; }
+        public DbSet<Users> Users { get; set; }
         public DbSet<Blogs> Blogs { get; set; } = null!;
         public DbSet<BlogHistory> BlogHistories { get; set; } = null!;
         public DbSet<Comments> Comments { get; set; } = null!;

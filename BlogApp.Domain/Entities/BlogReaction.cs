@@ -25,6 +25,6 @@ namespace BlogApp.Domain.Entities
 
         // Navigation Properties
         public virtual Blogs Blogs { get; set; }
-        public virtual User User { get; set; }
+        public virtual Users User { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace BlogApp.Infrastructure.DI
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)).UseLazyLoadingProxies(), ServiceLifetime.Transient);
 
 
-            services.AddIdentity<User, IdentityRole>(options =>
+            services.AddIdentity<Users, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = false;

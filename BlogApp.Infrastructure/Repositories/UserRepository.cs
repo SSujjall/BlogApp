@@ -4,7 +4,7 @@ using BlogApp.Infrastructure.Persistence;
 
 namespace BlogApp.Infrastructure.Repositories
 {
-    public class UserRepository : BaseRepository<User>, IUserRepository
+    public class UserRepository : BaseRepository<Users>, IUserRepository
     {
         private readonly AppDbContext _dbContext;
 

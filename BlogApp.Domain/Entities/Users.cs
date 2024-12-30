@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Domain.Entities
 {
-    public class User : IdentityUser
+    public class Users : IdentityUser
     {
         // Virtual navigation properties for relationships
         public virtual ICollection<Blogs> Blogs { get; set; } = new List<Blogs>();
