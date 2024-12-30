@@ -94,7 +94,7 @@ namespace BlogApp.Infrastructure.Services
                     DownVoteCount = result.DownVoteCount,
                 };
                 #endregion
-                return ApiResponse<BlogsDTO>.Success(response, "");
+                return ApiResponse<BlogsDTO>.Success(response, "Blog created successfully.");
             }
             return ApiResponse<BlogsDTO>.Failed(null, "Failed to create a new blog.");
         }

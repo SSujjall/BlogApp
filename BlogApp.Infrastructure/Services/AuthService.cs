@@ -119,7 +119,7 @@ namespace BlogApp.Infrastructure.Services
 
             var claims = new List<Claim>
             {
-                new Claim("userId", user.Id),
+                new Claim("UserId", user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Role, userRole)
             };
