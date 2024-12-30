@@ -48,7 +48,7 @@ namespace BlogApp.API.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateBlog(CreateBlogDTO dto)
         {
-            var userId = User.FindFirst("userId")?.Value;
+            var userId = User.FindFirst("UserId")?.Value;
 
             var response = await _blogService.CreateBlog(userId, dto);
             if (response.Status != true)
