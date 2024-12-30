@@ -60,16 +60,38 @@ namespace BlogApp.API.Controllers
 
         [Authorize]
         [HttpPost("update")]
-        public Task<IActionResult> UpdateBlog()
+        public async Task<IActionResult> UpdateBlog(UpdateBlogDTO dto)
         {
-            return null;
+            var userId = User.FindFirst("UserId").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ApiResponse<string>.Failed(null, "User not authenticated."));
+            }
+
+            var response = await _blogService.UpdateBlog(dto, userId);
+            if (response.Status != true)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
         }
 
         [Authorize]
         [HttpPost("delete/{id}")]
-        public Task<IActionResult> DeleteBlog(int id)
+        public async Task<IActionResult> DeleteBlog(int id)
         {
-            return null;
+            var userId = User.FindFirst("UserId").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ApiResponse<string>.Failed(null, "User not authenticated."));
+            }
+
+            var response = await _blogService.DeleteBlog(id, userId);
+            if (response.Status != true)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
         }
     }
 }
