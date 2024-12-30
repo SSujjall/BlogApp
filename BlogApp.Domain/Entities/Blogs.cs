@@ -20,15 +20,15 @@ namespace BlogApp.Domain.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public string ImageUrl { get; set; }
-        public int PopularityScore { get; set; }
-        public int UpVoteCount { get; set; }
-        public int DownVoteCount { get; set; }
-        public bool IsDeleted { get; set; }
+        public int PopularityScore { get; set; } = 0;
+        public int UpVoteCount { get; set; } = 0;
+        public int DownVoteCount { get; set; } = 0;
+        public bool IsDeleted { get; set; } = false;
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateOnly UpdatedAt { get; set; }
 
         // Navigation Properties
-        public virtual User User { get; set; } = null!;
+        public virtual Users User { get; set; } = null!;
         public virtual ICollection<Comments> Comments { get; set; } = new List<Comments>();
         public virtual ICollection<BlogReaction> Reactions { get; set; } = new List<BlogReaction>();
         public virtual ICollection<BlogHistory> History { get; set; } = new List<BlogHistory>();

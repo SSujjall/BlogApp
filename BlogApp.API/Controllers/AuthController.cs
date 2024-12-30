@@ -3,6 +3,7 @@ using BlogApp.Application.Helpers;
 using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.Net;
 
 namespace BlogApp.API.Controllers
@@ -12,62 +13,34 @@ namespace BlogApp.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IConfiguration _configuration;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AuthController(IAuthService authService, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
-            _roleManager = roleManager;
-            _configuration = configuration;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser(RegisterDTO registerDto)
         {
-            var result = await _authService.RegisterUser(registerDto);
-
-            if (result != null)
+            var response = await _authService.RegisterUser(registerDto);
+            if (response.StatusCode != HttpStatusCode.OK)
             {
-                return BadRequest(new Response(
-                    null,
-                    new Dictionary<string, string>
-                    {
-                        { "message", "Username already exists." }
-                    },
-                    HttpStatusCode.BadRequest));
+                return StatusCode((int)response.StatusCode, response);
             }
 
-            return Ok(new Response(
-                new { Message = "User created successfully." },
-                null,
-                HttpStatusCode.OK));
+            return Ok(response);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser(LoginDTO model)
         {
-            var token = await _authService.LoginUser(model);
-
-            if (token == null)
+            var response = await _authService.LoginUser(model);
+            if (response.StatusCode != HttpStatusCode.OK)
             {
-                return BadRequest(new Response(
-                    null,
-                    new Dictionary<string, string>
-                    {
-                        { "message", "Invalid username or password." }
-                    },
-                    HttpStatusCode.BadRequest));
+                return StatusCode((int)response.StatusCode, response);
             }
 
-            return Ok(new Response(
-                new
-                {
-                    Message = "User validated successfully",
-                    Token = token
-                },
-                null,
-                HttpStatusCode.OK));
+            return Ok(response);
         }
     }
 }

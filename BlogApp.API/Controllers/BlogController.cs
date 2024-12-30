@@ -1,4 +1,6 @@
-﻿using BlogApp.Application.Helpers;
+﻿using BlogApp.Application.DTOs;
+using BlogApp.Application.Helpers;
+using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -9,29 +11,51 @@ namespace BlogApp.API.Controllers
     [ApiController]
     public class BlogController : ControllerBase
     {
+        private readonly IBlogService _blogService;
+
+        public BlogController(IBlogService blogService)
+        {
+            _blogService = blogService;
+        }
+
         [AllowAnonymous]
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllBlogs()
         {
-            return Ok(new Response(
-                new { Message = "blogs" },
-                null,
-                HttpStatusCode.OK)
-            );
+            var response = await _blogService.GetAllBlogs();
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpGet("get-blog/{id}")]
-        public Task<IActionResult> GetBlog()
+        public async Task<IActionResult> GetBlog(int id)
         {
-            return null;
+            var response = await _blogService.GetBlogById(id);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+
+            return Ok(response);
         }
 
         [Authorize]
         [HttpPost("create")]
-        public Task<IActionResult> CreateBlog()
+        public async Task<IActionResult> CreateBlog(CreateBlogDTO dto)
         {
-            return null;
+            var userId = User.FindFirst("userId")?.Value;
+
+            var response = await _blogService.CreateBlog(userId, dto);
+            if (response.Status != true)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
         }
 
         [Authorize]

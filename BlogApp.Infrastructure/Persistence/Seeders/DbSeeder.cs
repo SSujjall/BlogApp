@@ -36,7 +36,7 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
             });
 
             // create new superadmin 
-            var adminUser = new User()
+            var adminUser = new Users()
             {
                 Id = superadminUserId,
                 Email = "superadmin@blog.com",
@@ -47,12 +47,12 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
                 SecurityStamp = Guid.NewGuid().ToString("D"),
             };
 
-            var passwordHash = new PasswordHasher<User>();
+            var passwordHash = new PasswordHasher<Users>();
             const string password = "Superadmin@123";
 
             adminUser.PasswordHash = passwordHash.HashPassword(adminUser, password);
 
-            builder.Entity<User>().HasData(adminUser);
+            builder.Entity<Users>().HasData(adminUser);
 
             // set the superadmin role to the superadmin user
             builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>

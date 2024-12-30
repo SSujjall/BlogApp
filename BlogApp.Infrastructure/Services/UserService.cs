@@ -14,11 +14,11 @@ namespace BlogApp.Infrastructure.Services
 {
     public class UserService : IUserService
     {
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<Users> _userManager;
         private readonly IUserRepository _iuserRepository;
         private readonly AppDbContext _context;
 
-        public UserService(UserManager<User> userManager, IUserRepository iuserRepository, AppDbContext context)
+        public UserService(UserManager<Users> userManager, IUserRepository iuserRepository, AppDbContext context)
         {
             _userManager = userManager;
             _iuserRepository = iuserRepository;

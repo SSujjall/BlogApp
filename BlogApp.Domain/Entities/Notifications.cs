@@ -23,6 +23,6 @@ namespace BlogApp.Domain.Entities
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
         // Virtual navigation property
-        public virtual User User { get; set; } = null!;
+        public virtual Users User { get; set; } = null!;
     }
 }

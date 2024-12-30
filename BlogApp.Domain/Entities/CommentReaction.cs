@@ -25,6 +25,6 @@ namespace BlogApp.Domain.Entities
 
         // Navigation Properties
         public virtual Comments Comments { get; set; } = null!;
-        public virtual User User { get; set; } = null!;
+        public virtual Users User { get; set; } = null!;
     }
 }

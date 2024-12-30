@@ -16,7 +16,7 @@ namespace BlogApp.Domain.Entities
         [ForeignKey(nameof(Comments))]
         public int CommentId { get; set; }
 
-        [ForeignKey(nameof(User))]
+        [ForeignKey(nameof(Users))]
         public string ModifiedByUserId { get; set; }
 
         public string CommentDescription { get; set; }
@@ -24,6 +24,6 @@ namespace BlogApp.Domain.Entities
 
         // Virtual navigation property
         public virtual Comments Comments { get; set; } = null!;
-        public virtual User ModifiedBy { get; set; } = null!;
+        public virtual Users ModifiedBy { get; set; } = null!;
     }
 }
