@@ -31,7 +31,7 @@ Before running the application, ensure you have the following installed:
 ### Backend Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/blog-app.git
+   git clone https://github.com/SSujjall/BlogApp.git
    cd blog-app/backend
    ```
 
@@ -43,7 +43,7 @@ Before running the application, ensure you have the following installed:
 3. Update `appsettings.json` with your database connection string:
    ```json
    "ConnectionStrings": {
-       "DefaultConnection": "Your-SQL-Server-Connection-String"
+       "BlogDB": "Your-SQL-Server-Connection-String"
    }
    ```
 
@@ -60,7 +60,7 @@ Before running the application, ensure you have the following installed:
 ### Frontend Setup
 1. Navigate to the frontend directory:
    ```bash
-   cd ../frontend
+   cd ../BlogApp.ReactFrontend
    ```
 
 2. Install dependencies:
