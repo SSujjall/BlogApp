@@ -59,7 +59,7 @@ namespace BlogApp.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("update")]
+        [HttpPut("update")]
         public async Task<IActionResult> UpdateBlog(UpdateBlogDTO dto)
         {
             var userId = User.FindFirst("UserId").Value;
@@ -77,7 +77,7 @@ namespace BlogApp.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("delete/{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteBlog(int id)
         {
             var userId = User.FindFirst("UserId").Value;

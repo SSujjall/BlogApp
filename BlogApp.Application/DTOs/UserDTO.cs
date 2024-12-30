@@ -4,8 +4,7 @@ namespace BlogApp.Application.DTOs
 {
     public class UserDTO
     {
-        public string Id { get; set; } // User ID
-        public string UserName { get; set; }
+        public string Username { get; set; }
         public string Email { get; set; }
     }
 

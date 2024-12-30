@@ -62,8 +62,7 @@ namespace BlogApp.Infrastructure.Services
                 #endregion
                 return ApiResponse<BlogsDTO>.Success(response, $"Blog id: {result.BlogId}");
             }
-
-            return ApiResponse<BlogsDTO>.Failed(null, "Failed to load blog.");
+            return ApiResponse<BlogsDTO>.Failed(null, "No Blog Found.");
         }
 
         public async Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto)
