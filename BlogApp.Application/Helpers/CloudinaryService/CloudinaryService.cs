@@ -63,9 +63,46 @@ namespace BlogApp.Application.Helpers.CloudinaryService
             throw new Exception("Failed to upload image to Cloudinary");
         }
 
-        public Task<string> UploadMultipleImage(List<IFormFile> files)
+        public async Task<(List<string> SuccessfulUploads, List<string> FailedUploads)> UploadMultipleImage(List<IFormFile> files)
         {
-            throw new NotImplementedException();
+            var failedUploads = new List<string>();
+            var successfulUploads = new List<string>();
+
+            if (files == null || files.Count == 0)
+                return (successfulUploads, failedUploads);
+
+            var folderExists = GetFolders();
+            if (!folderExists)
+            {
+                // create folder if it does not exists.
+                _cloudinary.CreateFolder(folderName);
+            }
+
+            // uploading each image from the list of images
+            foreach (var item in files)
+            {
+                try
+                {
+                    using var stream = item.OpenReadStream();
+                    var uploadParam = new ImageUploadParams
+                    {
+                        File = new FileDescription(item.FileName, stream),
+                        Folder = folderName,
+                    };
+                    var uploadRes = await _cloudinary.UploadAsync(uploadParam);
+                    if (uploadRes.StatusCode == HttpStatusCode.OK)
+                    {
+                        successfulUploads.Add(uploadRes.SecureUrl.ToString());
+                    }
+                    failedUploads.Add($"failed to upload file: {item.FileName}");
+                }
+                catch (Exception)
+                {
+                    failedUploads.Add(item.FileName);
+                }
+            }
+
+            return (successfulUploads, failedUploads);
         }
 
         public async Task DeleteImage(string imageUrl)
