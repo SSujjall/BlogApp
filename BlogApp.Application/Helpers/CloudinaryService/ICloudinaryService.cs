@@ -11,7 +11,7 @@ namespace BlogApp.Application.Helpers.CloudinaryService
     public interface ICloudinaryService
     {
         Task<string> UploadImage(IFormFile file);
-        Task<string> UploadMultipleImage(List<IFormFile> files);
+        Task<(List<string> SuccessfulUploads, List<string> FailedUploads)> UploadMultipleImage(List<IFormFile> files);
         Task DeleteImage(string imageUrl);
     }
 }
