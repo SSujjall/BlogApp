@@ -6,14 +6,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using BlogApp.Domain.Configs;
+using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var configuration = builder.Configuration;
 
-
 builder.Services.AddAuthorization(); // THIS IS NEEDED FOR [AUTHORIZE] to WORK!!!!!!!!!!!
+
 // JWT
 builder.Services.AddAuthentication(options =>
 {
@@ -35,6 +36,7 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+// Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "BlogApp.API", Version = "v1" });
@@ -74,9 +76,10 @@ var jwtSection = builder.Configuration.GetSection("JWT");
 builder.Services.Configure<JWTSettings>(jwtSection);
 
 // settings the values of cloudinary from configuration to the cloudinary config class
-var cloudinarySection = builder.Configuration.GetSection("CloudinarySettings");
-builder.Services.Configure<CloudinaryConfig>(cloudinarySection);
-
+var cloudinaryConfig = builder.Configuration.GetSection("CloudinarySettings").Get<CloudinaryConfig>();
+var account = new Account(cloudinaryConfig.CloudName, cloudinaryConfig.ApiKey, cloudinaryConfig.ApiSecret);
+var cloudinary = new Cloudinary(account);
+builder.Services.AddSingleton(cloudinary);
 
 // Add services to the container.
 builder.Services.AddControllers();
