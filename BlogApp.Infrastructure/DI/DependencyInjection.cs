@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.Interface.IRepositories;
+﻿using BlogApp.Application.Helpers.CloudinaryService;
+using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Persistence;
@@ -39,6 +40,7 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IBlogRepository, BlogRepository>();
 
+            services.AddTransient<ICloudinaryService, CloudinaryService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IBlogService, BlogService>();

@@ -1,6 +1,7 @@
 ﻿using Azure;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers;
+using BlogApp.Application.Helpers.CloudinaryService;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class BlogService(IBlogRepository _blogRepository) : IBlogService
+    public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary) : IBlogService
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs()
         {
@@ -67,13 +68,25 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto)
         {
+            string? imageUrl = null;
+            #region Uploading Image
+            if (dto.ImageUrl != null)
+            {
+                imageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    return ApiResponse<BlogsDTO>.Failed(null, "Image Upload Failed");
+                }
+            }
+            #endregion
+
             #region request model mapping
             var request = new Blogs
             {
                 UserId = userId,
                 Title = dto.Title,
                 Description = dto.Description,
-                ImageUrl = dto.ImageUrl,
+                ImageUrl = imageUrl
             };
             #endregion
             var result = await _blogRepository.Add(request);
@@ -107,10 +120,23 @@ namespace BlogApp.Infrastructure.Services
                     return ApiResponse<BlogsDTO>.Failed(authError, "Unauthorized blog update attempt.");
                 }
 
-                #region model mapping
+                #region Upload Image
+                var imageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
+
+                // If the new image is uploaded check if there is image in old blog and delete it.
+                if (imageUrl != null)
+                {
+                    if (!string.IsNullOrEmpty(existingBlog.ImageUrl))
+                    {
+                        await _cloudinary.DeleteImage(existingBlog.ImageUrl);
+                    }
+                }
+                #endregion
+
+                #region request model mapping
                 existingBlog.Title = dto.Title;
                 existingBlog.Description = dto.Description;
-                existingBlog.ImageUrl = dto.ImageUrl;
+                existingBlog.ImageUrl = imageUrl ?? existingBlog.ImageUrl;
                 #endregion
 
                 var result = await _blogRepository.Update(existingBlog);
