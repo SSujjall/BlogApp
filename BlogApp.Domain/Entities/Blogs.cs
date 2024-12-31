@@ -19,7 +19,7 @@ namespace BlogApp.Domain.Entities
 
         public string Title { get; set; }
         public string Description { get; set; }
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
         public int PopularityScore { get; set; } = 0;
         public int UpVoteCount { get; set; } = 0;
         public int DownVoteCount { get; set; } = 0;

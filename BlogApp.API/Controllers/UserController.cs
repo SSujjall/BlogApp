@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.Interface.IServices;
+﻿using BlogApp.Application.Helpers.CloudinaryService;
+using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +7,7 @@ namespace BlogApp.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(IUserService _userService) : ControllerBase
+    public class UserController(IUserService _userService, ICloudinaryService _cloudinary) : ControllerBase
     {
         [Authorize]
         [HttpGet("get-user-from-token")]
@@ -20,6 +21,12 @@ namespace BlogApp.API.Controllers
                 return StatusCode((int)response.StatusCode, response);
             }
             return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Test()
+        {
+            return Ok();
         }
     }
 }
