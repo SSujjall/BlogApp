@@ -35,29 +35,30 @@ namespace BlogApp.Application.Helpers.CloudinaryService
 
         public async Task<string> UploadImage(IFormFile file)
         {
-            if (file.Length > 0)
+            if (file == null || file.Length <= 0)
             {
-                var folderExists = GetFolders();
-                if (!folderExists)
-                {
-                    // create folder if it does not exists.
-                    _cloudinary.CreateFolder(folderName);
-                }
-
-                using var stream = file.OpenReadStream();
-                var uploadParam = new ImageUploadParams
-                {
-                    File = new FileDescription(file.FileName, stream),
-                    Folder = folderName,
-                };
-
-                var uploadRes = await _cloudinary.UploadAsync(uploadParam);
-                if (uploadRes.StatusCode == HttpStatusCode.OK)
-                {
-                    return uploadRes.SecureUrl.ToString();
-                }
+                return null;
             }
-            return null;
+            var folderExists = GetFolders();
+            if (!folderExists)
+            {
+                // create folder if it does not exists.
+                _cloudinary.CreateFolder(folderName);
+            }
+
+            using var stream = file.OpenReadStream();
+            var uploadParam = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Folder = folderName,
+            };
+
+            var uploadRes = await _cloudinary.UploadAsync(uploadParam);
+            if (uploadRes.StatusCode == HttpStatusCode.OK)
+            {
+                return uploadRes.SecureUrl.ToString();
+            }
+            throw new Exception("Failed to upload image to Cloudinary");
         }
 
         public Task<string> UploadMultipleImage(List<IFormFile> files)

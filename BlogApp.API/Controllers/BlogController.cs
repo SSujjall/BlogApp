@@ -46,9 +46,13 @@ namespace BlogApp.API.Controllers
 
         [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult> CreateBlog(CreateBlogDTO dto)
+        public async Task<IActionResult> CreateBlog([FromForm] CreateBlogDTO dto)
         {
             var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User id not found");
+            }
 
             var response = await _blogService.CreateBlog(userId, dto);
             if (response.Status != true)
