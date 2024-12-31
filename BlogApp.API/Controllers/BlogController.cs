@@ -64,7 +64,7 @@ namespace BlogApp.API.Controllers
 
         [Authorize]
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateBlog(UpdateBlogDTO dto)
+        public async Task<IActionResult> UpdateBlog([FromForm] UpdateBlogDTO dto)
         {
             var userId = User.FindFirst("UserId").Value;
             if (string.IsNullOrEmpty(userId))

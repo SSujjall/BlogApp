@@ -20,6 +20,7 @@ namespace BlogApp.Application.Helpers.CloudinaryService
             _logger = logger;
         }
 
+        #region helper methods
         public bool GetFolders()
         {
             var res = _cloudinary.SearchFolders().Expression($"name={folderName}").Execute();
@@ -32,6 +33,7 @@ namespace BlogApp.Application.Helpers.CloudinaryService
 
             else return false;
         }
+        #endregion
 
         public async Task<string> UploadImage(IFormFile file)
         {
@@ -66,13 +68,16 @@ namespace BlogApp.Application.Helpers.CloudinaryService
             throw new NotImplementedException();
         }
 
-        public async Task DeleteImage(string publicId)
+        public async Task DeleteImage(string imageUrl)
         {
-            if (string.IsNullOrEmpty(publicId))
+            if (string.IsNullOrEmpty(imageUrl))
             {
                 return;
             }
-            var deleteResult = await _cloudinary.DeleteResourcesAsync(ResourceType.Image, publicId);
+
+            string publicId = imageUrl.Split('/').Last().Split('.').First();
+            string cloudImageUrl = $"{folderName}/{publicId}";
+            var deleteResult = await _cloudinary.DeleteResourcesAsync(ResourceType.Image, cloudImageUrl);
 
             if (deleteResult.StatusCode != HttpStatusCode.OK)
             {
