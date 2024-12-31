@@ -12,6 +12,6 @@ namespace BlogApp.Application.Helpers.CloudinaryService
     {
         Task<string> UploadImage(IFormFile file);
         Task<string> UploadMultipleImage(List<IFormFile> files);
-        Task DeleteImage(string publicId);
+        Task DeleteImage(string imageUrl);
     }
 }
