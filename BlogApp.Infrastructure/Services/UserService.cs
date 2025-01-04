@@ -5,11 +5,6 @@ using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Services
 {
