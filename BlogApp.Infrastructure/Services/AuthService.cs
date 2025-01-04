@@ -5,18 +5,13 @@ using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Configs;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
-using Castle.Core.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Services
 {
@@ -110,6 +105,7 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<string>.Success(null, "User created successfully");
         }
 
+        #region helper methods
         private async Task<string> GenerateToken(Users user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
@@ -134,5 +130,6 @@ namespace BlogApp.Infrastructure.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        #endregion
     }
 }

@@ -1,9 +1,6 @@
 ﻿using BlogApp.Application.DTOs;
-using BlogApp.Application.Helpers;
 using BlogApp.Application.Interface.IServices;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.Net;
 
 namespace BlogApp.API.Controllers
