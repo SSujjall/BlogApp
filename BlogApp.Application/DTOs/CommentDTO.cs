@@ -20,9 +20,13 @@ namespace BlogApp.Application.DTOs
 
     public class AddCommentDTO
     {
-        public int CommendId { get; set; }
         public int BlogId { get; set; }
-        public string UserId { get; set; }
+        public string CommentDescription { get; set; }
+    }
+
+    public class UpdateCommentDTO
+    {
+        public int CommendId { get; set; }
         public string CommentDescription { get; set; }
     }
 }

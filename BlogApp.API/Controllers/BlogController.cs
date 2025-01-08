@@ -81,7 +81,7 @@ namespace BlogApp.API.Controllers
         }
 
         [Authorize]
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("delete")]
         public async Task<IActionResult> DeleteBlog(int id)
         {
             var userId = User.FindFirst("UserId").Value;

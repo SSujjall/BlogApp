@@ -39,11 +39,13 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IBlogRepository, BlogRepository>();
+            services.AddTransient<ICommentRepository, CommentRepository>();
 
             services.AddTransient<ICloudinaryService, CloudinaryService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IBlogService, BlogService>();
+            services.AddTransient<ICommentService, CommentService>();
 
             return services;
         }
