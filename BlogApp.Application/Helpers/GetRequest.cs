@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Security.Permissions;
 
 namespace BlogApp.Application.Helpers
 {
@@ -8,5 +9,6 @@ namespace BlogApp.Application.Helpers
         public Func<IQueryable<T>, IOrderedQueryable<T>> OrderBy { get; set; }
         public int? Skip { get; set; }
         public int? Take { get; set; }
+        public string? SortBy { get; set; }
     }
 }
