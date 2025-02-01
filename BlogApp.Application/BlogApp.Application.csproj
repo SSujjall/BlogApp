@@ -24,4 +24,8 @@
     <ProjectReference Include="..\BlogApp.Domain\BlogApp.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Helpers\EmailService\" />
+  </ItemGroup>
+
 </Project>

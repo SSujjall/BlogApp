@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Security.Permissions;
 
-namespace BlogApp.Application.Helpers
+namespace BlogApp.Application.Helpers.HelperModels
 {
     public class GetRequest<T> where T : class
     {

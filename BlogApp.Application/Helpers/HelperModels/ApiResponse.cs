@@ -1,5 +1,5 @@
 ﻿using System.Net;
-namespace BlogApp.Application.Helpers
+namespace BlogApp.Application.Helpers.HelperModels
 {
     public class ApiResponse<T>
     {

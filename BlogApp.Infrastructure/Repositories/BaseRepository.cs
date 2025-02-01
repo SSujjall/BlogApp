@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Helpers;
+﻿using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

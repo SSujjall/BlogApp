@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using BlogApp.Application.Helpers.HelperModels;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace BlogApp.Application.Helpers
+namespace BlogApp.Application.Helpers.ExtraHelpers
 {
     public class ValidationHelper
     {
