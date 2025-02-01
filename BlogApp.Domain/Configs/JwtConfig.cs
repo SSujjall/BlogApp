@@ -1,6 +1,6 @@
 ﻿namespace BlogApp.Domain.Configs
 {
-    public class JWTSettings
+    public class JwtConfig
     {
         public string Secret { get; set; }
         public string ValidIssuer { get; set; }
