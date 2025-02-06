@@ -7,6 +7,7 @@ namespace BlogApp.API.Controllers
     [ApiController]
     public class ReactionController : ControllerBase
     {
+        [HttpPost]
         public Task<IActionResult> Upvote()
         {
             return null;
