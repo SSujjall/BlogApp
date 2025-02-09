@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Helpers.CloudinaryService;
+﻿using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

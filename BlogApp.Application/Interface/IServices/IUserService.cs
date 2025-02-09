@@ -1,5 +1,5 @@
 ﻿using BlogApp.Application.DTOs;
-using BlogApp.Application.Helpers;
+using BlogApp.Application.Helpers.HelperModels;
 
 namespace BlogApp.Application.Interface.IServices
 {

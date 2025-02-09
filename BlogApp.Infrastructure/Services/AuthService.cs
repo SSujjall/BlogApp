@@ -1,5 +1,5 @@
 ﻿using BlogApp.Application.DTOs;
-using BlogApp.Application.Helpers;
+using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Configs;
@@ -20,10 +20,10 @@ namespace BlogApp.Infrastructure.Services
         private readonly IAuthRepository _authRepository;
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly JWTSettings _jwtSettings;
+        private readonly JwtConfig _jwtSettings;
 
         public AuthService(IAuthRepository authRepository, UserManager<Users> userManager,
-                           RoleManager<IdentityRole> roleManager, IOptions<JWTSettings> jwtSettings)
+                           RoleManager<IdentityRole> roleManager, IOptions<JwtConfig> jwtSettings)
         {
             _authRepository = authRepository;
             _userManager = userManager;
