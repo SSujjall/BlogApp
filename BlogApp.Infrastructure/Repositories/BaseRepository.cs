@@ -30,7 +30,7 @@ namespace BlogApp.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<T> FindByConditionAsync(Expression<Func<T, bool>> expression)
+        public async Task<T> FindSingleByConditionAsync(Expression<Func<T, bool>> expression)
         {
             return await _dbContext.Set<T>().FirstOrDefaultAsync(expression);
         }
@@ -80,6 +80,11 @@ namespace BlogApp.Infrastructure.Repositories
             var result = _dbContext.Update(entity);
             await SaveChangesAsync();
             return result.Entity;
+        }
+
+        public async Task<IEnumerable<T>> FindAllByConditionAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _dbContext.Set<T>().Where(expression).ToListAsync();
         }
     }
 }
