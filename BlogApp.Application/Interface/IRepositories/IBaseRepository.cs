@@ -10,7 +10,8 @@ namespace BlogApp.Application.Interface.IRepositories
         Task Delete(T entity);
         Task<IEnumerable<T>> GetAll(GetRequest<T>? request);
         Task<T>? GetById(object entityId);
-        Task<T> FindByConditionAsync(Expression<Func<T, bool>> expression);
+        Task<T> FindSingleByConditionAsync(Expression<Func<T, bool>> expression);
+        public Task<IEnumerable<T>> FindAllByConditionAsync(Expression<Func<T, bool>> expression);
         Task SaveChangesAsync();
     }
 }
