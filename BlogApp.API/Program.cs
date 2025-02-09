@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using BlogApp.Domain.Configs;
 using CloudinaryDotNet;
+using BlogApp.Application.Helpers.EmailService.Config;
+using BlogApp.Application.Helpers.CloudinaryService.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);

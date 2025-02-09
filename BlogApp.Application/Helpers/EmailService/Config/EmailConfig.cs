@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApp.Domain.Configs
+namespace BlogApp.Application.Helpers.EmailService.Config
 {
     public class EmailConfig
     {

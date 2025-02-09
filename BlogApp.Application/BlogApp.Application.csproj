@@ -25,7 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helpers\EmailService\" />
+    <Folder Include="Helpers\EmailService\Model\" />
+    <Folder Include="Helpers\EmailService\Service\" />
   </ItemGroup>
 
 </Project>
