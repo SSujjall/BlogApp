@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Reflection.Metadata;
 using BlogApp.Application.DTOs;
-using BlogApp.Application.Helpers.CloudinaryService;
+using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;

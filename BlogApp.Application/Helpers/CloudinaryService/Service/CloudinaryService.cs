@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
 
-namespace BlogApp.Application.Helpers.CloudinaryService
+namespace BlogApp.Application.Helpers.CloudinaryService.Service
 {
     public class CloudinaryService : ICloudinaryService
     {

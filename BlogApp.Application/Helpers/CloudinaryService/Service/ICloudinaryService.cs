@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace BlogApp.Application.Helpers.CloudinaryService
+namespace BlogApp.Application.Helpers.CloudinaryService.Service
 {
     public interface ICloudinaryService
     {

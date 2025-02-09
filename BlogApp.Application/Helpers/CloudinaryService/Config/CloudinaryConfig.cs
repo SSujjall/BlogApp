@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Configs
+﻿namespace BlogApp.Application.Helpers.CloudinaryService.Config
 {
     public class CloudinaryConfig
     {
