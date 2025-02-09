@@ -1,6 +1,8 @@
-﻿using BlogApp.Application.DTOs;
-using BlogApp.Application.Helpers;
-using BlogApp.Application.Helpers.CloudinaryService;
+﻿using System.Net;
+using System.Reflection.Metadata;
+using BlogApp.Application.DTOs;
+using BlogApp.Application.Helpers.CloudinaryService.Service;
+using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
@@ -9,15 +11,15 @@ namespace BlogApp.Infrastructure.Services
 {
     public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary) : IBlogService
     {
-        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs()
+        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request)
         {
-            var result = await _blogRepository.GetAll(null);
-            if (result != null)
+            var result = await _blogRepository.GetFilteredBlogs(request);
+            if (result.Item1 != null)
             {
                 #region response model mapping
                 var response = new List<BlogsDTO>();
 
-                foreach (var item in result)
+                foreach (var item in result.Item1)
                 {
                     var blog = new BlogsDTO
                     {
@@ -32,7 +34,7 @@ namespace BlogApp.Infrastructure.Services
                     response.Add(blog);
                 }
                 #endregion
-                return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "All Blogs Listed");
+                return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "All Blogs Listed", HttpStatusCode.OK, result.Item2);
             }
             return ApiResponse<IEnumerable<BlogsDTO>>.Failed(null, "Failed to load data");
         }

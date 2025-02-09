@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Helpers;
+﻿using BlogApp.Application.Helpers.HelperModels;
 using System.Linq.Expressions;
 
 namespace BlogApp.Application.Interface.IRepositories

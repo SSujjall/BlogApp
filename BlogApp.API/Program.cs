@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using BlogApp.Domain.Configs;
 using CloudinaryDotNet;
+using BlogApp.Application.Helpers.EmailService.Config;
+using BlogApp.Application.Helpers.CloudinaryService.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -73,7 +75,11 @@ builder.Services.AddCors(options =>
 
 // settings the values of jwt from configuration to the JWTSettings class
 var jwtSection = builder.Configuration.GetSection("JWT");
-builder.Services.Configure<JWTSettings>(jwtSection);
+builder.Services.Configure<JwtConfig>(jwtSection);
+
+// settings the values of jwt from configuration to the EmailConfig class
+var emailSection = builder.Configuration.GetSection("EmailConfiguration");
+builder.Services.Configure<EmailConfig>(emailSection);
 
 // settings the values of cloudinary from configuration to the cloudinary config class
 var cloudinaryConfig = builder.Configuration.GetSection("CloudinarySettings").Get<CloudinaryConfig>();

@@ -1,4 +1,5 @@
 ﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Entities.Abstracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

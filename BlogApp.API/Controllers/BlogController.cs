@@ -1,8 +1,11 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers;
+using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IServices;
+using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace BlogApp.API.Controllers
@@ -19,10 +22,24 @@ namespace BlogApp.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllBlogs()
+        [HttpGet("get-blogs")]
+        public async Task<IActionResult> GetBlogs([FromQuery] string? sortBy, [FromQuery] int? skip, [FromQuery] int? take, [FromQuery] string? search)
         {
-            var response = await _blogService.GetAllBlogs();
+            var request = new GetRequest<Blogs>
+            {
+                Filter = !string.IsNullOrEmpty(search) ? b => EF.Functions.Like(b.Title.ToLower(), $"%{search.ToLower()}%") || EF.Functions.Like(b.Description.ToLower(), $"%{search.ToLower()}%") : null,
+                Skip = skip ?? 0,
+                Take = take ?? 10,
+                SortBy = sortBy?.ToLower() switch
+                {
+                    "popularity" => "popularity",
+                    "recency" => "recency",
+                    "random" => "random",
+                    _ => "default", // Ensure unrecognized values don't cause issues
+                }
+            };
+
+            var response = await _blogService.GetAllBlogs(request);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 return StatusCode((int)response.StatusCode, response);
@@ -32,7 +49,7 @@ namespace BlogApp.API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("get-blog/{id}")]
+        [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetBlog(int id)
         {
             var response = await _blogService.GetBlogById(id);

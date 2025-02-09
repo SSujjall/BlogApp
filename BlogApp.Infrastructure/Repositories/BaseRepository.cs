@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Helpers;
+﻿using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +9,12 @@ namespace BlogApp.Infrastructure.Repositories
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         private readonly AppDbContext _dbContext;
+        protected readonly DbSet<T> _dbSet; // for reaction repo
 
         public BaseRepository(AppDbContext dbContext)
         {
             _dbContext = dbContext;
+            _dbSet = dbContext.Set<T>();
         }
 
         public async Task<T> Add(T entity)
