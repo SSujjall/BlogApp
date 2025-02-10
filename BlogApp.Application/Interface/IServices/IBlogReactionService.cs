@@ -12,7 +12,7 @@ namespace BlogApp.Application.Interface.IServices
     public interface IBlogReactionService
     {
         Task<ApiResponse<IEnumerable<BlogReactionDTO>>> GetAllBlogVotes(int blogId);
-        Task<ApiResponse<string>> UpvoteBlog();
+        Task<ApiResponse<string>> UpvoteBlog(AddBlogReactionDTO model, string userId);
         Task<ApiResponse<string>> DownvoteBlog();
         Task<ApiResponse<BlogReactionDTO>> GetVoteById();
     }

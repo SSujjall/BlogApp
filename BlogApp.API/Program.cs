@@ -9,6 +9,7 @@ using BlogApp.Domain.Configs;
 using CloudinaryDotNet;
 using BlogApp.Application.Helpers.EmailService.Config;
 using BlogApp.Application.Helpers.CloudinaryService.Config;
+using BlogApp.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -91,6 +92,9 @@ builder.Services.AddSingleton(cloudinary);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+// Automapper
+builder.Services.AddAutoMapper(typeof(ReactionMappingProfile));
 
 var app = builder.Build();
 
