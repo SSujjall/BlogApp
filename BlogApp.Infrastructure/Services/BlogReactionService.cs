@@ -58,7 +58,7 @@ namespace BlogApp.Infrastructure.Services
                     var response = await _blogReactionRepo.Add(request);
                     if (response != null)
                     {
-                        return ApiResponse<string>.Success(null, "Blog upvoted.");
+                        return ApiResponse<string>.Success(null, $"Blog voted as {request.ReactionType.ToString()}.");
                     }
                     return ApiResponse<string>.Failed(null, "Blog vote failed.");
                 }
