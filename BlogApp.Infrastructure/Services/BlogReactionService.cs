@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Azure.Core;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
@@ -21,11 +22,8 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<IEnumerable<BlogReactionDTO>>> GetAllBlogVotes(int blogId)
         {
-            var req = new GetRequest<BlogReaction> 
-            { 
-                Filter = r => r.BlogId == blogId 
-            };
-            var reactions = await _blogReactionRepo.GetAll(req);
+            Expression<Func<BlogReaction, bool>> req = x => x.BlogId == blogId;
+            var reactions = await _blogReactionRepo.FindAllByConditionAsync(req);
             if (reactions.Any())
             {
                 var response = _mapper.Map<IEnumerable<BlogReactionDTO>>(reactions);
@@ -73,9 +71,22 @@ namespace BlogApp.Infrastructure.Services
             }
         }
 
-        public Task<ApiResponse<BlogReactionDTO>> GetVoteById()
+        public async Task<ApiResponse<BlogReactionDTO>> GetBlogVoteById(int id)
         {
-            throw new NotImplementedException();
+            Expression<Func<BlogReaction, bool>> filter = x => x.Id == id;
+            var vote = await _blogReactionRepo.FindSingleByConditionAsync(filter);
+
+            if (vote != null)
+            {
+                var response = _mapper.Map<BlogReactionDTO>(vote);
+                return ApiResponse<BlogReactionDTO>.Success(response, "Vote Fetched Successfully.");
+            }
+
+            var errors = new Dictionary<string, string>
+            {
+                { "NotFound", "Vote not found." }
+            };
+            return ApiResponse<BlogReactionDTO>.Failed(errors, "Vote Not Found.", System.Net.HttpStatusCode.NotFound);
         }
     }
 }
