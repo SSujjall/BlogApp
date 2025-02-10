@@ -35,19 +35,25 @@ namespace BlogApp.Infrastructure.DI
 
             services.AddDbContext<AppDbContext>();
 
+            #region Register Repositories
             services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IBlogRepository, BlogRepository>();
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddScoped<IBlogReactionRepository, BlogReactionRepository>();
+            services.AddScoped<ICommentReactionRepository, CommentReactionRepository>();
+            #endregion
 
+            #region Register Services
             services.AddTransient<ICloudinaryService, CloudinaryService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IBlogService, BlogService>();
             services.AddTransient<ICommentService, CommentService>();
             services.AddScoped<IBlogReactionService, BlogReactionService>();
+            services.AddScoped<ICommentReactionService, CommentReactionService>();
+            #endregion
 
             return services;
         }
