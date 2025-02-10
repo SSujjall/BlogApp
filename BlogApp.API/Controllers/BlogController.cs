@@ -89,6 +89,8 @@ namespace BlogApp.API.Controllers
                 return Unauthorized(ApiResponse<string>.Failed(null, "User not authenticated."));
             }
 
+            // TODO : When updating blog, save the non updated blog to blog history.
+
             var response = await _blogService.UpdateBlog(dto, userId);
             if (response.Status != true)
             {
