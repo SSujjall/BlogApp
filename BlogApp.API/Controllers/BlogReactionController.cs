@@ -27,8 +27,8 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("upvote")]
-        public async Task<IActionResult> UpvoteBlog(AddBlogReactionDTO model)
+        [HttpPost("vote")]
+        public async Task<IActionResult> VoteBlog(AddOrUpdateBlogReactionDTO model)
         {
             var userId = User?.FindFirst("UserId")?.Value;
             if (userId == null)
@@ -36,7 +36,7 @@ namespace BlogApp.API.Controllers
                 return Unauthorized("User invalid");
             }
 
-            var response = await _blogReactionService.UpvoteBlog(model, userId);
+            var response = await _blogReactionService.VoteBlog(model, userId);
             if (response.Status == false)
             {
                 return StatusCode((int)response.StatusCode, response);

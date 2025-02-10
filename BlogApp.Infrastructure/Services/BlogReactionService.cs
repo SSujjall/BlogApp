@@ -38,10 +38,8 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<IEnumerable<BlogReactionDTO>>.Failed(errors, "No reactions found.", System.Net.HttpStatusCode.NotFound);
         }
 
-        public async Task<ApiResponse<string>> UpvoteBlog(AddBlogReactionDTO model, string userId)
+        public async Task<ApiResponse<string>> VoteBlog(AddOrUpdateBlogReactionDTO model, string userId)
         {
-            var req = _mapper.Map<BlogReaction>(model);
-
             Expression<Func<BlogReaction, bool>> filter = x => x.BlogId == model.BlogId && x.UserId == userId;
             var existingReaction = await _blogReactionRepo.FindSingleByConditionAsync(filter);
             if (existingReaction != null)
@@ -53,13 +51,26 @@ namespace BlogApp.Infrastructure.Services
             }
             else
             {
-                return null;
+                try
+                {
+                    var request = _mapper.Map<BlogReaction>(model);
+                    request.UserId = userId; // set the userId to the one coming from parameter
+                    var response = await _blogReactionRepo.Add(request);
+                    if (response != null)
+                    {
+                        return ApiResponse<string>.Success(null, "Blog upvoted.");
+                    }
+                    return ApiResponse<string>.Failed(null, "Blog vote failed.");
+                }
+                catch (Exception e)
+                {
+                    var errors = new Dictionary<string, string>
+                    {
+                        { "Exception", $"{e.Message}" }
+                    };
+                    return ApiResponse<string>.Failed(errors, "Exception Occured.");
+                }
             }
-        }
-
-        public Task<ApiResponse<string>> DownvoteBlog()
-        {
-            throw new NotImplementedException();
         }
 
         public Task<ApiResponse<BlogReactionDTO>> GetVoteById()

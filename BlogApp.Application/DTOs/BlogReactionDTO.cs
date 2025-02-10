@@ -16,7 +16,7 @@ namespace BlogApp.Application.DTOs
         public DateOnly CreatedAt { get; set; }
     }
 
-    public class AddBlogReactionDTO
+    public class AddOrUpdateBlogReactionDTO
     {
         public int BlogId { get; set; }
         public VoteType ReactionType { get; set; }

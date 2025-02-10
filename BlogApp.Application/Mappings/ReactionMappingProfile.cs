@@ -11,8 +11,8 @@ namespace BlogApp.Application.Mappings
             CreateMap<BlogReaction, BlogReactionDTO>();
             CreateMap<BlogReactionDTO, BlogReaction>();
 
-            CreateMap<BlogReaction, AddBlogReactionDTO>();
-            CreateMap<AddBlogReactionDTO, BlogReaction>();
+            CreateMap<BlogReaction, AddOrUpdateBlogReactionDTO>();
+            CreateMap<AddOrUpdateBlogReactionDTO, BlogReaction>();
         }
     }
 }
