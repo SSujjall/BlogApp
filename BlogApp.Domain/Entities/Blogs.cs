@@ -18,8 +18,8 @@ namespace BlogApp.Domain.Entities
         public int UpVoteCount { get; set; } = 0;
         public int DownVoteCount { get; set; } = 0;
         public bool IsDeleted { get; set; } = false;
-        public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public DateOnly UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public virtual Users User { get; set; } = null!;

@@ -16,7 +16,7 @@ namespace BlogApp.Domain.Entities
         public int CommentId { get; set; }
 
         public VoteType ReactionType { get; set; }
-        public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Navigation Property
         public virtual Comments Comments { get; set; } = null!;

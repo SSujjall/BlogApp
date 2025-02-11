@@ -15,7 +15,7 @@ namespace BlogApp.Domain.Entities
         public string UserId { get; set; }
 
         public string CommentDescription { get; set; }
-        public DateOnly UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         // Virtual navigation property
         public virtual Comments Comment { get; set; } = null!;

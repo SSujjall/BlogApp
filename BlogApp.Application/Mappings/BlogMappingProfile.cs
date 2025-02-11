@@ -13,9 +13,9 @@ namespace BlogApp.Application.Mappings
     {
         public BlogMappingProfile()
         {
-            CreateMap<AddToBlogHistoryDTO, UpdateBlogDTO>();
-            CreateMap<BlogHistory, AddToBlogHistoryDTO>();
-            CreateMap<AddToBlogHistoryDTO, BlogHistory>();
+            CreateMap<Blogs, BlogHistory>()
+                .ForMember(dest => dest.User, opt => opt.Ignore())  // Exclude the User navigation property
+                .ForMember(dest => dest.Blog, opt => opt.Ignore()); // Exclude the Blog Navigation Property
         }
     }
 }

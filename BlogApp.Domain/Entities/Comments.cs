@@ -16,8 +16,8 @@ namespace BlogApp.Domain.Entities
 
         public string CommentDescription { get; set; }
         public bool IsDeleted { get; set; }
-        public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public DateOnly UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public virtual Blogs Blogs { get; set; }

@@ -87,7 +87,7 @@ namespace BlogApp.Infrastructure.Services
 
                 #region request model mapping
                 comment.CommentDescription = dto.CommentDescription;
-                comment.UpdatedAt = DateOnly.FromDateTime(DateTime.Now);
+                comment.UpdatedAt = DateTime.Now;
                 #endregion
 
                 var result = await _commentRepository.Update(comment);
