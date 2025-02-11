@@ -6,7 +6,7 @@ namespace BlogApp.Domain.Entities
     public class Comments
     {
         [Key]
-        public int CommendId { get; set; }
+        public int CommentId { get; set; }
 
         [ForeignKey(nameof(Blogs))]
         public int BlogId { get; set; }
@@ -16,8 +16,8 @@ namespace BlogApp.Domain.Entities
 
         public string CommentDescription { get; set; }
         public bool IsDeleted { get; set; }
-        public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public DateOnly UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public virtual Blogs Blogs { get; set; }

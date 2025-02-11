@@ -4,6 +4,7 @@ using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250211042327_history-blog-comment")]
+    partial class historyblogcomment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,8 +39,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Property<int>("BlogId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -75,8 +78,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Property<int>("BlogId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<int>("ReactionType")
                         .HasColumnType("int");
@@ -103,8 +106,8 @@ namespace BlogApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BlogId"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -129,8 +132,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Property<int>("UpVoteCount")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("UpdatedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -158,8 +161,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Property<int>("CommentId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("UpdatedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -185,8 +188,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Property<int>("CommentId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<int>("ReactionType")
                         .HasColumnType("int");
@@ -207,11 +210,11 @@ namespace BlogApp.Infrastructure.Migrations
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Comments", b =>
                 {
-                    b.Property<int>("CommentId")
+                    b.Property<int>("CommendId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommendId"));
 
                     b.Property<int>("BlogId")
                         .HasColumnType("int");
@@ -220,20 +223,20 @@ namespace BlogApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("UpdatedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("CommentId");
+                    b.HasKey("CommendId");
 
                     b.HasIndex("BlogId");
 
@@ -250,8 +253,8 @@ namespace BlogApp.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -307,15 +310,15 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ffb16d35-eff3-4598-9302-97a1527cd1fd",
-                            ConcurrencyStamp = "ffb16d35-eff3-4598-9302-97a1527cd1fd",
+                            Id = "e484c5a2-89c0-43ff-881b-14f66dc82a64",
+                            ConcurrencyStamp = "e484c5a2-89c0-43ff-881b-14f66dc82a64",
                             Name = "Superadmin",
                             NormalizedName = "SUPERADMIN"
                         },
                         new
                         {
-                            Id = "f7d66ddd-1d47-43ff-ac03-0963fff7f7c5",
-                            ConcurrencyStamp = "f7d66ddd-1d47-43ff-ac03-0963fff7f7c5",
+                            Id = "d8ee08d2-73cf-4de6-8ea4-ee75be216397",
+                            ConcurrencyStamp = "d8ee08d2-73cf-4de6-8ea4-ee75be216397",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -484,8 +487,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "5ba0581e-0d8d-45b6-b1e8-c56c55f0406d",
-                            RoleId = "ffb16d35-eff3-4598-9302-97a1527cd1fd"
+                            UserId = "3820b8a9-74bd-4889-ad02-87fd924d1f2c",
+                            RoleId = "e484c5a2-89c0-43ff-881b-14f66dc82a64"
                         });
                 });
 
@@ -517,17 +520,17 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5ba0581e-0d8d-45b6-b1e8-c56c55f0406d",
+                            Id = "3820b8a9-74bd-4889-ad02-87fd924d1f2c",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "c0b374be-4343-4140-a5e0-ec14c7c66aa5",
+                            ConcurrencyStamp = "d1b1f881-1e14-4e36-ad88-69199f6b30c9",
                             Email = "superadmin@blog.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "SUPERADMIN@BLOG.COM",
                             NormalizedUserName = "SUPERADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDj8QgcwV4qOm5NBozYIoWnWNVvNMO1jyoVtbtsj7N/iPUSfbWiQsCx/yDohPHPcEg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEE8aC8B+R1mriZpK2Lv2lEzyq67st0kyrUT7t23DPbOVJp/h5NmkP6O2VbPnXlbzCA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "60c1f831-2b19-43f6-967e-b8a1d99ba645",
+                            SecurityStamp = "08638734-1f95-4558-8cd1-16e488c543eb",
                             TwoFactorEnabled = false,
                             UserName = "Superadmin"
                         });

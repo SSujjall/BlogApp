@@ -12,6 +12,8 @@ using BlogApp.Application.Helpers.CloudinaryService.Config;
 using BlogApp.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Dependency Injection for DB Connection, Services and Repos.
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var configuration = builder.Configuration;
