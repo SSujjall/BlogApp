@@ -44,7 +44,7 @@ namespace BlogApp.Infrastructure.Services
         public async Task<ApiResponse<BlogsDTO>> GetBlogById(int id)
         {
             var result = await _blogRepository.GetById(id);
-            if (result != null)
+            if (result != null && result.IsDeleted == false)
             {
                 #region response model mapping
                 var response = new BlogsDTO
@@ -132,7 +132,13 @@ namespace BlogApp.Infrastructure.Services
 
                 #region Add to Blog History
                 var historyReq = _mapper.Map<BlogHistory>(existingBlog);
-                await _blogHistoryRepo.Add(historyReq);
+                historyReq.CreatedAt = DateTime.Now;
+                var historyRes = await _blogHistoryRepo.Add(historyReq);
+                if (historyRes == null)
+                {
+                    var error = new Dictionary<string, string>() { { "Blog History", "Add Blog History respons returned null." } };
+                    return ApiResponse<BlogsDTO>.Failed(error, "Error When adding Blog History.");
+                }
                 #endregion
 
                 #region request model mapping
@@ -176,6 +182,12 @@ namespace BlogApp.Infrastructure.Services
                 }
                 try
                 {
+                    // Checking if the blog is already deleted or not
+                    if (blog.IsDeleted == true)
+                    {
+                        var blogError = new Dictionary<string, string>() { { "Blog", "Blog is already softdeleted." } };
+                        return ApiResponse<string>.Failed(blogError, "Blog Deletion Failed");
+                    }
                     blog.IsDeleted = true;
                     await _blogRepository.Update(blog); // Softdelete
                     return ApiResponse<string>.Success(null, "Blog Deleted Successfully");
@@ -187,7 +199,7 @@ namespace BlogApp.Infrastructure.Services
                 }
             }
             var errors = new Dictionary<string, string>() { { "Blog", "Blog Not Found." } };
-            return ApiResponse<string>.Failed(errors, "Blog Deleteion Failed");
+            return ApiResponse<string>.Failed(errors, "Blog Deletion Failed");
         }
     }
 }

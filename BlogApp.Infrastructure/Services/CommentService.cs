@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using AutoMapper;
+using Azure;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers;
 using BlogApp.Application.Helpers.HelperModels;
@@ -10,19 +11,21 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class CommentService(ICommentRepository _commentRepository) : ICommentService
+    public class CommentService(ICommentRepository _commentRepository, IBaseRepository<CommentHistory> _commentHistoryRepo, 
+        IMapper _mapper) : ICommentService
     {
         public async Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllCommentByBlogId(int blogId)
         {
             var requestFilter = new GetRequest<Comments>
             {
-                Filter = (x => x.BlogId == blogId)
+                Filter = (x => x.BlogId == blogId && x.IsDeleted == false)
             };
 
             var result = await _commentRepository.GetAll(requestFilter);
@@ -31,7 +34,7 @@ namespace BlogApp.Infrastructure.Services
                 #region response model mapping (using LINQ instead of normal foreach loop)
                 var response = result.Select(comment => new CommentDTO
                 {
-                    CommendId = comment.CommendId,
+                    CommentId = comment.CommentId,
                     BlogId = comment.BlogId,
                     UserId = comment.UserId,
                     CommentDescription = comment.CommentDescription,
@@ -61,7 +64,7 @@ namespace BlogApp.Infrastructure.Services
                 #region response model mapping
                 var response = new CommentDTO
                 {
-                    CommendId = result.CommendId,
+                    CommentId = result.CommentId,
                     BlogId = result.BlogId,
                     UserId = result.UserId,
                     CommentDescription = result.CommentDescription,
@@ -76,27 +79,38 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<CommentDTO>> UpdateComment(UpdateCommentDTO dto, string userId)
         {
-            var comment = await _commentRepository.GetById(dto.CommendId);
-            if (comment != null)
+            var existingComment = await _commentRepository.GetById(dto.CommentId);
+            if (existingComment != null)
             {
-                if (comment.UserId != userId)
+                if (existingComment.UserId != userId)
                 {
                     var authError = new Dictionary<string, string>() { { "Authorization", "You are not authorized to update this comment." } };
                     return ApiResponse<CommentDTO>.Failed(authError, "Unauthorized blog update attempt.");
                 }
 
-                #region request model mapping
-                comment.CommentDescription = dto.CommentDescription;
-                comment.UpdatedAt = DateTime.Now;
+                #region Add to Comment History
+                var historyReq = _mapper.Map<CommentHistory>(existingComment);
+                historyReq.UpdatedAt = DateTime.Now;
+                var historyRes = await _commentHistoryRepo.Add(historyReq);
+                if (historyRes == null)
+                {
+                    var error = new Dictionary<string, string>() { { "Comment History", "Add Comment History respons returned null." } };
+                    return ApiResponse<CommentDTO>.Failed(error, "Error When adding Comment History.");
+                }
                 #endregion
 
-                var result = await _commentRepository.Update(comment);
+                #region request model mapping
+                existingComment.CommentDescription = dto.CommentDescription;
+                existingComment.UpdatedAt = DateTime.Now;
+                #endregion
+
+                var result = await _commentRepository.Update(existingComment);
                 if (result != null)
                 {
                     #region response model mapping
                     var response = new CommentDTO
                     {
-                        CommendId = result.CommendId,
+                        CommentId = result.CommentId,
                         BlogId = result.BlogId,
                         UserId = result.UserId,
                         CommentDescription = result.CommentDescription,
@@ -123,6 +137,12 @@ namespace BlogApp.Infrastructure.Services
                 }
                 try
                 {
+                    // Checking if the comment is already deleted or not
+                    if (comment.IsDeleted == true)
+                    {
+                        var blogError = new Dictionary<string, string>() { { "Comment", "Comment is already softdeleted." } };
+                        return ApiResponse<string>.Failed(blogError, "Comment Deletion Failed");
+                    }
                     comment.IsDeleted = true;
                     await _commentRepository.Update(comment);
                     return ApiResponse<string>.Success(null, "Comment Deleted Successfully");
@@ -134,7 +154,7 @@ namespace BlogApp.Infrastructure.Services
                 }
             }
             var errors = new Dictionary<string, string>() { { "Comment", "Comment Not Found." } };
-            return ApiResponse<string>.Failed(errors, "Comment Deleteion failed.");
+            return ApiResponse<string>.Failed(errors, "Comment Deletion failed.");
         }
     }
 }
