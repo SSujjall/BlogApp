@@ -7,6 +7,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Services
 {
@@ -200,6 +201,41 @@ namespace BlogApp.Infrastructure.Services
             }
             var errors = new Dictionary<string, string>() { { "Blog", "Blog Not Found." } };
             return ApiResponse<string>.Failed(errors, "Blog Deletion Failed");
+        }
+
+        public async Task UpdateBlogVoteCount(AddOrUpdateBlogReactionDTO model, bool reactionExists, VoteType? previousVote)
+        {
+            var blog = await _blogRepository.GetById(model.BlogId);
+            if (blog != null)
+            {
+                if (!reactionExists) // New reaction
+                {
+                    if (model.ReactionType == VoteType.UpVote)
+                        blog.UpVoteCount++;
+                    else if (model.ReactionType == VoteType.DownVote)
+                        blog.DownVoteCount++;
+                }
+                else // Reaction is being updated
+                {
+                    // Remove previous vote
+                    if (previousVote == VoteType.UpVote)
+                        blog.UpVoteCount--;
+                    else if (previousVote == VoteType.DownVote)
+                        blog.DownVoteCount--;
+
+                    // Apply new vote
+                    if (model.ReactionType == VoteType.UpVote)
+                        blog.UpVoteCount++;
+                    else if (model.ReactionType == VoteType.DownVote)
+                        blog.DownVoteCount++;
+                }
+
+                // Ensure no negative votes
+                blog.UpVoteCount = Math.Max(0, blog.UpVoteCount);
+                blog.DownVoteCount = Math.Max(0, blog.DownVoteCount);
+
+                await _blogRepository.Update(blog);
+            }
         }
     }
 }

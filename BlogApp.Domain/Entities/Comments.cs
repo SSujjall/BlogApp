@@ -15,6 +15,8 @@ namespace BlogApp.Domain.Entities
         public string UserId { get; set; }
 
         public string CommentDescription { get; set; }
+        public int UpVoteCount { get; set; } = 0;
+        public int DownVoteCount { get; set; } = 0;
         public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }

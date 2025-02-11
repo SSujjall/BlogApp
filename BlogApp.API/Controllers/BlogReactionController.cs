@@ -1,6 +1,7 @@
 ﻿using Azure;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Interface.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +28,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPost("vote")]
         public async Task<IActionResult> VoteBlog(AddOrUpdateBlogReactionDTO model)
         {
