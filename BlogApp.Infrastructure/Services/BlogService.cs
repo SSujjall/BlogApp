@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Reflection.Metadata;
+using AutoMapper;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.HelperModels;
@@ -9,7 +10,8 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary) : IBlogService
+    public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary, 
+        IBaseRepository<BlogHistory> _blogHistoryRepo, IMapper _mapper) : IBlogService
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request)
         {
@@ -128,6 +130,11 @@ namespace BlogApp.Infrastructure.Services
                 }
                 #endregion
 
+                #region Add to Blog History
+                var historyReq = _mapper.Map<BlogHistory>(dto);
+                await _blogHistoryRepo.Add(historyReq);
+                #endregion
+
                 #region request model mapping
                 existingBlog.Title = dto.Title;
                 existingBlog.Description = dto.Description;
@@ -168,7 +175,8 @@ namespace BlogApp.Infrastructure.Services
                 }
                 try
                 {
-                    await _blogRepository.Delete(blog);
+                    blog.IsDeleted = true;
+                    await _blogRepository.Update(blog); // Softdelete
                     return ApiResponse<string>.Success(null, "Blog Deleted Successfully");
                 }
                 catch (Exception ex)

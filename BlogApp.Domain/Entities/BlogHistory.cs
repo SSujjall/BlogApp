@@ -8,8 +8,11 @@ namespace BlogApp.Domain.Entities
         [Key]
         public int BlogHistoryId { get; set; }
         
-        [ForeignKey(nameof(Blogs))]
+        [ForeignKey(nameof(Blog))]
         public int BlogId { get; set; }
+
+        [ForeignKey(nameof(User))]
+        public string UserId { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
@@ -17,6 +20,7 @@ namespace BlogApp.Domain.Entities
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
         // Virtual navigation property
-        public virtual Blogs Blogs { get; set; } = null!;
+        public virtual Blogs Blog { get; set; } = null!;
+        public virtual Users User { get; set; } = null!;
     }
 }

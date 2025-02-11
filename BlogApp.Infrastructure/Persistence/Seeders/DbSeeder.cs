@@ -68,7 +68,7 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
 
             // BlogHistory configuration
             builder.Entity<BlogHistory>()
-                .HasOne(bh => bh.Blogs)
+                .HasOne(bh => bh.Blog)
                 .WithMany(b => b.History)
                 .HasForeignKey(bh => bh.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -110,15 +110,15 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
 
             // CommentHistory configuration
             builder.Entity<CommentHistory>()
-                .HasOne(ch => ch.Comments)
+                .HasOne(ch => ch.Comment)
                 .WithMany(c => c.History)
                 .HasForeignKey(ch => ch.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CommentHistory>()
-                .HasOne(ch => ch.ModifiedBy)
+                .HasOne(ch => ch.User)
                 .WithMany()
-                .HasForeignKey(ch => ch.ModifiedByUserId)
+                .HasForeignKey(ch => ch.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
