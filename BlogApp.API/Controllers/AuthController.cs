@@ -1,13 +1,11 @@
-﻿using BlogApp.Application.DTOs;
+﻿using System.Net;
+using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.EmailService.Model;
 using BlogApp.Application.Helpers.EmailService.Service;
+using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IServices;
-using BlogApp.Domain.Entities;
-using Castle.Core.Smtp;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace BlogApp.API.Controllers
 {
@@ -50,7 +48,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
@@ -58,28 +56,26 @@ namespace BlogApp.API.Controllers
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Authentication", new { token = response.Data, email }, Request.Scheme);
-                var message = new EmailMessage(new string[] { email }, "Forgot Password Link", forgotPasswordLink!);
+                var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Auth", new { token = response.Data.ForgotPasswordToken, email }, Request.Scheme);
+                var message = new EmailMessage(new string[] { email }, "Password Reset Link", $"Click the link to reset password: {forgotPasswordLink!}");
                 _emailService.SendEmail(message);
-                return Ok();
+                return Ok(response);
             }
 
-            return BadRequest();
+            return BadRequest(response);
         }
 
-        [HttpGet("reset-password")]
+        [HttpGet("get-reset-password-request")]
         public async Task<IActionResult> ResetPassword(string token, string email)
         {
-            var model = new ResetPasswordDTO
+            var model = new
             {
                 Token = token,
                 Email = email
             };
 
-            return Ok(new
-            {
-                model
-            });
+            var response = ApiResponse<object>.Success(model, "Reset Password Token.");
+            return Ok(response);
         }
 
         [HttpPost]
