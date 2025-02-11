@@ -181,9 +181,9 @@ namespace BlogApp.Infrastructure.Services
             var resetPasswordResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
             if (!resetPasswordResult.Succeeded)
             {
-                // storing errors if there are any
-                var errors = resetPasswordResult.Errors.Select(x => x.Description).ToList();
-                return ApiResponse<string>.Failed(null, "User Not Found.");
+                // storing errors if there are any (token errors like invalid token)
+                var errors = resetPasswordResult.Errors.ToDictionary(x => x.Code, x => x.Description);
+                return ApiResponse<string>.Failed(errors, "User Not Found.");
             }
 
             return ApiResponse<string>.Success(null, "Password reset successful");
