@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.DTOs;
+﻿using Azure;
+using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
@@ -6,6 +7,7 @@ using BlogApp.Domain.Configs;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -49,18 +51,26 @@ namespace BlogApp.Infrastructure.Services
                 return ApiResponse<object>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
             }
 
+            var isEmailVerified = await _userManager.IsEmailConfirmedAsync(user);
+
+            if (isEmailVerified == false)
+            {
+                var errors = new Dictionary<string, string> { { "Email", "Email not verified" } };
+                return ApiResponse<object>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
+            }
+
             string generatedToken = await GenerateToken(user);
 
             return ApiResponse<object>.Success(new { token = generatedToken }, "User Validated");
         }
 
-        public async Task<ApiResponse<string>> RegisterUser(RegisterDTO registerDto)
+        public async Task<ApiResponse<RegisterResponseDTO>> RegisterUser(RegisterDTO registerDto)
         {
             // Check if the username already exists
             if (await _authRepository.UsernameExists(registerDto.Username))
             {
                 var errors = new Dictionary<string, string> { { "Username", "Username already exists" } };
-                return ApiResponse<string>.Failed(errors, "Register Failed.");
+                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.");
             }
 
             var user = new Users
@@ -75,7 +85,7 @@ namespace BlogApp.Infrastructure.Services
             if (!createResult)
             {
                 var errors = new Dictionary<string, string> { { "User", "Error when creating user." } };
-                return ApiResponse<string>.Failed(errors, "User Creation Failed." , HttpStatusCode.InternalServerError);
+                return ApiResponse<RegisterResponseDTO>.Failed(errors, "User Creation Failed." , HttpStatusCode.InternalServerError);
             }
 
             // Ensure the role exists
@@ -89,7 +99,7 @@ namespace BlogApp.Infrastructure.Services
                 if (!roleCreateResult.Succeeded)
                 {
                     var errors = new Dictionary<string, string> { { "Role", "Failed to create role" } };
-                    return ApiResponse<string>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
+                    return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
                 }
             }
 
@@ -98,11 +108,85 @@ namespace BlogApp.Infrastructure.Services
             if (!addToRoleResult.Succeeded)
             {
                 var errors = new Dictionary<string, string> { { "User", "Failed to assign role to user" } };
-                return ApiResponse<string>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
+                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
             }
 
-            // Return success response using the correct constructor
-            return ApiResponse<string>.Success(null, "User created successfully");
+            #region Generate email verification token
+            var existingUser = await _authRepository.FindByUsername(registerDto.Username);
+            if (existingUser == null)
+            {
+                var errors = new Dictionary<string, string> { { "User", "Failed to fetch newly created user." } };
+                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Failed to fetch user.");
+            }
+            var emailVerificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
+            var response = new RegisterResponseDTO
+            {
+                EmailConfirmToken = emailVerificationToken
+            };
+            #endregion
+
+            return ApiResponse<RegisterResponseDTO>.Success(response, "User created successfully");
+        }
+
+        public async Task<ApiResponse<string>> ConfirmEmailVerification(string token, string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                var errors = new Dictionary<string, string> { { "User", "Incorrect Email, user not found." } };
+                return ApiResponse<string>.Failed(errors, "User Not Found.");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                var errors = new Dictionary<string, string> { { "Email Confirmation", "Failed to confirm Email, Invalid Token." } };
+                return ApiResponse<string>.Failed(errors, "Email Confirmation Failed.");
+            }
+            return ApiResponse<string>.Success(null, "Email Confirmed successfully");
+        }
+
+        public async Task<ApiResponse<ForgotPasswordResponseDTO>> GenerateForgotPasswordLink(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                var errors = new Dictionary<string, string> { { "User", "Incorrect Email, user not found." } };
+                return ApiResponse<ForgotPasswordResponseDTO>.Failed(errors, "User Not Found.");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            if (token == null)
+            {
+                var errors = new Dictionary<string, string> { { "Token", "Error when generating forgot password token." } };
+                return ApiResponse<ForgotPasswordResponseDTO>.Failed(errors, "Token Generation Failed");
+            }
+
+            var response = new ForgotPasswordResponseDTO
+            {
+                ForgotPasswordToken = token
+            };
+            return ApiResponse<ForgotPasswordResponseDTO>.Success(response, "Forgot Password Token Generated successfully");
+        }
+
+        public async Task<ApiResponse<string>> ResetPasswordAsync(ResetPasswordDTO model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                var errors = new Dictionary<string, string> { { "User", "Incorrect Email, user not found." } };
+                return ApiResponse<string>.Failed(errors, "User Not Found.");
+            }
+
+            var resetPasswordResult = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+            if (!resetPasswordResult.Succeeded)
+            {
+                // storing errors if there are any (token errors like invalid token)
+                var errors = resetPasswordResult.Errors.ToDictionary(x => x.Code, x => x.Description);
+                return ApiResponse<string>.Failed(errors, "User Not Found.");
+            }
+
+            return ApiResponse<string>.Success(null, "Password reset successful");
         }
 
         #region helper methods

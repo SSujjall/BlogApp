@@ -10,13 +10,16 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class CommentReactionService(ICommentReactionRepository commentReactionRepo, IMapper mapper) : ICommentReactionService
+    public class CommentReactionService(ICommentReactionRepository commentReactionRepo, IMapper mapper,
+        ICommentService commentService) : ICommentReactionService
     {
         protected readonly ICommentReactionRepository _commentReactionRepo = commentReactionRepo;
         private readonly IMapper _mapper = mapper;
+        private readonly ICommentService _commentService = commentService;
 
         public async Task<ApiResponse<IEnumerable<CommentReactionDTO>>> GetAllCommentVotes(int commentId)
         {
@@ -41,17 +44,39 @@ namespace BlogApp.Infrastructure.Services
             if (existingReaction != null)
             {
                 var previousCommentVote = existingReaction.ReactionType;
-                existingReaction.ReactionType = model.ReactionType;
-                await _commentReactionRepo.Update(existingReaction);
-                return ApiResponse<string>.Success(null, $"comment vote changed from {previousCommentVote.ToString()} to {existingReaction.ReactionType.ToString()}");
+
+                if (previousCommentVote == model.ReactionType)
+                {
+                    var errors = new Dictionary<string, string> { { "Same Vote", $"Cannot {previousCommentVote} again." } };
+                    return ApiResponse<string>.Failed(errors, "Comment vote failed.");
+                }
+
+                if (model.ReactionType == VoteType.None)
+                {
+                    await _commentReactionRepo.Delete(existingReaction);
+                }
+                else
+                {
+                    existingReaction.ReactionType = model.ReactionType;
+                    await _commentReactionRepo.Update(existingReaction);
+                }
+
+                await _commentService.UpdateCommentVoteCount(model, true, previousCommentVote); // Update vote count in main comment table
+                return ApiResponse<string>.Success(null, $"comment vote changed from {previousCommentVote.ToString()} to {model.ReactionType.ToString()}");
             }
             else
             {
+                if (model.ReactionType == VoteType.None)
+                {
+                    return ApiResponse<string>.Failed(null, "Cannot remove a vote that doesn't exist.");
+                }
+
                 try
                 {
                     var request = _mapper.Map<CommentReaction>(model);
                     request.UserId = userId; // set the userId to the one coming from parameter
                     var response = await _commentReactionRepo.Add(request);
+                    await _commentService.UpdateCommentVoteCount(model, false, null); // Update vote count in main comment table
                     if (response != null)
                     {
                         return ApiResponse<string>.Success(null, $"Comment voted as {request.ReactionType.ToString()}.");

@@ -12,13 +12,15 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper) : IBlogReactionService
+    public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper, IBlogService blogService) : IBlogReactionService
     {
         protected readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
         private readonly IMapper _mapper = mapper;
+        private readonly IBlogService _blogService = blogService;
 
         public async Task<ApiResponse<IEnumerable<BlogReactionDTO>>> GetAllBlogVotes(int blogId)
         {
@@ -38,22 +40,44 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<string>> VoteBlog(AddOrUpdateBlogReactionDTO model, string userId)
         {
-            Expression<Func<BlogReaction, bool>> filter = x => x.BlogId == model.BlogId && x.UserId == userId;
+            Expression<Func<BlogReaction, bool>> filter = (x => x.BlogId == model.BlogId && x.UserId == userId);
             var existingReaction = await _blogReactionRepo.FindSingleByConditionAsync(filter);
             if (existingReaction != null)
             {
-                var previousBlogVote = existingReaction.ReactionType;
-                existingReaction.ReactionType = model.ReactionType;
-                await _blogReactionRepo.Update(existingReaction);
-                return ApiResponse<string>.Success(null, $"blog vote changed from {previousBlogVote.ToString()} to {existingReaction.ReactionType.ToString()}");
+                var previousVote = existingReaction.ReactionType;
+
+                if (previousVote == model.ReactionType)
+                {
+                    var errors = new Dictionary<string, string> { { "Same Vote", $"Cannot {previousVote} again." } };
+                    return ApiResponse<string>.Failed(errors, "Blog vote failed.");
+                }
+
+                if (model.ReactionType == VoteType.None)
+                {
+                    await _blogReactionRepo.Delete(existingReaction);
+                }
+                else
+                {
+                    existingReaction.ReactionType = model.ReactionType;
+                    await _blogReactionRepo.Update(existingReaction);
+                }
+
+                await _blogService.UpdateBlogVoteCount(model, true, previousVote); // Update vote count in main blog table
+                return ApiResponse<string>.Success(null, $"blog vote changed from {previousVote.ToString()} to {model.ReactionType.ToString()}");
             }
             else
             {
+                if (model.ReactionType == VoteType.None)
+                {
+                    return ApiResponse<string>.Failed(null, "Cannot remove a vote that doesn't exist.");
+                }
+
                 try
                 {
                     var request = _mapper.Map<BlogReaction>(model);
                     request.UserId = userId; // set the userId to the one coming from parameter
                     var response = await _blogReactionRepo.Add(request);
+                    await _blogService.UpdateBlogVoteCount(model, false, null); // Update vote count in main blog table
                     if (response != null)
                     {
                         return ApiResponse<string>.Success(null, $"Blog voted as {request.ReactionType.ToString()}.");

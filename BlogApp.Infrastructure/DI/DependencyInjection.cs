@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.Helpers.CloudinaryService.Service;
+using BlogApp.Application.Helpers.EmailService.Service;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
@@ -53,6 +54,7 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient<ICommentService, CommentService>();
             services.AddScoped<IBlogReactionService, BlogReactionService>();
             services.AddScoped<ICommentReactionService, CommentReactionService>();
+            services.AddScoped<IEmailService, EmailService>();
             #endregion
 
             return services;

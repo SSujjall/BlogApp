@@ -6,6 +6,8 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
+using BlogApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
@@ -155,6 +157,41 @@ namespace BlogApp.Infrastructure.Services
             }
             var errors = new Dictionary<string, string>() { { "Comment", "Comment Not Found." } };
             return ApiResponse<string>.Failed(errors, "Comment Deletion failed.");
+        }
+
+        public async Task UpdateCommentVoteCount(AddOrUpdateCommentReactionDTO model, bool reactionExists, VoteType? previousVote)
+        {
+            var comment = await _commentRepository.GetById(model.CommentId);
+            if (comment != null)
+            {
+                if (!reactionExists) // New reaction
+                {
+                    if (model.ReactionType == VoteType.UpVote)
+                        comment.UpVoteCount++;
+                    else if (model.ReactionType == VoteType.DownVote)
+                        comment.DownVoteCount++;
+                }
+                else // Reaction is being updated
+                {
+                    // Remove previous vote
+                    if (previousVote == VoteType.UpVote)
+                        comment.UpVoteCount--;
+                    else if (previousVote == VoteType.DownVote)
+                        comment.DownVoteCount--;
+
+                    // Apply new vote
+                    if (model.ReactionType == VoteType.UpVote)
+                        comment.UpVoteCount++;
+                    else if (model.ReactionType == VoteType.DownVote)
+                        comment.DownVoteCount++;
+                }
+
+                // Ensure no negative votes
+                comment.UpVoteCount = Math.Max(0, comment.UpVoteCount);
+                comment.DownVoteCount = Math.Max(0, comment.DownVoteCount);
+
+                await _commentRepository.Update(comment);
+            }
         }
     }
 }
