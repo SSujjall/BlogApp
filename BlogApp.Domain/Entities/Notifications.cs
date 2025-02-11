@@ -15,7 +15,7 @@ namespace BlogApp.Domain.Entities
         public string Type { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public bool IsRead { get; set; }
-        public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Virtual navigation property
         public virtual Users User { get; set; } = null!;

@@ -4,6 +4,7 @@ using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250211044856_DateTime-Fix")]
+    partial class DateTimeFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,11 +210,11 @@ namespace BlogApp.Infrastructure.Migrations
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Comments", b =>
                 {
-                    b.Property<int>("CommentId")
+                    b.Property<int>("CommendId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommendId"));
 
                     b.Property<int>("BlogId")
                         .HasColumnType("int");
@@ -233,7 +236,7 @@ namespace BlogApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("CommentId");
+                    b.HasKey("CommendId");
 
                     b.HasIndex("BlogId");
 
@@ -307,15 +310,15 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ffb16d35-eff3-4598-9302-97a1527cd1fd",
-                            ConcurrencyStamp = "ffb16d35-eff3-4598-9302-97a1527cd1fd",
+                            Id = "97b0f48b-ef99-4176-9e9c-5454dd6ebd19",
+                            ConcurrencyStamp = "97b0f48b-ef99-4176-9e9c-5454dd6ebd19",
                             Name = "Superadmin",
                             NormalizedName = "SUPERADMIN"
                         },
                         new
                         {
-                            Id = "f7d66ddd-1d47-43ff-ac03-0963fff7f7c5",
-                            ConcurrencyStamp = "f7d66ddd-1d47-43ff-ac03-0963fff7f7c5",
+                            Id = "049ce140-81c4-43ed-b6b1-b563db5e74a0",
+                            ConcurrencyStamp = "049ce140-81c4-43ed-b6b1-b563db5e74a0",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -484,8 +487,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "5ba0581e-0d8d-45b6-b1e8-c56c55f0406d",
-                            RoleId = "ffb16d35-eff3-4598-9302-97a1527cd1fd"
+                            UserId = "78cbc9d5-275a-4d93-a3c6-18bf3fe98ac7",
+                            RoleId = "97b0f48b-ef99-4176-9e9c-5454dd6ebd19"
                         });
                 });
 
@@ -517,17 +520,17 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5ba0581e-0d8d-45b6-b1e8-c56c55f0406d",
+                            Id = "78cbc9d5-275a-4d93-a3c6-18bf3fe98ac7",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "c0b374be-4343-4140-a5e0-ec14c7c66aa5",
+                            ConcurrencyStamp = "c202c774-363a-4d96-81ee-5b619827cc9a",
                             Email = "superadmin@blog.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "SUPERADMIN@BLOG.COM",
                             NormalizedUserName = "SUPERADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDj8QgcwV4qOm5NBozYIoWnWNVvNMO1jyoVtbtsj7N/iPUSfbWiQsCx/yDohPHPcEg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP/ZgzQWAvMJia8URFOXtBH4dCxIoVja3f1rlL+pjdS445AjGxAgfYwaq0hQshCXew==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "60c1f831-2b19-43f6-967e-b8a1d99ba645",
+                            SecurityStamp = "e3cbf07c-07ec-4320-aec5-5dc9f39e5efc",
                             TwoFactorEnabled = false,
                             UserName = "Superadmin"
                         });
