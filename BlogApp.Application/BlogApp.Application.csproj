@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="CloudinaryDotNet" Version="1.27.1" />
+    <PackageReference Include="MailKit" Version="4.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
@@ -28,11 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlogApp.Domain\BlogApp.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Helpers\EmailService\Model\" />
-    <Folder Include="Helpers\EmailService\Service\" />
   </ItemGroup>
 
 </Project>

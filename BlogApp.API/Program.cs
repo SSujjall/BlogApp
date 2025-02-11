@@ -81,8 +81,8 @@ var jwtSection = builder.Configuration.GetSection("JWT");
 builder.Services.Configure<JwtConfig>(jwtSection);
 
 // settings the values of jwt from configuration to the EmailConfig class
-var emailSection = builder.Configuration.GetSection("EmailConfiguration");
-builder.Services.Configure<EmailConfig>(emailSection);
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfig>();
+builder.Services.AddSingleton(emailConfig);
 
 // settings the values of cloudinary from configuration to the cloudinary config class
 var cloudinaryConfig = builder.Configuration.GetSection("CloudinarySettings").Get<CloudinaryConfig>();
