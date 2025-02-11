@@ -123,7 +123,8 @@ namespace BlogApp.Infrastructure.Services
                 }
                 try
                 {
-                    await _commentRepository.Delete(comment);
+                    comment.IsDeleted = true;
+                    await _commentRepository.Update(comment);
                     return ApiResponse<string>.Success(null, "Comment Deleted Successfully");
                 }
                 catch (Exception ex)
