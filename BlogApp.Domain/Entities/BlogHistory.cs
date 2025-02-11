@@ -17,7 +17,7 @@ namespace BlogApp.Domain.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public string ImageUrl { get; set; }
-        public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Virtual navigation property
         public virtual Blogs Blog { get; set; } = null!;

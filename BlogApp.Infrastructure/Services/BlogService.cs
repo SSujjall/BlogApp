@@ -131,7 +131,7 @@ namespace BlogApp.Infrastructure.Services
                 #endregion
 
                 #region Add to Blog History
-                var historyReq = _mapper.Map<BlogHistory>(dto);
+                var historyReq = _mapper.Map<BlogHistory>(existingBlog);
                 await _blogHistoryRepo.Add(historyReq);
                 #endregion
 
@@ -139,6 +139,7 @@ namespace BlogApp.Infrastructure.Services
                 existingBlog.Title = dto.Title;
                 existingBlog.Description = dto.Description;
                 existingBlog.ImageUrl = imageUrl ?? existingBlog.ImageUrl;
+                existingBlog.UpdatedAt = DateTime.Now;
                 #endregion
 
                 var result = await _blogRepository.Update(existingBlog);

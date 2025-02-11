@@ -14,8 +14,8 @@ namespace BlogApp.Application.DTOs
         public int BlogId { get; set; }
         public string UserId { get; set; }
         public string CommentDescription { get; set; }
-        public DateOnly CreatedAt { get; set; }
-        public DateOnly UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 
     public class AddCommentDTO
