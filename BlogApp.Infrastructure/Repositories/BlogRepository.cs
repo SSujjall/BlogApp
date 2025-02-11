@@ -5,6 +5,7 @@ using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using BlogApp.Application.Helpers.HelperModels;
+using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Repositories
 {
