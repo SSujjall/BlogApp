@@ -6,7 +6,7 @@ namespace BlogApp.Domain.Entities
     public class Comments
     {
         [Key]
-        public int CommendId { get; set; }
+        public int CommentId { get; set; }
 
         [ForeignKey(nameof(Blogs))]
         public int BlogId { get; set; }

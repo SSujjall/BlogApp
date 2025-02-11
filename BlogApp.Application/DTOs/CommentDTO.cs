@@ -10,7 +10,7 @@ namespace BlogApp.Application.DTOs
 {
     public class CommentDTO
     {
-        public int CommendId { get; set; }
+        public int CommentId { get; set; }
         public int BlogId { get; set; }
         public string UserId { get; set; }
         public string CommentDescription { get; set; }
@@ -26,7 +26,7 @@ namespace BlogApp.Application.DTOs
 
     public class UpdateCommentDTO
     {
-        public int CommendId { get; set; }
+        public int CommentId { get; set; }
         public string CommentDescription { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace BlogApp.Infrastructure.Repositories
 
         public async Task<(IEnumerable<Blogs>, int)> GetFilteredBlogs(GetRequest<Blogs> request)
         {
-            var query = _dbContext.Blogs.AsQueryable();
+            var query = _dbContext.Blogs.AsQueryable().Where(x => x.IsDeleted == false);
 
             // Apply generic filters from GetRequest
             if (request.Filter != null)
