@@ -65,7 +65,7 @@ namespace BlogApp.API.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("get-reset-password-request")]
+        [HttpGet("get-reset-password-model")]
         public async Task<IActionResult> ResetPassword(string token, string email)
         {
             var model = new
