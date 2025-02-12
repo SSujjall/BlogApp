@@ -23,18 +23,6 @@ const HomePage = () => {
   return (
     <Layout>
       <h1 className="text-3xl font-semibold mb-4">Blogs</h1>
-      {blogs.length === 0 ? (
-        <p>No blogs available</p>
-      ) : (
-        <ul>
-          {blogs.map((blog) => (
-            <li key={blog.id} className="mb-4 p-4 border border-gray-200 rounded-lg">
-              <h2 className="text-xl font-semibold">{blog.title}</h2>
-              <p>{blog.description}</p>
-            </li>
-          ))}
-        </ul>
-      )}
     </Layout>
   );
 };
