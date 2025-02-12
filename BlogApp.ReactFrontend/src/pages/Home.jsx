@@ -11,7 +11,7 @@ const HomePage = () => {
       try {
         const data = await getBlogs();
         setBlogs(data.data);
-        showSuccessToast("Blogs fetched successfully");
+        // showSuccessToast("Blogs fetched successfully");
       } catch {
         showErrorToast("Error fetching blogs");
       }
