@@ -23,7 +23,7 @@ Button.propTypes = {
   text: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
   icon: PropTypes.string,
-  iconSize: PropTypes.string,
+  iconSize: PropTypes.number,
   className: PropTypes.string,
 };
 

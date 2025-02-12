@@ -1,7 +1,7 @@
 import { makeRequest } from "./api";
 
 const getBlogs = async () => {
-  return makeRequest("GET", "/blogs");
+  return makeRequest("GET", "/Blog/get-blogs");
 };
 
 const createBlog = async (blogData) => {
