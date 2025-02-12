@@ -1,32 +1,29 @@
 const menuData = [
   {
+    icon: "home",
     name: "Home",
     link: "/",
-    type: "single"
+    type: "single",
   },
   {
-    name: "Blog",
+    parentIcon: "book",
+    name: "Posts",
     type: "parent",
     children: [
-      { name: "All Posts", link: "/blog/posts" },
-      { name: "Categories", link: "/blog/categories" },
-      { name: "Tags", link: "/blog/tags" }
-    ]
+      { icon: "shuffle", name: "Random", link: "/blog/random" },
+      { icon: "schedule", name: "Recent", link: "/blog/recent" },
+      { icon: "trending_up", name: "Popular", link: "/blog/popular" },
+    ],
   },
   {
+    parentIcon: "settings",
     name: "Settings",
-    link: "/settings",
-    type: "single"
-  },
-  {
-    name: "User Management",
     type: "parent",
     children: [
-      { name: "Users", link: "/users" },
-      { name: "Roles", link: "/roles" },
-      { name: "Permissions", link: "/permissions" }
-    ]
-  }
+      { icon: "account_circle", name: "Profile", link: "/user/profile" },
+      { icon: "lock", name: "Password", link: "/user/password" },
+    ],
+  },
 ];
 
 export default menuData;

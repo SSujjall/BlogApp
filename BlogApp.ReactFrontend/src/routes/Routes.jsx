@@ -10,8 +10,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/page1" element={<Page1 />} />
-
+        <Route path="/blog/random" element={<Page1 />} />
 
 
         {/* 404 Not Found */}
