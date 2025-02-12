@@ -1,7 +1,11 @@
+import Layout from "../components/layout/Layout"
+
 const NotFound = () => {
   return (
-    <div className='text-7xl text-center'>NotFound</div>
-  )
-}
+    <Layout>
+      <div className="text-7xl text-center">NotFound</div>
+    </Layout>
+  );
+};
 
-export default NotFound
+export default NotFound;
