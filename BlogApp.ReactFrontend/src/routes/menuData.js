@@ -1,7 +1,7 @@
 const menuData = [
   {
-    name: "Dashboard",
-    link: "/dashboard",
+    name: "Home",
+    link: "/",
     type: "single"
   },
   {
