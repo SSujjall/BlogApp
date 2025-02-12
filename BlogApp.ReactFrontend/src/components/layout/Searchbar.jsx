@@ -22,7 +22,6 @@ const Searchbar = ({ toggleSidebar }) => {
       </div>
 
       {/* left div  */}
-
       <div className="pr-5 text-2xl font-bold">
         <Link to="/">MyBlog</Link>
       </div>
@@ -33,7 +32,6 @@ const Searchbar = ({ toggleSidebar }) => {
           <CommonInputField
             placeholder={"Search Blog"}
             icon={"search"}
-            classProp={"focus:ring-2 focus:ring-blue-500"}
           />
         </div>
       </div>
@@ -45,7 +43,7 @@ const Searchbar = ({ toggleSidebar }) => {
           onClick={handleLoginClick}
           icon={"person"}
           iconSize={20}
-          className={"bg-gray-800 hover:bg-gray-700"}
+          className={"text-white bg-gray-800 hover:bg-gray-700"}
         />
       </div>
     </nav>

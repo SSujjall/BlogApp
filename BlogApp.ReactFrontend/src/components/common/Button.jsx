@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 const Button = ({ text, onClick, icon, iconSize, className }) => {
   return (
     <button
-      className={`p-2 rounded flex items-center justify-center space-x-2 text-white ${className}`}
+      className={`p-2 rounded flex items-center justify-center gap-1 transition-colors ${className} ${icon ? "pr-3" : ""}`} // add extra padding if there is icon
       onClick={onClick}
     >
       {icon && (
