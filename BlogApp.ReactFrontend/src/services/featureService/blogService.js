@@ -1,4 +1,4 @@
-import { makeRequest } from "./api";
+import { makeRequest } from "../api";
 
 const getBlogs = async () => {
   return makeRequest("GET", "/Blog/get-blogs");

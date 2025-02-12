@@ -1,4 +1,4 @@
-import { makeRequest } from "./api";
+import { makeRequest } from "../api";
 
 const getComments = async (blogId) => {
   return makeRequest("GET", `/blogs/${blogId}/comments`);

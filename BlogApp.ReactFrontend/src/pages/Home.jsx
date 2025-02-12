@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getBlogs } from "../services/blogService";
+import { getBlogs } from "../services/featureService/blogService";
 import { showSuccessToast, showErrorToast } from "../utils/toastHelper";
 import Layout from "../components/layout/Layout";
 
