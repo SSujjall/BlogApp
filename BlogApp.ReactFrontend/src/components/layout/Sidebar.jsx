@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import MenuLink from "./menu/MenuLink";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
   // Handle screen size changes
@@ -41,7 +41,7 @@ const Sidebar = ({ visible, toggleSidebar }) => {
           } transition-all duration-300`}
       >
         <button
-          className="absolute top-4 right-4 cursor-pointer"
+          className="absolute top-5 right-4 cursor-pointer"
           onClick={toggleSidebar}
           aria-label="Close sidebar"
         >

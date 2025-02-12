@@ -23,13 +23,18 @@ const MenuLink = () => {
     <Link
       key={item.name}
       to={item.link}
-      className={`block px-4 py-2 rounded-lg transition-colors duration-200 
+      className={`flex px-4 py-3 gap-1 rounded-lg transition-colors duration-200 
         ${
           location.pathname === item.link
             ? "bg-gray-200 text-gray-900 font-medium"
             : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
         }`}
     >
+      {item.icon && (
+        <i className="material-symbols-rounded" style={{ userSelect: "none" }}>
+          {item.icon}
+        </i>
+      )}
       {item.name}
     </Link>
   );
@@ -42,7 +47,7 @@ const MenuLink = () => {
       <div key={item.name} className="mb-2">
         <button
           onClick={() => toggleMenu(item.name)}
-          className={`w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors duration-200 
+          className={`w-full flex px-4 py-3 gap-1 items-center justify-between rounded-lg transition-colors duration-200 
             ${
               hasActiveChild
                 ? "bg-gray-200 text-gray-900 font-medium"
@@ -51,7 +56,20 @@ const MenuLink = () => {
                 : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
             }`}
         >
-          <span>{item.name}</span>
+          {/* Left side: Icon + Name */}
+          <div className="flex items-center gap-1">
+            {item.parentIcon && (
+              <i
+                className="material-symbols-rounded"
+                style={{ userSelect: "none" }}
+              >
+                {item.parentIcon}
+              </i>
+            )}
+            <span>{item.name}</span>
+          </div>
+
+          {/* Right side: Expand/Collapse icon */}
           {isOpen ? (
             <ChevronUp
               className={`w-4 h-4 ${
@@ -76,13 +94,21 @@ const MenuLink = () => {
               <Link
                 key={child.name}
                 to={child.link}
-                className={`block px-4 py-2 rounded-lg transition-colors duration-200
+                className={`flex items-center px-4 py-2 gap-1 rounded-lg transition-colors duration-200
                   ${
                     location.pathname === child.link
                       ? "bg-gray-200 text-gray-900 font-medium"
                       : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
                   }`}
               >
+                {child.icon && (
+                  <i
+                    className="material-symbols-rounded text-xl"
+                    style={{ userSelect: "none" }}
+                  >
+                    {child.icon}
+                  </i>
+                )}
                 {child.name}
               </Link>
             ))}

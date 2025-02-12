@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../common/Button";
 import CommonInputField from "../common/CommonInputField";
 import { Link } from "react-router-dom";
-import PropTypes from 'prop-types';
-
+import PropTypes from "prop-types";
 
 const Searchbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
