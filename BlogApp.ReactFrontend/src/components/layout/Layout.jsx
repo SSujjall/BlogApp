@@ -1,21 +1,20 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
+import Searchbar from "./Searchbar";
 import Sidebar from "./Sidebar";
 
 const Layout = ({ children }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
 
   return (
     <div className="flex">
-      <Sidebar isCollapsed={isSidebarCollapsed} />
-      <div className="flex-1 ml-64 p-4">
-        <div className="flex justify-between mb-4">
-          <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
-            Toggle Sidebar
-          </button>
-        </div>
-        {children}
-      </div>
+      <Searchbar toggleSidebar={toggleSidebar} />
+      <Sidebar visible={sidebarVisible} toggleSidebar={toggleSidebar} />
+      <div className="p-4 pt-20">{children}</div>
     </div>
   );
 };
