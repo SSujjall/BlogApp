@@ -44,8 +44,8 @@ const CommonInputField = ({
 };
 
 CommonInputField.propTypes = {
-  type: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
+  type: PropTypes.string,
+  onChange: PropTypes.func,
   placeholder: PropTypes.string,
   icon: PropTypes.string,
   value: PropTypes.string,
