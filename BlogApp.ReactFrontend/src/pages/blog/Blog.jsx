@@ -1,6 +1,6 @@
 import Layout from "../../components/layout/Layout";
 
-const Page1 = () => {
+const Blog = () => {
   return (
     <Layout>
       <div>Page1</div>
@@ -8,4 +8,4 @@ const Page1 = () => {
   );
 };
 
-export default Page1;
+export default Blog;
