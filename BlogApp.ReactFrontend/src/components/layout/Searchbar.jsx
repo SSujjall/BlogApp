@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import Button from "../common/Button";
 import CommonInputField from "../common/CommonInputField";
 import { Link } from "react-router-dom";
@@ -6,6 +7,13 @@ import PropTypes from "prop-types";
 
 const Searchbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    navigate(search ? `/?search=${encodeURIComponent(search)}` : "/");
+  };
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -21,20 +29,22 @@ const Searchbar = ({ toggleSidebar }) => {
         &#9776; {/* Hamburger icon */}
       </div>
 
-      {/* left div  */}
+      {/* left Title div  */}
       <div className="pr-5 text-2xl font-bold">
         <Link to="/">MyBlog</Link>
       </div>
 
-      {/* Middle div */}
-      <div className="flex-1 flex justify-center py-xs">
+      {/* Middle Search div */}
+      <form className="flex-1 flex justify-center py-xs" onSubmit={handleSearch}>
         <div className="w-full max-w-[560px] mx-auto">
           <CommonInputField
             placeholder={"Search Blog"}
             icon={"search"}
+            onChange={(e) => setSearch(e.target.value)}
+            isRequired={false}
           />
         </div>
-      </div>
+      </form>
 
       {/* Right div with Login button */}
       <div className="pl-5 gap-xs flex items-center justify-end">

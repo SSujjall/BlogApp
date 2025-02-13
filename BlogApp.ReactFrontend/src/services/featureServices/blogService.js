@@ -1,11 +1,17 @@
 import { makeRequest } from "../api";
 
-const getBlogs = async () => {
-  return makeRequest("GET", "/Blog/get-blogs");
+export const getBlogs = async ({ sortBy = "", search = "", skip = 0, take = 10 }) => {
+  const params = new URLSearchParams();
+
+  if (sortBy) params.append("sortBy", sortBy);
+  if (search) params.append("search", search);
+  params.append("skip", skip);
+  params.append("take", take);
+
+  return makeRequest("GET", `/Blog/get-blogs?${params.toString()}`);
 };
 
-const createBlog = async (blogData) => {
+export const createBlog = async (blogData) => {
   return makeRequest("POST", "/blogs", blogData);
 };
 
-export { getBlogs, createBlog };
