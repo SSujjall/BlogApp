@@ -17,6 +17,23 @@ namespace BlogApp.API.Controllers
             _blogReactionService = blogReactionService;
         }
 
+        [HttpGet("get-all-user-reactions")]
+        public async Task<IActionResult> GetAllUserReactions()
+        {
+            var userId = User?.FindFirst("UserId")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized("User invalid");
+            }
+
+            var response = await _blogReactionService.GetAllUserReactionsByUserId(userId);
+            if (response.Status == false)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
         [HttpGet("get-all/{blogId}")]
         public async Task<IActionResult> GetAllReactions(int blogId)
         {
