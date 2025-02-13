@@ -12,7 +12,7 @@ using BlogApp.Domain.Shared;
 namespace BlogApp.Infrastructure.Services
 {
     public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary, 
-        IBaseRepository<BlogHistory> _blogHistoryRepo, IMapper _mapper) : IBlogService
+        IBaseRepository<BlogHistory> _blogHistoryRepo, IMapper _mapper, IUserRepository _userRepository) : IBlogService
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request)
         {
@@ -27,7 +27,11 @@ namespace BlogApp.Infrastructure.Services
                     var blog = new BlogsDTO
                     {
                         BlogId = item.BlogId,
-                        UserId = item.UserId,
+                        User = new BlogUser
+                        {
+                            UserId = item.UserId,
+                            Name = item.User.UserName ?? ""
+                        },
                         Title = item.Title,
                         Description = item.Description,
                         ImageUrl = item.ImageUrl,
@@ -51,7 +55,11 @@ namespace BlogApp.Infrastructure.Services
                 var response = new BlogsDTO
                 {
                     BlogId = result.BlogId,
-                    UserId = result.UserId,
+                    User = new BlogUser
+                    {
+                        UserId = result.UserId,
+                        Name = result.User.UserName ?? ""
+                    },
                     Title = result.Title,
                     Description = result.Description,
                     ImageUrl = result.ImageUrl,
@@ -90,11 +98,16 @@ namespace BlogApp.Infrastructure.Services
             var result = await _blogRepository.Add(request);
             if (result != null)
             {
+                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
                 #region response model mapping
                 var response = new BlogsDTO
                 {
                     BlogId = result.BlogId,
-                    UserId = result.UserId,
+                    User = new BlogUser
+                    {
+                        UserId = result.UserId,
+                        Name = userDetail.UserName ?? ""
+                    },
                     Title = result.Title,
                     Description = result.Description,
                     ImageUrl = result.ImageUrl,
@@ -156,7 +169,11 @@ namespace BlogApp.Infrastructure.Services
                     var response = new BlogsDTO
                     {
                         BlogId = result.BlogId,
-                        UserId = result.UserId,
+                        User = new BlogUser
+                        {
+                            UserId = result.UserId,
+                            Name = result.User.UserName ?? ""
+                        },
                         Title = result.Title,
                         Description = result.Description,
                         ImageUrl = result.ImageUrl,

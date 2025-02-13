@@ -1,11 +1,9 @@
 import { makeRequest } from "../api";
 
-const getComments = async (blogId) => {
-  return makeRequest("GET", `/blogs/${blogId}/comments`);
+export const getCommentsByBlogId = async (blogId) => {
+  return makeRequest("GET", `/Comment/get-all?blogId=${blogId}`);
 };
 
-const createComment = async (blogId, commentData) => {
+export const createComment = async (blogId, commentData) => {
   return makeRequest("POST", `/blogs/${blogId}/comments`, commentData);
 };
-
-export { getComments, createComment };

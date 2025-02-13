@@ -44,7 +44,7 @@ namespace BlogApp.Infrastructure.Repositories
                         query = query.OrderBy(_ => Guid.NewGuid());
                         break;
                     default:
-                        query = query.OrderBy(b => b.BlogId); // Default sorting
+                        query = query.OrderByDescending(b => b.CreatedAt); // Default sorting
                         break;
                 }
             }

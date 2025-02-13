@@ -14,6 +14,8 @@ namespace BlogApp.Application.Mappings
 
             CreateMap<BlogReaction, AddOrUpdateBlogReactionDTO>();
             CreateMap<AddOrUpdateBlogReactionDTO, BlogReaction>();
+
+            CreateMap<BlogReaction, GetAllUserReactionDTO>();
             #endregion
 
             #region Comment Reaction Map

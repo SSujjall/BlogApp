@@ -11,6 +11,12 @@ namespace BlogApp.Application.DTOs
         public DateTime CreatedAt { get; set; }
     }
 
+    public class GetAllUserReactionDTO
+    {
+        public int BlogId { get; set; }
+        public VoteType ReactionType { get; set; }
+    }
+
     public class AddOrUpdateBlogReactionDTO
     {
         public int BlogId { get; set; }
