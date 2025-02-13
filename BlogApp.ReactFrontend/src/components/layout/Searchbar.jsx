@@ -20,7 +20,7 @@ const Searchbar = ({ toggleSidebar }) => {
   };
 
   return (
-    <nav className="fixed bg-gray-100 p-3 w-full flex items-center justify-between border-b border-gray-300">
+    <nav className="fixed bg-gray-100 p-3 w-full flex items-center justify-between border-b border-gray-300 z-50">
       {/* Hidden left div with hamburger menu */}
       <div
         className="pr-2 text-2xl font-bold cursor-pointer lg:hidden"
