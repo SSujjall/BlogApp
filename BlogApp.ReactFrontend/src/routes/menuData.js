@@ -10,9 +10,9 @@ const menuData = [
     name: "Posts",
     type: "parent",
     children: [
-      { icon: "shuffle", name: "Random", link: "/blog/random" },
-      { icon: "schedule", name: "Recent", link: "/blog/recency" },
-      { icon: "trending_up", name: "Popular", link: "/blog/popularity" },
+      { icon: "shuffle", name: "Random", link: "/blog/filter/random" },
+      { icon: "schedule", name: "Recent", link: "/blog/filter/recency" },
+      { icon: "trending_up", name: "Popular", link: "/blog/filter/popularity" },
     ],
   },
   {
