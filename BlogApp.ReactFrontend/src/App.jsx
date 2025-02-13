@@ -6,6 +6,7 @@ function App() {
   return (
     <>
       <AppRoutes />
+      
       {/* Toast container to show the notifications */}
       <ToastContainer />
     </>

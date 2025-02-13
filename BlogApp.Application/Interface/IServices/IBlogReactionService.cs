@@ -15,5 +15,6 @@ namespace BlogApp.Application.Interface.IServices
         Task<ApiResponse<string>> VoteBlog(AddOrUpdateBlogReactionDTO model, string userId);
         //Task<ApiResponse<string>> DownvoteBlog();
         Task<ApiResponse<BlogReactionDTO>> GetBlogVoteById(int id);
+        Task<ApiResponse<IEnumerable<GetAllUserReactionDTO>>> GetAllUserReactionsByUserId(string userId);
     }
 }

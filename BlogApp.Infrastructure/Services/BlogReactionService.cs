@@ -16,7 +16,8 @@ using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper, IBlogService blogService) : IBlogReactionService
+    public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper, 
+        IBlogService blogService) : IBlogReactionService
     {
         protected readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
         private readonly IMapper _mapper = mapper;
@@ -111,6 +112,29 @@ namespace BlogApp.Infrastructure.Services
                 { "NotFound", "Vote not found." }
             };
             return ApiResponse<BlogReactionDTO>.Failed(errors, "Vote Not Found.", System.Net.HttpStatusCode.NotFound);
+        }
+
+        public async Task<ApiResponse<IEnumerable<GetAllUserReactionDTO>>> GetAllUserReactionsByUserId(string userId)
+        {
+            Expression<Func<BlogReaction, bool>> filter = x => x.UserId == userId;
+            var vote = await _blogReactionRepo.FindAllByConditionAsync(filter);
+
+            if (vote != null)
+            {
+                var response = new List<GetAllUserReactionDTO>();
+                foreach (var item in vote)
+                {
+                    var reaction = _mapper.Map<GetAllUserReactionDTO>(item);
+                    response.Add(reaction);
+                }
+                return ApiResponse<IEnumerable<GetAllUserReactionDTO>>.Success(response, "All User's Blog Votes Fetched Successfully.");
+            }
+
+            var errors = new Dictionary<string, string>
+            {
+                { "NotFound", "User has not voted anything." }
+            };
+            return ApiResponse<IEnumerable<GetAllUserReactionDTO>>.Failed(errors, "Vote Not Found.", System.Net.HttpStatusCode.NotFound);
         }
     }
 }
