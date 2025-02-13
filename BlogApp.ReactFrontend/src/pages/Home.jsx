@@ -116,8 +116,10 @@ const HomePage = () => {
               <p className="text-gray-600">{blog.description}</p>
             </Link>
 
-            {/* Voting Buttons */}
+            {/* Voting and comment Buttons */}
+            {/* !TODO: SHOW TOTAL UPVOTES AND DOWNVOTES*/}
             <div className="flex flex-row mt-3">
+              {/* Upvote button */}
               <Button
                 icon={
                   userReactions[blog.blogId] === 1
@@ -125,10 +127,14 @@ const HomePage = () => {
                     : "thumb_up_off_alt"
                 }
                 className={
-                  userReactions[blog.blogId] === 1 ? "text-sky-500 p-0" : "p-0"
+                  userReactions[blog.blogId] === 1
+                    ? "text-sky-500 pr-0 drop-shadow-md"
+                    : "pr-0"
                 }
                 onClick={() => handleVote(blog.blogId, 1)}
               />
+
+              {/* Downvote button */}
               <Button
                 icon={
                   userReactions[blog.blogId] === 2
@@ -136,10 +142,17 @@ const HomePage = () => {
                     : "thumb_down_off_alt"
                 }
                 className={
-                  userReactions[blog.blogId] === 2 ? "text-red-500 p-0" : "p-0"
+                  userReactions[blog.blogId] === 2
+                    ? "text-red-500 pr-0 drop-shadow-md"
+                    : " pr-0"
                 }
                 onClick={() => handleVote(blog.blogId, 2)}
               />
+
+              {/* Comment button */}
+              <Link to={`/blog/blogById/${blog.blogId}`}>
+                <Button icon={"forum"} />
+              </Link>
             </div>
           </div>
         ))}
