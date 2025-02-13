@@ -11,6 +11,10 @@ export const getBlogs = async ({ sortBy = "", search = "", skip = 0, take = 10 }
   return makeRequest("GET", `/Blog/get-blogs?${params.toString()}`);
 };
 
+export const getBlogById = async (blogId) => {
+  return makeRequest("GET", `/Blog/get-by-id/${blogId}`);
+}
+
 export const createBlog = async (blogData) => {
   return makeRequest("POST", "/blogs", blogData);
 };

@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 namespace BlogApp.Infrastructure.Services
 {
     public class CommentService(ICommentRepository _commentRepository, IBaseRepository<CommentHistory> _commentHistoryRepo, 
-        IMapper _mapper) : ICommentService
+        IMapper _mapper, IUserRepository _userRepository) : ICommentService
     {
         public async Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllCommentByBlogId(int blogId)
         {
@@ -38,7 +38,11 @@ namespace BlogApp.Infrastructure.Services
                 {
                     CommentId = comment.CommentId,
                     BlogId = comment.BlogId,
-                    UserId = comment.UserId,
+                    User = new CommentUser
+                    {
+                        UserId = comment.UserId,
+                        Name = comment.User.UserName,
+                    },
                     CommentDescription = comment.CommentDescription,
                     CreatedAt = comment.CreatedAt,
                     UpdatedAt = comment.UpdatedAt
@@ -63,12 +67,18 @@ namespace BlogApp.Infrastructure.Services
             var result = await _commentRepository.Add(request);
             if (result != null)
             {
+                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
+
                 #region response model mapping
                 var response = new CommentDTO
                 {
                     CommentId = result.CommentId,
                     BlogId = result.BlogId,
-                    UserId = result.UserId,
+                    User = new CommentUser
+                    {
+                        UserId = result.UserId,
+                        Name = userDetail.UserName
+                    },
                     CommentDescription = result.CommentDescription,
                     CreatedAt = result.CreatedAt,
                     UpdatedAt = result.UpdatedAt
@@ -114,7 +124,11 @@ namespace BlogApp.Infrastructure.Services
                     {
                         CommentId = result.CommentId,
                         BlogId = result.BlogId,
-                        UserId = result.UserId,
+                        User = new CommentUser
+                        {
+                            UserId = result.User.Id,
+                            Name = result.User.UserName
+                        },
                         CommentDescription = result.CommentDescription,
                         CreatedAt = result.CreatedAt,
                         UpdatedAt = result.UpdatedAt

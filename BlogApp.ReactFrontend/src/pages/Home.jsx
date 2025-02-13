@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useParams } from "react-router-dom";
+import { useSearchParams, useParams, Link } from "react-router-dom";
 import { getBlogs } from "../services/featureServices/blogService";
 import { showSuccessToast, showErrorToast } from "../utils/toastHelper";
 import Layout from "../components/layout/Layout";
@@ -32,23 +32,34 @@ const HomePage = () => {
     fetchBlogs();
   }, [sortBy, search, page]);
 
+  if (blogs.length === 0) {
+    return (
+      <Layout>
+        <p className="text-center">Loading blogs...</p>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {blogs.map((blog) => (
-          <div key={blog.blogId} className="border p-4 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold">{blog.title}</h2>
-            <p className="mb-2 text-sm text-gray-500">By {blog.user.name}</p>
-            <img
-              src={blog.imageUrl}
-              alt={blog.title}
-              className="w-full h-64 object-cover mb-4 rounded-lg"
-            />
-            <p className="text-gray-600">{blog.description}</p>
-          </div>
+          <Link to={`/blog/blogById/${blog.blogId}`} key={blog.blogId}>
+            <div key={blog.blogId} className="border p-4 rounded-lg shadow-md">
+              <h2 className="text-2xl font-semibold">{blog.title}</h2>
+              <p className="mb-2 text-sm text-gray-500">By {blog.user.name}</p>
+              <div className="w-full aspect-video mb-4 border rounded-lg">
+                <img
+                  src={blog.imageUrl}
+                  alt={blog.title}
+                  className="w-full h-full object-contain bg-gray-100 rounded-lg"
+                />
+              </div>
+              <p className="text-gray-600">{blog.description}</p>
+            </div>
+          </Link>
         ))}
       </div>
-      
 
       {/* Pagination TODO HERE */}
       <Button
