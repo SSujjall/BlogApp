@@ -11,8 +11,8 @@ const menuData = [
     type: "parent",
     children: [
       { icon: "shuffle", name: "Random", link: "/blog/random" },
-      { icon: "schedule", name: "Recent", link: "/blog/recent" },
-      { icon: "trending_up", name: "Popular", link: "/blog/popular" },
+      { icon: "schedule", name: "Recent", link: "/blog/recency" },
+      { icon: "trending_up", name: "Popular", link: "/blog/popularity" },
     ],
   },
   {
