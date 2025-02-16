@@ -1,11 +1,8 @@
 import axios from "axios";
+import { getToken } from "../utils/tokenHelper";
 
-// Set up the base URL for your API (replace with your actual API URL)
 const API_URL = "https://localhost:7108/api";
 
-const getToken = () => {
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDk0YjVlMi0zYTZjLTRkYTktOThkNi1kNjlhNWU5NjcxMzgiLCJqdGkiOiIwZmNkOTAwZS04OTBhLTQ5MmEtYjM1Ny00Yjg5ODJjM2ZjNmUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiZXhwIjoxNzM5NjkzNzgyLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo3MTA4LyIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTE3My8ifQ.1AxcgwnChFF87mM-dRxPcIgDBxhLu7MqvWuRDx_ObBE";
-} // put this in tokenHelper.js later
 
 // Create an Axios instance with base configuration
 const api = axios.create({
@@ -18,7 +15,7 @@ const api = axios.create({
 // Interceptor to add token when required
 api.interceptors.request.use((config) => {
   if (config.requiresAuth) {
-    const token = getToken();
+    const token = getToken(); // getting token from local storage
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

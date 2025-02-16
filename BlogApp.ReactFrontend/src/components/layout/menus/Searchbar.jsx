@@ -1,14 +1,20 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../../common/Button";
 import CommonInputField from "../../common/CommonInputField";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
+import { isAuthenticated } from "../../../common/utils/tokenHelper";
 
 const Searchbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [authStatus, setAuthStatus] = useState(false);
+
+  useEffect(() => {
+    setAuthStatus(isAuthenticated());
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -35,7 +41,10 @@ const Searchbar = ({ toggleSidebar }) => {
       </div>
 
       {/* Middle Search div */}
-      <form className="flex-1 flex justify-center py-xs" onSubmit={handleSearch}>
+      <form
+        className="flex-1 flex justify-center py-xs"
+        onSubmit={handleSearch}
+      >
         <div className="w-full max-w-[560px] mx-auto">
           <CommonInputField
             placeholder={"Search Blog"}
@@ -48,13 +57,25 @@ const Searchbar = ({ toggleSidebar }) => {
 
       {/* Right div with Login button */}
       <div className="pl-5 gap-xs flex items-center justify-end">
-        <Button
-          text="Login"
-          onClick={handleLoginClick}
-          icon={"person"}
-          iconSize={20}
-          className={"text-white bg-gray-800 hover:bg-gray-700"}
-        />
+        {!authStatus ? (
+          <Button
+            text="Login"
+            onClick={handleLoginClick}
+            icon={"person"}
+            iconSize={20}
+            className={"text-white bg-gray-800 hover:bg-gray-700"}
+          />
+        ) : (
+          <>
+            <Button
+              icon={"add"}
+              text={"Create"}
+              className={"text-black hover:bg-gray-200 rounded-full"}
+            />
+
+            <Button icon={"person"} className={"bg-black text-white rounded-full"}/>
+          </>
+        )}
       </div>
     </nav>
   );
