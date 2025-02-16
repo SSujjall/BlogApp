@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
-import Button from "../common/Button";
-import CommonInputField from "../common/CommonInputField";
+import Button from "../../common/Button";
+import CommonInputField from "../../common/CommonInputField";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
@@ -20,7 +20,7 @@ const Searchbar = ({ toggleSidebar }) => {
   };
 
   return (
-    <nav className="fixed bg-gray-100 p-3 w-full flex items-center justify-between border-b border-gray-300">
+    <nav className="fixed bg-gray-100 p-3 w-full flex items-center justify-between border-b border-gray-300 z-50">
       {/* Hidden left div with hamburger menu */}
       <div
         className="pr-2 text-2xl font-bold cursor-pointer lg:hidden"

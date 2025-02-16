@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 namespace BlogApp.Infrastructure.Services
 {
     public class CommentService(ICommentRepository _commentRepository, IBaseRepository<CommentHistory> _commentHistoryRepo, 
-        IMapper _mapper, IUserRepository _userRepository) : ICommentService
+        IMapper _mapper, IUserRepository _userRepository, IBlogService _blogService) : ICommentService
     {
         public async Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllCommentByBlogId(int blogId)
         {
@@ -67,9 +67,9 @@ namespace BlogApp.Infrastructure.Services
             var result = await _commentRepository.Add(request);
             if (result != null)
             {
-                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
-
+                await _blogService.UpdateBlogCommentCount(dto.BlogId, true); // Increase comment count
                 #region response model mapping
+                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
                 var response = new CommentDTO
                 {
                     CommentId = result.CommentId,
@@ -161,6 +161,7 @@ namespace BlogApp.Infrastructure.Services
                     }
                     comment.IsDeleted = true;
                     await _commentRepository.Update(comment);
+                    await _blogService.UpdateBlogCommentCount(comment.BlogId, false); // Decrease comment count
                     return ApiResponse<string>.Success(null, "Comment Deleted Successfully");
                 }
                 catch (Exception ex)
