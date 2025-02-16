@@ -11,6 +11,7 @@ namespace BlogApp.Application.DTOs
         public string ImageUrl { get; set; }
         public int UpVoteCount { get; set; }
         public int DownVoteCount { get; set; }
+        public int CommentCount { get; set; }
     }
 
     public class BlogUser

@@ -13,5 +13,6 @@ namespace BlogApp.Application.Interface.IServices
         Task<ApiResponse<string>> DeleteBlog(int id, string userId);
         Task<ApiResponse<BlogsDTO>> UpdateBlog(UpdateBlogDTO dto, string userId);
         Task UpdateBlogVoteCount(AddOrUpdateBlogReactionDTO model, bool reactionExists, VoteType? previousVote);
+        Task UpdateBlogCommentCount(int blogId, bool isAdding);
     }
 }
