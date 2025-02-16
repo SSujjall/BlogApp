@@ -15,7 +15,7 @@ const Login = () => {
 
         <Button text="Login" className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"} />
 
-        <p className="mt-3">Don't have an account?&nbsp;<Link to="/signup" className="text-blue-500 hover:underline">Signup</Link></p>
+        <p className="mt-3">Don&apos;t have an account?&nbsp;<Link to="/signup" className="text-blue-500 hover:underline">Signup</Link></p>
 
         {/* OR separator */}
         <div className="relative flex items-center my-4">
