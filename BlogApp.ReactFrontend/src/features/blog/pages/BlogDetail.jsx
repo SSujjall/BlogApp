@@ -8,6 +8,7 @@ import CommonInputField from "../../../components/common/CommonInputField";
 import { BlogCard } from "../components/BlogCard";
 import { useVoting } from "../hooks/useVoting";
 import { updateBlogVotes } from "../helpers/voteHelpers";
+import Button from "../../../components/common/Button";
 
 const BlogDetail = () => {
   const { blogId } = useParams();
@@ -91,7 +92,7 @@ const BlogDetail = () => {
           <h2 className="text-2xl font-semibold mb-4">Comments</h2>
 
           {/* Comment Input */}
-          <form onSubmit={handleCommentSubmit} className="mb-6">
+          <div className="mb-6">
             <CommonInputField
               icon="comment"
               placeholder="Join the conversation"
@@ -99,18 +100,19 @@ const BlogDetail = () => {
               onChange={(e) => setNewComment(e.target.value)}
               classProp="mb-2"
             />
-            <button
-              type="submit"
-              disabled={!newComment.trim()}
-              className={`px-4 py-2 rounded-md text-white ${
+
+            <Button
+              icon={"add_comment"}
+              text={"Add Comment"}
+              className={`text-white ${
                 newComment.trim()
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-gray-400 cursor-not-allowed"
               }`}
-            >
-              Post Comment
-            </button>
-          </form>
+              disabled={!newComment.trim()}
+              onClick={handleCommentSubmit}
+            />
+          </div>
 
           {/* Comments List */}
           <div className="space-y-4">
