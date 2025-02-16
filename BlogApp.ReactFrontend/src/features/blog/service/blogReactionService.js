@@ -1,4 +1,4 @@
-import { makeRequest } from "../api";
+import { makeRequest } from "../../../common/services/api";
 
 // Fetch user reactions (only if logged in)
 export const getUserReactions = async () => {
