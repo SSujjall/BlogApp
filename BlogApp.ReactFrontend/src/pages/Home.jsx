@@ -72,6 +72,35 @@ const HomePage = () => {
       userReactions[blogId] === reactionType ? 0 : reactionType;
     setUserReactions((prev) => ({ ...prev, [blogId]: newReaction }));
 
+    /**
+     * !TODO : This is just a temporary solution to update the UI
+     * This should be handled by the API
+     * Use SignalR or other method to give live upvote or downvote update when
+     * multiple users are signed in so that they can see the live update of the votes
+     */
+    setBlogs((prevBlogs) =>
+      prevBlogs.map((blog) => {
+        if (blog.blogId === blogId) {
+          return {
+            ...blog,
+            upVoteCount:
+              newReaction === 1
+                ? blog.upVoteCount + 1
+                : userReactions[blogId] === 1
+                ? blog.upVoteCount - 1
+                : blog.upVoteCount,
+            downVoteCount:
+              newReaction === 2
+                ? blog.downVoteCount + 1
+                : userReactions[blogId] === 2
+                ? blog.downVoteCount - 1
+                : blog.downVoteCount,
+          };
+        }
+        return blog; // this only returns from the map function, not the entire handleVote function
+      })
+    );
+
     const response = await voteBlog(blogId, newReaction);
     if (!response) {
       showErrorToast("Error submitting vote");
@@ -118,7 +147,7 @@ const HomePage = () => {
 
             {/* Voting and comment Buttons */}
             {/* !TODO: SHOW TOTAL UPVOTES AND DOWNVOTES*/}
-            <div className="flex flex-row mt-3">
+            <div className="flex flex-row mt-3 items-center">
               {/* Upvote button */}
               <Button
                 icon={
@@ -133,6 +162,7 @@ const HomePage = () => {
                 }
                 onClick={() => handleVote(blog.blogId, 1)}
               />
+              <span className="-ml-2 text-gray-600">{blog.upVoteCount}</span>
 
               {/* Downvote button */}
               <Button
@@ -148,11 +178,17 @@ const HomePage = () => {
                 }
                 onClick={() => handleVote(blog.blogId, 2)}
               />
+              <span className="-ml-2 mr-2 text-gray-700">
+                {blog.downVoteCount}
+              </span>
 
               {/* Comment button */}
               <Link to={`/blog/blogById/${blog.blogId}`}>
                 <Button icon={"forum"} />
               </Link>
+              <span className="-ml-2 mr-2 text-gray-700">
+                {blog.commentCount}
+              </span>
             </div>
           </div>
         ))}

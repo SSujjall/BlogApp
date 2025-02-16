@@ -11,7 +11,7 @@ using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary, 
+    public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary,
         IBaseRepository<BlogHistory> _blogHistoryRepo, IMapper _mapper, IUserRepository _userRepository) : IBlogService
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request)
@@ -37,6 +37,7 @@ namespace BlogApp.Infrastructure.Services
                         ImageUrl = item.ImageUrl,
                         UpVoteCount = item.UpVoteCount,
                         DownVoteCount = item.DownVoteCount,
+                        CommentCount = item.CommentCount
                     };
                     response.Add(blog);
                 }
@@ -65,6 +66,7 @@ namespace BlogApp.Infrastructure.Services
                     ImageUrl = result.ImageUrl,
                     UpVoteCount = result.UpVoteCount,
                     DownVoteCount = result.DownVoteCount,
+                    CommentCount = result.CommentCount
                 };
                 #endregion
                 return ApiResponse<BlogsDTO>.Success(response, $"Blog id: {result.BlogId}");
@@ -113,6 +115,7 @@ namespace BlogApp.Infrastructure.Services
                     ImageUrl = result.ImageUrl,
                     UpVoteCount = result.UpVoteCount,
                     DownVoteCount = result.DownVoteCount,
+                    CommentCount = result.CommentCount
                 };
                 #endregion
                 return ApiResponse<BlogsDTO>.Success(response, "Blog created successfully.");
@@ -179,6 +182,7 @@ namespace BlogApp.Infrastructure.Services
                         ImageUrl = result.ImageUrl,
                         UpVoteCount = result.UpVoteCount,
                         DownVoteCount = result.DownVoteCount,
+                        CommentCount = result.CommentCount
                     };
                     #endregion
                     return ApiResponse<BlogsDTO>.Success(response, "Blog Update Successful");
@@ -252,6 +256,27 @@ namespace BlogApp.Infrastructure.Services
                 blog.DownVoteCount = Math.Max(0, blog.DownVoteCount);
 
                 await _blogRepository.Update(blog);
+            }
+        }
+
+        public async Task UpdateBlogCommentCount(int blogId, bool isAdding)
+        {
+            var blog = await _blogRepository.GetById(blogId);
+            if (blog != null)
+            {
+                if (isAdding)
+                    blog.CommentCount++;
+                else
+                    blog.CommentCount = Math.Max(0, blog.CommentCount - 1); // Prevent negative counts
+
+                try
+                {
+                    await _blogRepository.Update(blog);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
             }
         }
     }

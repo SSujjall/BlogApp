@@ -17,6 +17,7 @@ namespace BlogApp.Domain.Entities
         public int PopularityScore { get; set; } = 0;
         public int UpVoteCount { get; set; } = 0;
         public int DownVoteCount { get; set; } = 0;
+        public int CommentCount { get; set; } = 0;
         public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }
