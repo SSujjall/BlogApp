@@ -1,5 +1,5 @@
-import CommonInputField from "../../components/common/CommonInputField"
-import Button from "../../components/common/Button"
+import CommonInputField from "../../../components/common/CommonInputField"
+import Button from "../../../components/common/Button"
 import { useNavigate } from "react-router-dom"
 
 const ForgotPassword = () => {

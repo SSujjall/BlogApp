@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import Searchbar from "./Searchbar";
-import Sidebar from "./Sidebar";
+import Searchbar from "./menus/Searchbar";
+import Sidebar from "./menus/Sidebar";
 
 const Layout = ({ children }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);

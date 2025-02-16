@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
-import MenuLink from "./menu/MenuLink";
+import MenuLink from "./MenuLink";
 import PropTypes from "prop-types";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
