@@ -6,7 +6,7 @@ import Layout from "../../../components/layout/Layout";
 import Button from "../../../components/common/Button";
 import { BlogCard } from "../components/BlogCard";
 import { useVoting } from "../hooks/useVoting";
-import { updateBlogVotes } from "../utils/voteHelpers";
+import { updateBlogVotes } from "../helpers/voteHelpers";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);

@@ -7,7 +7,7 @@ import Layout from "../../../components/layout/Layout";
 import CommonInputField from "../../../components/common/CommonInputField";
 import { BlogCard } from "../components/BlogCard";
 import { useVoting } from "../hooks/useVoting";
-import { updateBlogVotes } from "../utils/voteHelpers";
+import { updateBlogVotes } from "../helpers/voteHelpers";
 
 const BlogDetail = () => {
   const { blogId } = useParams();
