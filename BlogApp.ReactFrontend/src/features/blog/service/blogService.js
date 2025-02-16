@@ -1,4 +1,4 @@
-import { makeRequest } from "../api";
+import { makeRequest } from "../../../common/services/api";
 
 export const getBlogs = async ({
   sortBy = "",

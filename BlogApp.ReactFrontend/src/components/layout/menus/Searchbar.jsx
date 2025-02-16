@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
-import Button from "../common/Button";
-import CommonInputField from "../common/CommonInputField";
+import Button from "../../common/Button";
+import CommonInputField from "../../common/CommonInputField";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 

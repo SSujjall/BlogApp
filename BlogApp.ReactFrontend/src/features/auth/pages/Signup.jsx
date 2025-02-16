@@ -1,5 +1,5 @@
-import CommonInputField from "../../components/common/CommonInputField"
-import Button from "../../components/common/Button"
+import CommonInputField from "../../../components/common/CommonInputField"
+import Button from "../../../components/common/Button"
 import { Link } from "react-router-dom"
 
 const Signup = () => {

@@ -1,4 +1,4 @@
-import { makeRequest } from "../api";
+import { makeRequest } from "../../../common/services/api";
 
 export const getCommentsByBlogId = async (blogId) => {
   return makeRequest("GET", `/Comment/get-all?blogId=${blogId}`);
