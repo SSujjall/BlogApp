@@ -10,9 +10,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Bcpg;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BlogApp.Infrastructure.Services
@@ -33,14 +36,14 @@ namespace BlogApp.Infrastructure.Services
             _jwtSettings = jwtSettings.Value;
         }
 
-        public async Task<ApiResponse<object>> LoginUser(LoginDTO loginDto)
+        public async Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto)
         {
             var user = await _authRepository.FindByUsername(loginDto.Username);
 
             if (user == null)
             {
                 var errors = new Dictionary<string, string> { { "Username", "Userame does not exist." } };
-                return ApiResponse<object>.Failed(errors, "Login failed", HttpStatusCode.NotFound);
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.NotFound);
             }
 
             var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginDto.Password);
@@ -48,7 +51,7 @@ namespace BlogApp.Infrastructure.Services
             if (isPasswordCorrect == false)
             {
                 var errors = new Dictionary<string, string> { { "Password", "Invalid password" } };
-                return ApiResponse<object>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
             }
 
             var isEmailVerified = await _userManager.IsEmailConfirmedAsync(user);
@@ -56,12 +59,25 @@ namespace BlogApp.Infrastructure.Services
             if (isEmailVerified == false)
             {
                 var errors = new Dictionary<string, string> { { "Email", "Email not verified" } };
-                return ApiResponse<object>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
             }
 
-            string generatedToken = await GenerateToken(user);
+            string generatedToken = await this.GenerateToken(user);
+            string refreshToken = GenerateRefreshToken();
+            #region response map
+            var response = new LoginResponseDTO
+            {
+                JwtToken = generatedToken,
+                RefreshToken = refreshToken,
+            };
+            #endregion
 
-            return ApiResponse<object>.Success(new { token = generatedToken }, "User Validated");
+            #region update refresh token with expiry in db
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.Now.AddHours(12);
+            await _userManager.UpdateAsync(user);
+            #endregion
+            return ApiResponse<LoginResponseDTO>.Success(response, "User Validated");
         }
 
         public async Task<ApiResponse<RegisterResponseDTO>> RegisterUser(RegisterDTO registerDto)
@@ -85,7 +101,7 @@ namespace BlogApp.Infrastructure.Services
             if (!createResult)
             {
                 var errors = new Dictionary<string, string> { { "User", "Error when creating user." } };
-                return ApiResponse<RegisterResponseDTO>.Failed(errors, "User Creation Failed." , HttpStatusCode.InternalServerError);
+                return ApiResponse<RegisterResponseDTO>.Failed(errors, "User Creation Failed.", HttpStatusCode.InternalServerError);
             }
 
             // Ensure the role exists
@@ -189,8 +205,63 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<string>.Success(null, "Password reset successful");
         }
 
+        public async Task<ApiResponse<LoginResponseDTO>> RefreshToken(RefreshTokenRequestDTO model)
+        {
+            var principal = GetTokenPrincipal(model.JwtToken);
+            if (principal == null)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "Token", "Invalid access token" } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
+            }
+
+            var userId = principal.FindFirst("UserId").Value;
+            if (userId == null)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "UserId", "Invalid user id." } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiry <= DateTime.Now)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "RefreshToken", "Invalid or expired refresh token" } }, "Refresh Failed.");
+            }
+
+            #region update refresh token for user
+            string newJwtToken = await this.GenerateToken(user);
+            string newRefreshToken = this.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiry = DateTime.Now.AddSeconds(20);
+            await _userManager.UpdateAsync(user);
+            #endregion
+
+            #region response map
+            var response = new LoginResponseDTO
+            {
+                JwtToken = newJwtToken,
+                RefreshToken = newRefreshToken
+            };
+            #endregion
+
+            return ApiResponse<LoginResponseDTO>.Success(response, "Token Refreshed Successfully");
+        }
+
+        public async Task<ApiResponse<string>> LogoutUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return ApiResponse<string>.Failed(new Dictionary<string, string> { { "User", "User not found" } }, "Logout Failed.");
+            }
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiry = null;
+            await _userManager.UpdateAsync(user);
+
+            return ApiResponse<string>.Success(null, "Logged out successfully");
+        }
+
         #region helper methods
-        private async Task<string> GenerateToken(Users user)
+        protected async Task<string> GenerateToken(Users user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -207,12 +278,45 @@ namespace BlogApp.Infrastructure.Services
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.ValidIssuer,
                 audience: _jwtSettings.ValidAudience,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.Now.AddSeconds(20),
                 claims: claims,
                 signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        protected string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[128];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+        private ClaimsPrincipal? GetTokenPrincipal(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidIssuer = _jwtSettings.ValidIssuer,
+                ValidAudience = _jwtSettings.ValidAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
+                ValidateLifetime = false, // Don't validate expiration, we check expiration manually
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            var jwtToken = securityToken as JwtSecurityToken;
+
+            if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return null;
+            }
+
+            return principal;
         }
         #endregion
     }
