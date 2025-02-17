@@ -132,13 +132,14 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpGet("auth-test")]
+        [Authorize]
         public async Task<IActionResult> AuthorizeTest()
         {
             var authHeader = HttpContext.Request.Headers.Authorization.ToString();
             string jwtToken = authHeader.Replace("Bearer ", "");
             var jwt = new JwtSecurityToken(jwtToken);
             var res = $"Authenticated! {Environment.NewLine}";
-            res += $"{Environment.NewLine} Exp Time: {jwt.ValidTo.ToLongTimeString()}, " +
+            res += $"{Environment.NewLine} Jwt Exp Time: {jwt.ValidTo.ToLocalTime()}, " +
                 $"Time: {DateTime.Now.ToLongTimeString()}";
             return Ok(res);
         }

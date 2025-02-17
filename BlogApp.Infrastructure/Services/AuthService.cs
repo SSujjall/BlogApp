@@ -1,5 +1,4 @@
-﻿using Azure;
-using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
@@ -7,11 +6,8 @@ using BlogApp.Domain.Configs;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Bcpg;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
@@ -25,7 +21,7 @@ namespace BlogApp.Infrastructure.Services
         private readonly IAuthRepository _authRepository;
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly JwtConfig _jwtSettings;
+        private readonly JwtConfig _jwtConfig;
 
         public AuthService(IAuthRepository authRepository, UserManager<Users> userManager,
                            RoleManager<IdentityRole> roleManager, IOptions<JwtConfig> jwtSettings)
@@ -33,51 +29,7 @@ namespace BlogApp.Infrastructure.Services
             _authRepository = authRepository;
             _userManager = userManager;
             _roleManager = roleManager;
-            _jwtSettings = jwtSettings.Value;
-        }
-
-        public async Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto)
-        {
-            var user = await _authRepository.FindByUsername(loginDto.Username);
-
-            if (user == null)
-            {
-                var errors = new Dictionary<string, string> { { "Username", "Userame does not exist." } };
-                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.NotFound);
-            }
-
-            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (isPasswordCorrect == false)
-            {
-                var errors = new Dictionary<string, string> { { "Password", "Invalid password" } };
-                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
-            }
-
-            var isEmailVerified = await _userManager.IsEmailConfirmedAsync(user);
-
-            if (isEmailVerified == false)
-            {
-                var errors = new Dictionary<string, string> { { "Email", "Email not verified" } };
-                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
-            }
-
-            string generatedToken = await this.GenerateToken(user);
-            string refreshToken = GenerateRefreshToken();
-            #region response map
-            var response = new LoginResponseDTO
-            {
-                JwtToken = generatedToken,
-                RefreshToken = refreshToken,
-            };
-            #endregion
-
-            #region update refresh token with expiry in db
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiry = DateTime.Now.AddHours(12);
-            await _userManager.UpdateAsync(user);
-            #endregion
-            return ApiResponse<LoginResponseDTO>.Success(response, "User Validated");
+            _jwtConfig = jwtSettings.Value;
         }
 
         public async Task<ApiResponse<RegisterResponseDTO>> RegisterUser(RegisterDTO registerDto)
@@ -89,12 +41,14 @@ namespace BlogApp.Infrastructure.Services
                 return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.");
             }
 
+            #region request model mapping
             var user = new Users
             {
                 UserName = registerDto.Username,
                 Email = registerDto.Email,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
+            #endregion
 
             // Attempt to create the user
             var createResult = await _authRepository.CreateNewUser(user, registerDto.Password);
@@ -127,7 +81,7 @@ namespace BlogApp.Infrastructure.Services
                 return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
             }
 
-            #region Generate email verification token
+            #region Generate Email verification token
             var existingUser = await _authRepository.FindByUsername(registerDto.Username);
             if (existingUser == null)
             {
@@ -142,6 +96,106 @@ namespace BlogApp.Infrastructure.Services
             #endregion
 
             return ApiResponse<RegisterResponseDTO>.Success(response, "User created successfully");
+        }
+
+        public async Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto)
+        {
+            var user = await _authRepository.FindByUsername(loginDto.Username);
+
+            if (user == null)
+            {
+                var errors = new Dictionary<string, string> { { "Username", "Userame does not exist." } };
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.NotFound);
+            }
+
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+            if (isPasswordCorrect == false)
+            {
+                var errors = new Dictionary<string, string> { { "Password", "Invalid password" } };
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
+            }
+
+            var isEmailVerified = await _userManager.IsEmailConfirmedAsync(user);
+
+            if (isEmailVerified == false)
+            {
+                var errors = new Dictionary<string, string> { { "Email", "Email not verified" } };
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
+            }
+
+            #region generate and update jwt & refresh token with expiry in db
+            string generatedToken = await this.GenerateJwtToken(user);
+            string refreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.Now.AddDays(7);
+            await _userManager.UpdateAsync(user);
+            #endregion
+
+            #region response map
+            var response = new LoginResponseDTO
+            {
+                JwtToken = generatedToken,
+                RefreshToken = refreshToken,
+            };
+            #endregion
+
+            return ApiResponse<LoginResponseDTO>.Success(response, "User Validated");
+        }
+
+        public async Task<ApiResponse<LoginResponseDTO>> RefreshToken(RefreshTokenRequestDTO model)
+        {
+            var principal = GetTokenPrincipal(model.JwtToken);
+            if (principal == null)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "Token", "Invalid access token" } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
+            }
+
+            var userId = principal.FindFirst("UserId").Value;
+            if (userId == null)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "UserId", "Invalid user id." } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null || user.RefreshToken != model.RefreshToken)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "RefreshToken", "Invalid refresh token" } }, "Refresh Failed.");
+            }
+            // Check if the refresh token has expired
+            if (user.RefreshTokenExpiry <= DateTime.Now)
+            {
+                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "RefreshToken", "Refresh token expired" } }, "Refresh Failed.");
+            }
+
+            #region update refresh token for user
+            string newJwtToken = await this.GenerateJwtToken(user);
+            string newRefreshToken = this.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            /*
+             * 7 days expiration for refresh token
+             * Problem: Each time the jwt token is refreshed, the refresh token's expiry is set to 7 days from the refresh time.
+             * If the user keeps the browser open then they will have indefinite session as tokens will keep refreshing
+             * and time will be 7 days from each refresh.
+             * If you dont want this then comment out the line below (RefreshTokenExpiry).
+             * It will make it so that the refresh token will be updated but it's expiry will remain absolute and 
+             * use will have to re authenticate after every 7 days.
+             */
+            user.RefreshTokenExpiry = DateTime.Now.AddDays(7);
+            await _userManager.UpdateAsync(user);
+            #endregion
+
+            #region response map
+            var response = new LoginResponseDTO
+            {
+                JwtToken = newJwtToken,
+                RefreshToken = newRefreshToken
+            };
+            #endregion
+
+            return ApiResponse<LoginResponseDTO>.Success(response, "Token Refreshed Successfully");
         }
 
         public async Task<ApiResponse<string>> ConfirmEmailVerification(string token, string email)
@@ -205,46 +259,6 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<string>.Success(null, "Password reset successful");
         }
 
-        public async Task<ApiResponse<LoginResponseDTO>> RefreshToken(RefreshTokenRequestDTO model)
-        {
-            var principal = GetTokenPrincipal(model.JwtToken);
-            if (principal == null)
-            {
-                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "Token", "Invalid access token" } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
-            }
-
-            var userId = principal.FindFirst("UserId").Value;
-            if (userId == null)
-            {
-                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "UserId", "Invalid user id." } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiry <= DateTime.Now)
-            {
-                return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "RefreshToken", "Invalid or expired refresh token" } }, "Refresh Failed.");
-            }
-
-            #region update refresh token for user
-            string newJwtToken = await this.GenerateToken(user);
-            string newRefreshToken = this.GenerateRefreshToken();
-
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiry = DateTime.Now.AddSeconds(20);
-            await _userManager.UpdateAsync(user);
-            #endregion
-
-            #region response map
-            var response = new LoginResponseDTO
-            {
-                JwtToken = newJwtToken,
-                RefreshToken = newRefreshToken
-            };
-            #endregion
-
-            return ApiResponse<LoginResponseDTO>.Success(response, "Token Refreshed Successfully");
-        }
-
         public async Task<ApiResponse<string>> LogoutUser(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -261,9 +275,9 @@ namespace BlogApp.Infrastructure.Services
         }
 
         #region helper methods
-        protected async Task<string> GenerateToken(Users user)
+        protected async Task<string> GenerateJwtToken(Users user)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var userRole = await _authRepository.GetUserRole(user);
@@ -276,9 +290,9 @@ namespace BlogApp.Infrastructure.Services
             };
 
             var token = new JwtSecurityToken(
-                issuer: _jwtSettings.ValidIssuer,
-                audience: _jwtSettings.ValidAudience,
-                expires: DateTime.Now.AddSeconds(20),
+                issuer: _jwtConfig.ValidIssuer,
+                audience: _jwtConfig.ValidAudience,
+                expires: DateTime.Now.AddMinutes(20), // 20 minutes expiration for JWT Token
                 claims: claims,
                 signingCredentials: credentials
             );
@@ -300,15 +314,15 @@ namespace BlogApp.Infrastructure.Services
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
-                ValidIssuer = _jwtSettings.ValidIssuer,
-                ValidAudience = _jwtSettings.ValidAudience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
+                ValidIssuer = _jwtConfig.ValidIssuer,
+                ValidAudience = _jwtConfig.ValidAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Secret)),
                 ValidateLifetime = false, // Don't validate expiration, we check expiration manually
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken securityToken;
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
             var jwtToken = securityToken as JwtSecurityToken;
 
             if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
