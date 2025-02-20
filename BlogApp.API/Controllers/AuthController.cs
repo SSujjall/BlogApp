@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using Azure;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.EmailService.Model;
 using BlogApp.Application.Helpers.EmailService.Service;
@@ -102,6 +104,44 @@ namespace BlogApp.API.Controllers
             }
 
             return Ok(response);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequestDTO model)
+        {
+            var response = await _authService.RefreshToken(model);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var response = await _authService.LogoutUser(userId);
+            return Ok(response);
+        }
+
+        [HttpGet("auth-test")]
+        [Authorize]
+        public async Task<IActionResult> AuthorizeTest()
+        {
+            var authHeader = HttpContext.Request.Headers.Authorization.ToString();
+            string jwtToken = authHeader.Replace("Bearer ", "");
+            var jwt = new JwtSecurityToken(jwtToken);
+            var res = $"Authenticated! {Environment.NewLine}";
+            res += $"{Environment.NewLine} Jwt Exp Time: {jwt.ValidTo.ToLocalTime()}, " +
+                $"Time: {DateTime.Now.ToLongTimeString()}";
+            return Ok(res);
         }
     }
 }

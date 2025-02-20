@@ -10,7 +10,7 @@ export const BlogCard = ({
   showFullContent = false,
 }) => {
   return (
-    <div className="border p-4 rounded-lg shadow-md">
+    <div className="border p-4 rounded-lg shadow-sm">
       <Link to={`/blog/blogById/${blog.blogId}`}>
         <h2
           className={`font-semibold ${

@@ -12,11 +12,14 @@ const Home = () => {
   const [blogs, setBlogs] = useState([]);
   const [totalBlogs, setTotalBlogs] = useState(0);
   const { sortBy } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
-  const [page, setPage] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const pageSize = 10;
+
+  // Read page from URL (default to 0)
+  const initialPage = parseInt(searchParams.get("page")) || 0;
+  const [page, setPage] = useState(initialPage);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { userReactions, handleVote } = useVoting();
 
@@ -61,6 +64,16 @@ const Home = () => {
   // Calculate total pages
   const totalPages = Math.ceil(totalBlogs / pageSize);
 
+  // Handle page change and update URL
+  const changePage = (newPage) => {
+    setPage(newPage);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("page", newPage);
+      return params;
+    });
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -101,7 +114,7 @@ const Home = () => {
         <div className="mt-4 flex justify-end gap-4 items-center">
           <Button
             icon={"chevron_left"}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+            onClick={() => changePage(Math.max(page - 1, 0))}
             className={`bg-black text-white p-1 pr-1 ${
               page === 0 ? "opacity-50 cursor-not-allowed" : ""
             }`}
@@ -113,9 +126,7 @@ const Home = () => {
           </div>
           <Button
             icon={"chevron_right"}
-            onClick={() =>
-              setPage((prev) => Math.min(prev + 1, totalPages - 1))
-            }
+            onClick={() => changePage(Math.min(page + 1, totalPages - 1))}
             className={`bg-black text-white p-1 pr-1 ${
               page === totalPages - 1 ? "opacity-50 cursor-not-allowed" : ""
             }`}

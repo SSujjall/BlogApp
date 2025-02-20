@@ -54,6 +54,18 @@ namespace BlogApp.Application.DTOs
         public string Password { get; set; }
     }
 
+    public class LoginResponseDTO
+    {
+        public string JwtToken { get; set; }
+        public string RefreshToken { get; set; }
+    }
+
+    public class RefreshTokenRequestDTO
+    {
+        public string JwtToken { get; set; }
+        public string RefreshToken { get; set; }
+    }
+
     public class UpdateUserDTO
     {
         public string? Id { get; set; }

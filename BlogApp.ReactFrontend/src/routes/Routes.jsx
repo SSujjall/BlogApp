@@ -5,6 +5,7 @@ import Login from "../features/auth/pages/Login";
 import BlogDetail from "../features/blog/pages/BlogDetail";
 import Signup from "../features/auth/pages/Signup";
 import ForgotPassword from "../features/auth/pages/ForgotPassword";
+import AddBlog from "../features/blog/pages/AddBlog";
 
 const AppRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AppRoutes = () => {
         {/* Blog Routes */}
         <Route path="/blog/filter/:sortBy" element={<Home />} />
         <Route path="/blog/blogById/:blogId" element={<BlogDetail />}></Route>
+        <Route path="/blog/addBlog" element={<AddBlog />}></Route>
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
