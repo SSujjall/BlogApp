@@ -1,3 +1,5 @@
+import { isAuthenticated } from "../common/utils/tokenHelper";
+
 const menuData = [
   {
     icon: "home",
@@ -15,7 +17,7 @@ const menuData = [
       { icon: "trending_up", name: "Popular", link: "/blog/filter/popularity" },
     ],
   },
-  {
+  isAuthenticated() && {
     parentIcon: "settings",
     name: "Settings",
     type: "parent",
@@ -24,6 +26,6 @@ const menuData = [
       { icon: "lock", name: "Password", link: "/user/password" },
     ],
   },
-];
+].filter(Boolean);
 
 export default menuData;

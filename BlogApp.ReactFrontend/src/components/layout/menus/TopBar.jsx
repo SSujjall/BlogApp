@@ -1,20 +1,17 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Button from "../../common/Button";
 import CommonInputField from "../../common/CommonInputField";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { isAuthenticated } from "../../../common/utils/tokenHelper";
 
-const Searchbar = ({ toggleSidebar }) => {
+const TopBar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
-  const [authStatus, setAuthStatus] = useState(false);
-
-  useEffect(() => {
-    setAuthStatus(isAuthenticated());
-  }, []);
+  const authStatus = isAuthenticated();
+  // const [menuVisible, setMenuVisible] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -24,6 +21,10 @@ const Searchbar = ({ toggleSidebar }) => {
   const handleLoginClick = () => {
     navigate("/login");
   };
+
+  // const toggleMenu = () => {
+  //   setMenuVisible((prev) => !prev);
+  // };
 
   return (
     <nav className="fixed bg-gray-100 p-3 w-full flex items-center justify-between border-b border-gray-300 z-50">
@@ -66,23 +67,57 @@ const Searchbar = ({ toggleSidebar }) => {
             className={"text-white bg-gray-800 hover:bg-gray-700"}
           />
         ) : (
-          <>
+          <div className="flex gap-1">
             <Button
               icon={"add"}
               text={"Create"}
-              className={"text-black hover:bg-gray-200 rounded-full"}
+              className={"text-black hover:bg-gray-200 rounded-md gap-0"}
+              onClick={() => navigate("/blog/addBlog")}
             />
 
-            <Button icon={"person"} className={"bg-black text-white rounded-full"}/>
-          </>
+            {/* <div className="menu">
+              <Button
+                icon={"person"}
+                text={"user"}
+                onClick={toggleMenu}
+                className={"rounded-lg bg-black text-white"}
+              />
+
+              {menuVisible && (
+                <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg w-40">
+                  <ul>
+                    <li>
+                      <Link
+                        to="/user/profile"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-200"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/user/settings"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-200"
+                      >
+                        Settings
+                      </Link>
+                    </li>
+                    <li>
+                      <Button text={"Logout"} className={"bg-red-500  text-white w-full"}/>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div> */}
+          </div>
         )}
       </div>
     </nav>
   );
 };
 
-Searchbar.propTypes = {
+TopBar.propTypes = {
   toggleSidebar: PropTypes.func.isRequired,
 };
 
-export default Searchbar;
+export default TopBar;

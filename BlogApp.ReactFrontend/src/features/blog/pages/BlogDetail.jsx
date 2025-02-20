@@ -43,7 +43,7 @@ const BlogDetail = () => {
     await handleVote(
       blogId,
       reactionType,
-      (blogId, newReaction, previousReaction) => {
+      (newReaction, previousReaction) => {
         setBlog((prevBlog) =>
           updateBlogVotes(prevBlog, newReaction, previousReaction)
         );
