@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react';
-import { getUserReactions, voteBlog } from '../service/blogReactionService';
-import { showErrorToast } from '../../../common/utils/toastHelper';
+import { useState, useEffect } from "react";
+import { getUserReactions, voteBlog } from "../service/blogReactionService";
+import {
+  showErrorToast,
+  showWarningToast,
+} from "../../../common/utils/toastHelper";
+import { isAuthenticated } from "../../../common/utils/tokenHelper";
+// import { useNavigate } from "react-router-dom";
 
 export const useVoting = () => {
   const [userReactions, setUserReactions] = useState({});
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserReactions = async () => {
@@ -27,7 +33,15 @@ export const useVoting = () => {
   }, []);
 
   const handleVote = async (blogId, reactionType, onVoteSuccess) => {
-    const newReaction = userReactions[blogId] === reactionType ? 0 : reactionType;
+    // Check if the user is autneticated or not
+    if (!isAuthenticated()) {
+      showWarningToast("Please login to vote");
+      return false;
+      // navigate('/login');
+    }
+
+    const newReaction =
+      userReactions[blogId] === reactionType ? 0 : reactionType;
     setUserReactions((prev) => ({ ...prev, [blogId]: newReaction }));
 
     const response = await voteBlog(blogId, newReaction);
@@ -35,11 +49,11 @@ export const useVoting = () => {
       showErrorToast("Error submitting vote");
       return false;
     }
-    
+
     if (onVoteSuccess) {
       onVoteSuccess(blogId, newReaction, userReactions[blogId]);
     }
-    
+
     return true;
   };
 

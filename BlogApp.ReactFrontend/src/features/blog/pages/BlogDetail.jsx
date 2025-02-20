@@ -43,6 +43,7 @@ const BlogDetail = () => {
     await handleVote(
       blogId,
       reactionType,
+      // dont remove blog id below, it creates a glitch that shows the vote negative
       (blogId, newReaction, previousReaction) => {
         setBlog((prevBlog) =>
           updateBlogVotes(prevBlog, newReaction, previousReaction)

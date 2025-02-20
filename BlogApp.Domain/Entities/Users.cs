@@ -4,6 +4,10 @@ namespace BlogApp.Domain.Entities
 {
     public class Users : IdentityUser
     {
+        // Extra properties for identity user
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiry { get; set; }
+
         // Virtual navigation properties for relationships
         public virtual ICollection<Blogs> Blogs { get; set; } = new List<Blogs>();
         public virtual ICollection<Comments> Comments { get; set; } = new List<Comments>();
