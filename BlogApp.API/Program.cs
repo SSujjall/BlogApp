@@ -78,6 +78,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+#region Set Config to Models and Register service
 // settings the values of jwt from configuration to the JWTSettings class
 var jwtSection = builder.Configuration.GetSection("JWT");
 builder.Services.Configure<JwtConfig>(jwtSection);
@@ -91,6 +92,7 @@ var cloudinaryConfig = builder.Configuration.GetSection("CloudinarySettings").Ge
 var account = new Account(cloudinaryConfig.CloudName, cloudinaryConfig.ApiKey, cloudinaryConfig.ApiSecret);
 var cloudinary = new Cloudinary(account);
 builder.Services.AddSingleton(cloudinary);
+#endregion
 
 // Add services to the container.
 builder.Services.AddControllers();
