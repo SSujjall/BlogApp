@@ -9,3 +9,7 @@ export const showSuccessToast = (message) => {
 export const showErrorToast = (message) => {
   toast.error(message);
 };
+
+export const showWarningToast = (message) => {
+  toast.warning(message);
+}
