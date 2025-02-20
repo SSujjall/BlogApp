@@ -38,7 +38,9 @@ const TopBar = ({ toggleSidebar }) => {
 
       {/* left Title div  */}
       <div className="pr-5 text-2xl font-bold">
-        <Link to="/">MyBlog</Link>
+        <Link to="/" onClick={() => window.reload()}>
+          MyBlog
+        </Link>
       </div>
 
       {/* Middle Search div */}
