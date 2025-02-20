@@ -2,14 +2,18 @@ import { useState } from "react";
 import Button from "../../../components/common/Button";
 import CommonInputField from "../../../components/common/CommonInputField";
 import Layout from "../../../components/layout/Layout";
+import { XCircle } from "lucide-react";
+import { showSuccessToast } from "../../../common/utils/toastHelper";
 
 const AddBlog = () => {
   const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -22,12 +26,22 @@ const AddBlog = () => {
     const droppedFile = event.dataTransfer.files[0];
     if (droppedFile) {
       setFile(droppedFile);
+      setPreview(URL.createObjectURL(droppedFile));
     }
+  };
+
+  const handleDeleteImage = () => {
+    setFile(null);
+    setPreview(null);
+  };
+
+  const onPostClick = () => {
+    showSuccessToast("You just clicked post button heehee ");
   };
 
   return (
     <Layout>
-      <div className="mx-auto max-w-4xl border rounded-md p-4">
+      <div className="mx-auto max-w-4xl border rounded-md p-4 shadow-sm">
         <h1 className="text-3xl font-bold mb-3">Create Post</h1>
 
         <CommonInputField placeholder={"Title"} classProp={"py-3 mb-3"} />
@@ -64,8 +78,29 @@ const AddBlog = () => {
           </label>
         </div>
 
+        {/* Image Preview */}
+        {preview && (
+          <div className="relative mt-4 w-80 h-80">
+            <img
+              src={preview}
+              alt="Uploaded Preview"
+              className="w-80 h-80 object-cover rounded-md shadow-md border"
+            />
+            <button
+              onClick={handleDeleteImage}
+              className="absolute top-2 right-2 bg-black text-white p-1 rounded-full shadow-md hover:bg-gray-700 transition"
+            >
+              <XCircle size={24} />
+            </button>
+          </div>
+        )}
+
         <div className="flex justify-end mt-4">
-          <Button text={"Post"} className={"bg-black text-white px-5"} />
+          <Button
+            text={"Post"}
+            className={"bg-black text-white px-10"}
+            onClick={onPostClick}
+          />
         </div>
       </div>
     </Layout>
