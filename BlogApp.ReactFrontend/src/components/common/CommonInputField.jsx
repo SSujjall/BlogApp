@@ -2,6 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 
 const CommonInputField = ({
+  name,
   type,
   placeholder,
   icon,
@@ -26,6 +27,7 @@ const CommonInputField = ({
       )}
 
       <input
+        name={name}
         type={isPasswordShown ? "text" : type}
         placeholder={placeholder}
         className="flex-1 outline-none px-2 h-full text-base"

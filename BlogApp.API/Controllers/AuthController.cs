@@ -106,6 +106,14 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        #region Google Auth
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin(LoginDTO model)
+        {
+            return Ok();
+        }
+        #endregion
+
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(RefreshTokenRequestDTO model)
         {
