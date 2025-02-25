@@ -1,19 +1,40 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Button from "../../../components/common/Button";
 import CommonInputField from "../../../components/common/CommonInputField";
 import Layout from "../../../components/layout/Layout";
 import { XCircle } from "lucide-react";
 import { showSuccessToast } from "../../../common/utils/toastHelper";
 
+const initFieldValues = {
+  title: "",
+  description: "",
+  imageFile: null,
+};
+
 const AddBlog = () => {
-  const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // request constants
+  const [values, setValues] = useState(initFieldValues);
+
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setValues({
+      ...values,
+      [name]: value,
+    });
+  };
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
+      // Update both imageFile and preview together
+      setValues({
+        ...values,
+        imageFile: selectedFile,
+      });
+      setPreview(URL.createObjectURL(selectedFile)); // Set preview URL
     }
   };
 
@@ -25,18 +46,29 @@ const AddBlog = () => {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files[0];
     if (droppedFile) {
-      setFile(droppedFile);
-      setPreview(URL.createObjectURL(droppedFile));
+      // Update both imageFile and preview together
+      setValues({
+        ...values,
+        imageFile: droppedFile,
+      });
+      setPreview(URL.createObjectURL(droppedFile)); // Set preview URL
     }
   };
 
   const handleDeleteImage = () => {
-    setFile(null);
+    setValues({ ...values, imageFile: null });
     setPreview(null);
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  const onPostClick = () => {
-    showSuccessToast("You just clicked post button heehee ");
+  const onPostClick = (e) => {
+    e.preventDefault();
+    console.log(values);
+    showSuccessToast(`You just clicked post button heehee`);
   };
 
   return (
@@ -44,61 +76,71 @@ const AddBlog = () => {
       <div className="mx-auto max-w-4xl border rounded-md p-4 shadow-sm">
         <h1 className="text-3xl font-bold mb-3">Create Post</h1>
 
-        <CommonInputField placeholder={"Title"} classProp={"py-3 mb-3"} />
+        <CommonInputField
+          name="title"
+          placeholder="Title"
+          classProp="py-3 mb-3"
+          onChange={handleFieldChange}
+          value={values.title}
+        />
 
         <textarea
+          name="description"
           className="px-4 py-3 w-full border rounded-md outline-none focus-within:border-black transition-colors"
           placeholder="Description"
           rows={10}
+          onChange={handleFieldChange}
+          value={values.description}
         />
 
         {/* File Upload Area */}
         <div
-          className="mt-4 border-2 border-dashed border-gray-400 rounded-md text-center cursor-pointer hover:border-black transition-colors"
+          className="mt-4 border-2 border-dashed border-gray-400 rounded-md text-center cursor-pointer hover:border-black transition-colors relative overflow-hidden"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
           <input
+            ref={fileInputRef}
+            name="imageFile"
             type="file"
             id="fileUpload"
             className="hidden"
             onChange={handleFileChange}
           />
-          <label htmlFor="fileUpload" className="cursor-pointer">
-            {file ? (
-              <div className="text-sm text-gray-700 p-6">
-                <p className="font-semibold">Selected file:</p>
-                <p className="truncate">{file.name}</p>
-              </div>
-            ) : (
+
+          {preview ? (
+            <div className="relative w-full h-80 flex justify-center items-center pointer-events-none">
+              <img
+                src={preview}
+                alt="Uploaded Preview"
+                className="w-full h-full object-contain rounded-md"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent click from bubbling up
+                  handleDeleteImage();
+                }}
+                className="absolute top-2 right-2 bg-black text-white p-1 rounded-full shadow-md hover:bg-gray-700 transition pointer-events-auto"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+          ) : (
+            <label
+              htmlFor="fileUpload"
+              className="cursor-pointer block w-full h-full"
+            >
               <p className="text-gray-600 p-6">
                 Drag & drop a file here or click to upload
               </p>
-            )}
-          </label>
+            </label>
+          )}
         </div>
-
-        {/* Image Preview */}
-        {preview && (
-          <div className="relative mt-4 w-80 h-80">
-            <img
-              src={preview}
-              alt="Uploaded Preview"
-              className="w-80 h-80 object-cover rounded-md shadow-md border"
-            />
-            <button
-              onClick={handleDeleteImage}
-              className="absolute top-2 right-2 bg-black text-white p-1 rounded-full shadow-md hover:bg-gray-700 transition"
-            >
-              <XCircle size={24} />
-            </button>
-          </div>
-        )}
 
         <div className="flex justify-end mt-4">
           <Button
-            text={"Post"}
-            className={"bg-black text-white px-10"}
+            text="Post"
+            className="bg-black text-white px-10"
             onClick={onPostClick}
           />
         </div>
