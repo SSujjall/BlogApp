@@ -13,13 +13,21 @@ export const getBlogs = async ({
   params.append("skip", skip);
   params.append("take", take);
 
-  return makeRequest("GET", `/Blog/get-blogs?${params.toString()}`);
+  return await makeRequest("GET", `/Blog/get-blogs?${params.toString()}`);
 };
 
 export const getBlogById = async (blogId) => {
-  return makeRequest("GET", `/Blog/get-by-id/${blogId}`);
+  return await makeRequest("GET", `/Blog/get-by-id/${blogId}`);
 };
 
 export const createBlog = async (blogData) => {
-  return makeRequest("POST", "/Blog/create", blogData);
+  console.log(blogData);
+  const formData = new FormData();
+  formData.append("Title", blogData.title);
+  formData.append("Description", blogData.description);
+  if (blogData.imageFile) {
+    formData.append("ImageUrl", blogData.imageFile); // Ensure this matches DTO
+  }
+
+  return await makeRequest("POST", "/Blog/create", formData, true);
 };

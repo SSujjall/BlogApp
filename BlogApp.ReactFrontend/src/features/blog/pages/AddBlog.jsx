@@ -4,6 +4,7 @@ import CommonInputField from "../../../components/common/CommonInputField";
 import Layout from "../../../components/layout/Layout";
 import { XCircle } from "lucide-react";
 import { showSuccessToast } from "../../../common/utils/toastHelper";
+import { createBlog } from "../service/blogService";
 
 const initFieldValues = {
   title: "",
@@ -65,10 +66,16 @@ const AddBlog = () => {
     }
   };
 
-  const onPostClick = (e) => {
+  const onPostClick = async (e) => {
     e.preventDefault();
-    console.log(values);
-    showSuccessToast(`You just clicked post button heehee`);
+    try {
+      const response = await createBlog(values);
+      if (response) {
+        showSuccessToast("Blog created successfully!");
+      }
+    } catch (error) {
+      console.error("Error creating blog:", error);
+    }
   };
 
   return (
