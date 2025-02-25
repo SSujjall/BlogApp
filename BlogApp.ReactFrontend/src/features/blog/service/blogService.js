@@ -21,5 +21,5 @@ export const getBlogById = async (blogId) => {
 };
 
 export const createBlog = async (blogData) => {
-  return makeRequest("POST", "/blogs", blogData);
+  return makeRequest("POST", "/Blog/create", blogData);
 };
