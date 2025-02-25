@@ -4,10 +4,14 @@ import MenuLink from "./MenuLink";
 import PropTypes from "prop-types";
 import Button from "../../common/Button";
 import { useNavigate } from "react-router-dom";
-import { removeToken } from "../../../common/utils/tokenHelper";
+import {
+  isAuthenticated,
+  removeToken,
+} from "../../../common/utils/tokenHelper";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
   const navigate = useNavigate();
+  const authStatus = isAuthenticated();
 
   // Handle screen size changes
   useEffect(() => {
@@ -43,14 +47,16 @@ const Sidebar = ({ visible, toggleSidebar }) => {
       <div className="hidden lg:block w-72 bg-gray-100 border-r border-gray-300 h-screen p-4 pt-20 text-white">
         <div className="flex flex-col justify-between h-full">
           <MenuLink />
-          <Button
-            icon={"logout"}
-            text={"Logout"}
-            className={
-              "border border-gray-700 text-gray-700 hover:bg-red-600 hover:border-red-600 w-full hover:text-white mb-5"
-            }
-            onClick={handleLogoutClick}
-          />
+          {authStatus && (
+            <Button
+              icon={"logout"}
+              text={"Logout"}
+              className={
+                "border border-gray-700 text-gray-700 hover:bg-red-600 hover:border-red-600 w-full hover:text-white mb-5"
+              }
+              onClick={handleLogoutClick}
+            />
+          )}
         </div>
       </div>
 
@@ -71,14 +77,16 @@ const Sidebar = ({ visible, toggleSidebar }) => {
 
         <div className="flex flex-col justify-between h-full">
           <MenuLink />
-          <Button
-            icon={"logout"}
-            text={"Logout"}
-            className={
-              "border border-gray-700 text-gray-700 hover:bg-red-600 hover:border-red-600 w-full hover:text-white mb-5"
-            }
-            onClick={handleLogoutClick}
-          />
+          {authStatus && (
+            <Button
+              icon={"logout"}
+              text={"Logout"}
+              className={
+                "border border-gray-700 text-gray-700 hover:bg-red-600 hover:border-red-600 w-full hover:text-white mb-5"
+              }
+              onClick={handleLogoutClick}
+            />
+          )}
         </div>
       </div>
     </>
