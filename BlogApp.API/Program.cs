@@ -10,6 +10,7 @@ using CloudinaryDotNet;
 using BlogApp.Application.Helpers.EmailService.Config;
 using BlogApp.Application.Helpers.CloudinaryService.Config;
 using BlogApp.Application.Mappings;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,12 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
         };
     });
+    //.AddGoogle(GoogleDefaults.AuthenticationScheme, opt =>
+    //{
+    //    opt.ClientId = builder.Configuration["Authentications:Google:ClientId"];
+    //    opt.ClientSecret = builder.Configuration["Authentications:Google:ClientSecret"];
+    //    opt.SaveTokens = true;
+    //});
 
 // Swagger configuration
 builder.Services.AddSwaggerGen(c =>

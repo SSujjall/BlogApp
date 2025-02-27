@@ -27,12 +27,21 @@ const Login = () => {
           placeholder={"Password"}
           classProp={"py-3 mb-3"}
         />
-        <Link
-          to={"/forgot-password"}
-          className="font-semibold text-gray-500 hover:text-black hover:underline"
-        >
-          Forgot password?
-        </Link>
+
+        <div className="flex justify-between">
+          <div className="flex items-center text-gray-500 hover:text-black transition-all">
+            <input id="rememberMe" type="checkbox" className="h-4 w-4 mr-2" />
+            <label htmlFor="rememberMe" className="select-none">
+              Remember me
+            </label>
+          </div>
+          <Link
+            to={"/forgot-password"}
+            className="font-semibold text-gray-500 hover:text-black hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <Button
           text="Login"
