@@ -4,6 +4,8 @@ using Azure;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.EmailService.Model;
 using BlogApp.Application.Helpers.EmailService.Service;
+using BlogApp.Application.Helpers.GoogleAuthService.Model;
+using BlogApp.Application.Helpers.GoogleAuthService.Service;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -17,11 +19,14 @@ namespace BlogApp.API.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IEmailService _emailService;
+        private readonly IGoogleAuthService _googleAuthService;
 
-        public AuthController(IAuthService authService, IEmailService emailService)
+        public AuthController(IAuthService authService, IEmailService emailService,
+                              IGoogleAuthService googleAuthService)
         {
             _authService = authService;
             _emailService = emailService;
+            _googleAuthService = googleAuthService;
         }
 
         [HttpPost("register")]
@@ -108,9 +113,15 @@ namespace BlogApp.API.Controllers
 
         #region Google Auth
         [HttpPost("google-login")]
-        public async Task<IActionResult> GoogleLogin(LoginDTO model)
+        public async Task<IActionResult> GoogleLogin(GoogleLoginDTO model)
         {
-            return Ok();
+            var response = await _googleAuthService.HandleGoogleLogin(model);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+
+            return Ok(response);
         }
         #endregion
 

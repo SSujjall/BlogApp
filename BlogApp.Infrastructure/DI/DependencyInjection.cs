@@ -1,5 +1,7 @@
 ﻿using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.EmailService.Service;
+using BlogApp.Application.Helpers.GoogleAuthService.Service;
+using BlogApp.Application.Helpers.TokenHelper;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
@@ -54,6 +56,8 @@ namespace BlogApp.Infrastructure.DI
             services.AddScoped<IBlogReactionService, BlogReactionService>();
             services.AddScoped<ICommentReactionService, CommentReactionService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IGoogleAuthService, GoogleAuthService>();
             #endregion
 
             return services;

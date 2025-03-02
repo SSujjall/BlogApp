@@ -1,8 +1,23 @@
 import CommonInputField from "../../../components/common/CommonInputField";
 import Button from "../../../components/common/Button";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const Login = () => {
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = () => {
+    console.log("Login clicked");
+    setIsButtonDisabled(true);
+    setIsLoading(true);
+    // Set a timer to re-enable the button after 3 seconds
+    setTimeout(() => {
+      setIsButtonDisabled(false);
+      setIsLoading(false);
+    }, 3000);
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center">
       <Link to={"/"}>
@@ -43,10 +58,16 @@ const Login = () => {
           </Link>
         </div>
 
-        <Button
-          text="Login"
-          className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
-        />
+        <button
+          className="bg-black text-white rounded hover:bg-gray-700 w-full py-3 mt-5 flex items-center justify-center"
+          onClick={handleLogin}
+          disabled={isButtonDisabled}
+        >
+          {isLoading && (
+            <div className="w-5 h-5 mr-2 border-4 border-t-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
+          )}
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
 
         <p className="mt-3">
           Don&apos;t have an account?&nbsp;
