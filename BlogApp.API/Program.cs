@@ -11,6 +11,7 @@ using BlogApp.Application.Helpers.EmailService.Config;
 using BlogApp.Application.Helpers.CloudinaryService.Config;
 using BlogApp.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.Google;
+using BlogApp.Application.Helpers.GoogleAuthService.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,7 +91,7 @@ builder.Services.AddCors(options =>
 var jwtSection = builder.Configuration.GetSection("JWT");
 builder.Services.Configure<JwtConfig>(jwtSection);
 
-// settings the values of jwt from configuration to the EmailConfig class
+// settings the values of EmailConfiguration from configuration to the EmailConfig class
 var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfig>();
 builder.Services.AddSingleton(emailConfig);
 
@@ -99,6 +100,11 @@ var cloudinaryConfig = builder.Configuration.GetSection("CloudinarySettings").Ge
 var account = new Account(cloudinaryConfig.CloudName, cloudinaryConfig.ApiKey, cloudinaryConfig.ApiSecret);
 var cloudinary = new Cloudinary(account);
 builder.Services.AddSingleton(cloudinary);
+
+// settings the values of Google from configuration to the GoogleConfig class
+// .Configure is used because the values for config might change in the future
+var googleConfig = builder.Configuration.GetSection("Authentications:Google");
+builder.Services.Configure<GoogleConfig>(googleConfig);
 #endregion
 
 // Add services to the container.
