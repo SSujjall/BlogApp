@@ -74,6 +74,42 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<BlogsDTO>.Failed(null, "No Blog Found.");
         }
 
+        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetBlogsByUserId(string userId)
+        {
+            var reqFilter = new GetRequest<Blogs>()
+            {
+                Filter = (x => x.UserId == userId && x.IsDeleted == false)
+            };
+            var result = await _blogRepository.GetAll(reqFilter);
+            if (result.Any())
+            {
+                #region response model mapping using LINQ
+                var response = result.Select(res => new BlogsDTO
+                {
+                    BlogId = res.BlogId,
+                    User = new BlogUser
+                    {
+                        UserId = res.UserId,
+                        Name = res.User.UserName ?? ""
+                    },
+                    Title = res.Title,
+                    Description = res.Description,
+                    ImageUrl = res.ImageUrl,
+                    UpVoteCount = res.UpVoteCount,
+                    DownVoteCount = res.DownVoteCount,
+                    CommentCount = res.CommentCount
+                });
+                #endregion
+                return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "Blogs Fetched for User");
+            }
+
+            var errors = new Dictionary<string, string>
+            {
+                {"Blogs", "No Blogs Available For User"}
+            };
+            return ApiResponse<IEnumerable<BlogsDTO>>.Failed(errors, "Blogs Not Found", HttpStatusCode.NoContent);
+        }
+
         public async Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto)
         {
             string? imageUrl = null;
@@ -100,7 +136,7 @@ namespace BlogApp.Infrastructure.Services
             var result = await _blogRepository.Add(request);
             if (result != null)
             {
-                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
+                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using 'result.UserId' instead of fetching everything.
                 #region response model mapping
                 var response = new BlogsDTO
                 {

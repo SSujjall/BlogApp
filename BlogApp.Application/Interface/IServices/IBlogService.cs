@@ -9,6 +9,7 @@ namespace BlogApp.Application.Interface.IServices
     {
         Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request);
         Task<ApiResponse<BlogsDTO>> GetBlogById(int id);
+        Task<ApiResponse<IEnumerable<BlogsDTO>>> GetBlogsByUserId(string userId);
         Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto);
         Task<ApiResponse<string>> DeleteBlog(int id, string userId);
         Task<ApiResponse<BlogsDTO>> UpdateBlog(UpdateBlogDTO dto, string userId);

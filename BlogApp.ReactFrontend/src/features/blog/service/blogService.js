@@ -31,3 +31,7 @@ export const createBlog = async (blogData) => {
 
   return await makeRequest("POST", "/Blog/create", formData, true);
 };
+
+export const getUserBlogs = async () => {
+  return await makeRequest("GET", "/Blog/get-user-blogs", null, true);
+}

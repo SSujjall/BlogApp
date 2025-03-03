@@ -25,7 +25,7 @@ export const useVoting = () => {
         );
         setUserReactions(reactionMap);
       } catch {
-        showErrorToast("Error fetching user reactions");
+        // showErrorToast("Error fetching user reactions");
       }
     };
 

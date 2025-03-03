@@ -62,6 +62,24 @@ namespace BlogApp.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("get-user-blogs")]
+        public async Task<IActionResult> GetUserBlogs()
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User id not found");
+            }
+
+            var response = await _blogService.GetBlogsByUserId(userId);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return Ok(response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateBlog([FromForm] CreateBlogDTO dto)
         {

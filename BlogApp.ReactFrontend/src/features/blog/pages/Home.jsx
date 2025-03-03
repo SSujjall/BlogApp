@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { getBlogs } from "../service/blogService";
-import { showErrorToast } from "../../../common/utils/toastHelper";
+// import { showErrorToast } from "../../../common/utils/toastHelper";
 import Layout from "../../../components/layout/Layout";
 import Button from "../../../components/common/Button";
 import { BlogCard } from "../components/BlogCard";
@@ -36,7 +36,7 @@ const Home = () => {
         setBlogs(data.data);
         setTotalBlogs(data.totalCount);
       } catch {
-        showErrorToast("Error fetching blogs");
+        // showErrorToast("Error fetching blogs");
       } finally {
         setIsLoading(false);
       }
