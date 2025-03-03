@@ -18,6 +18,12 @@ const menuData = [
     ],
   },
   isAuthenticated() && {
+    icon: "article",
+    name: "My Posts",
+    link: "/my-posts",
+    type: "single",
+  },
+  isAuthenticated() && {
     parentIcon: "settings",
     name: "Settings",
     type: "parent",

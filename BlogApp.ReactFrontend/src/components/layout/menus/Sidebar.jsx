@@ -6,7 +6,7 @@ import Button from "../../common/Button";
 import { useNavigate } from "react-router-dom";
 import {
   isAuthenticated,
-  removeToken,
+  removeTokens,
 } from "../../../common/utils/tokenHelper";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
@@ -28,7 +28,7 @@ const Sidebar = ({ visible, toggleSidebar }) => {
 
   const handleLogoutClick = () => {
     navigate("/");
-    removeToken();
+    removeTokens();
     window.location.reload();
   };
 

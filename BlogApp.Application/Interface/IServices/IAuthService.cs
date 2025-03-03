@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.DTOs;
+using BlogApp.Application.Helpers.GoogleAuthService.Model;
 using BlogApp.Application.Helpers.HelperModels;
 using Newtonsoft.Json.Linq;
 

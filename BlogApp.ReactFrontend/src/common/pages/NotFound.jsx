@@ -3,7 +3,10 @@ import Layout from "../../components/layout/Layout";
 const NotFound = () => {
   return (
     <Layout>
-      <div className="flex flex-col justify-center items-center h-full -mt-5">
+      <div
+        className="flex flex-col justify-center items-center"
+        style={{ height: "calc(100vh - 11rem)" }}
+      >
         <span className="bg-red-500 text-7xl p-4 rounded-2xl inline-block text-white">
           404
         </span>
