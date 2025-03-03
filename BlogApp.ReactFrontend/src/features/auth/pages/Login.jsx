@@ -1,11 +1,34 @@
 import CommonInputField from "../../../components/common/CommonInputField";
 import Button from "../../../components/common/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { loginWithGoogle } from "../service/loginService";
+import { setTokens } from "../../../common/utils/tokenHelper";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "../../../common/utils/toastHelper";
+
+{
+  /* FOR GOOGLE LOGIN:
+  #Enable "Google People API" 
+  -Go to APIs & Services > Library.
+  -Search for "Google People API" (needed for profile/email access).
+  -Click Enable.
+
+  #Configure OAuth Client
+  In Authorized JavaScript Origins, add your react running url (http) http://localhost:5173
+  (Add your production domain if deployed)
+  In Authorized Redirect URIs do the same as above.
+*/
+}
 
 const Login = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const navigate = useNavigate();
 
   const handleLogin = () => {
     console.log("Login clicked");
@@ -16,6 +39,20 @@ const Login = () => {
       setIsButtonDisabled(false);
       setIsLoading(false);
     }, 3000);
+  };
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    const googleToken = credentialResponse.credential;
+    console.log("Google Token:", googleToken);
+
+    const response = await loginWithGoogle(googleToken);
+    if (response) {
+      setTokens(response.data.jwtToken, response.data.refreshToken);
+      showSuccessToast("Logged in successfully");
+      navigate("/");
+    } else {
+      showErrorToast("Google Login Failed");
+    }
   };
 
   return (
@@ -84,12 +121,13 @@ const Login = () => {
           </span>
         </div>
 
-        <Button
-          text="Login With Google"
-          className={
-            "w-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-3"
-          }
-        />
+        {/* Google Login Button with provider */}
+        <GoogleOAuthProvider clientId={clientId}>
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => console.log("Google Login Failed")}
+          />
+        </GoogleOAuthProvider>
       </form>
     </div>
   );
