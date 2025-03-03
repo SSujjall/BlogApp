@@ -11,10 +11,10 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="flex overflow-hidden">
+    <div className="flex overflow-hidden h-screen">
       <TopBar toggleSidebar={toggleSidebar} />
       <Sidebar visible={sidebarVisible} toggleSidebar={toggleSidebar} />
-      <div className="p-4 pt-20 flex-1 overflow-y-auto">{children}</div>
+      <div className="p-4 mt-16 flex-1 overflow-y-auto">{children}</div>
     </div>
   );
 };
