@@ -1,8 +1,60 @@
 import CommonInputField from "../../../components/common/CommonInputField";
 import Button from "../../../components/common/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { loginWithGoogle } from "../service/loginService";
+import { setTokens } from "../../../common/utils/tokenHelper";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "../../../common/utils/toastHelper";
+
+{
+  /* FOR GOOGLE LOGIN:
+  #Enable "Google People API" 
+  -Go to APIs & Services > Library.
+  -Search for "Google People API" (needed for profile/email access).
+  -Click Enable.
+
+  #Configure OAuth Client
+  In Authorized JavaScript Origins, add your react running url (http) http://localhost:5173
+  (Add your production domain if deployed)
+  In Authorized Redirect URIs do the same as above.
+*/
+}
 
 const Login = () => {
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    console.log("Login clicked");
+    setIsButtonDisabled(true);
+    setIsLoading(true);
+    // Set a timer to re-enable the button after 3 seconds
+    setTimeout(() => {
+      setIsButtonDisabled(false);
+      setIsLoading(false);
+    }, 3000);
+  };
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    const googleToken = credentialResponse.credential;
+    console.log("Google Token:", googleToken);
+
+    const response = await loginWithGoogle(googleToken);
+    if (response) {
+      setTokens(response.data.jwtToken, response.data.refreshToken);
+      showSuccessToast("Logged in successfully");
+      navigate("/");
+    } else {
+      showErrorToast("Google Login Failed");
+    }
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center">
       <Link to={"/"}>
@@ -27,17 +79,32 @@ const Login = () => {
           placeholder={"Password"}
           classProp={"py-3 mb-3"}
         />
-        <Link
-          to={"/forgot-password"}
-          className="font-semibold text-gray-500 hover:text-black hover:underline"
-        >
-          Forgot password?
-        </Link>
 
-        <Button
-          text="Login"
-          className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
-        />
+        <div className="flex justify-between">
+          <div className="flex items-center text-gray-500 hover:text-black transition-all">
+            <input id="rememberMe" type="checkbox" className="h-4 w-4 mr-2" />
+            <label htmlFor="rememberMe" className="select-none">
+              Remember me
+            </label>
+          </div>
+          <Link
+            to={"/forgot-password"}
+            className="font-semibold text-gray-500 hover:text-black hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        <button
+          className="bg-black text-white rounded hover:bg-gray-700 w-full py-3 mt-5 flex items-center justify-center"
+          onClick={handleLogin}
+          disabled={isButtonDisabled}
+        >
+          {isLoading && (
+            <div className="w-5 h-5 mr-2 border-4 border-t-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
+          )}
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
 
         <p className="mt-3">
           Don&apos;t have an account?&nbsp;
@@ -54,12 +121,13 @@ const Login = () => {
           </span>
         </div>
 
-        <Button
-          text="Login With Google"
-          className={
-            "w-full border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-3"
-          }
-        />
+        {/* Google Login Button with provider */}
+        <GoogleOAuthProvider clientId={clientId}>
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => console.log("Google Login Failed")}
+          />
+        </GoogleOAuthProvider>
       </form>
     </div>
   );
