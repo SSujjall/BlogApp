@@ -30,7 +30,7 @@ const CommonInputField = ({
         name={name}
         type={isPasswordShown ? "text" : type}
         placeholder={placeholder}
-        className="flex-1 outline-none px-2 h-full text-base"
+        className="flex-1 outline-none px-2 h-full text-base w-full"
         value={value}
         onChange={onChange}
         {...isRequired && { required: true }}
@@ -54,6 +54,7 @@ const CommonInputField = ({
 };
 
 CommonInputField.propTypes = {
+  name: PropTypes.string,
   type: PropTypes.string,
   onChange: PropTypes.func,
   placeholder: PropTypes.string,
