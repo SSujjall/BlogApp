@@ -1,8 +1,26 @@
 import CommonInputField from "../../../components/common/CommonInputField";
 import Button from "../../../components/common/Button";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+
+const initFieldValues = {
+  username: "",
+  email: "",
+  phone: "",
+  password: "",
+};
 
 const Signup = () => {
+  const [values, setValues] = useState(initFieldValues);
+
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setValues({
+      ...values,
+      [name]: value,
+    });
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center">
       <Link to={"/"}>
@@ -20,24 +38,36 @@ const Signup = () => {
           icon={"person"}
           placeholder={"Username"}
           classProp={"py-3 mb-3"}
+          name={"username"}
+          onChange={handleFieldChange}
+          value={values.username}
         />
         <CommonInputField
           type={"text"}
           icon={"mail"}
           placeholder={"Email"}
           classProp={"py-3 mb-3"}
+          name={"email"}
+          onChange={handleFieldChange}
+          value={values.email}
         />
         <CommonInputField
           type={"text"}
           icon={"call"}
           placeholder={"Phone"}
           classProp={"py-3 mb-3"}
+          name={"phone"}
+          onChange={handleFieldChange}
+          value={values.phone}
         />
         <CommonInputField
           type={"password"}
           icon={"password"}
           placeholder={"Password"}
           classProp={"py-3 mb-3"}
+          name={"password"}
+          onChange={handleFieldChange}
+          value={values.password}
         />
         <CommonInputField
           type={"password"}
@@ -49,6 +79,10 @@ const Signup = () => {
         <Button
           text="Signup"
           className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
+          onClick={(e) => {
+            e.preventDefault(),
+              console.log("Signup button clicked, values: ", values);
+          }}
         />
 
         <p className="mt-3">
