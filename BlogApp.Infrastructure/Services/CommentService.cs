@@ -41,7 +41,7 @@ namespace BlogApp.Infrastructure.Services
                     User = new CommentUser
                     {
                         UserId = comment.UserId,
-                        Name = comment.User.UserName,
+                        Name = comment.User.UserName ?? "",
                     },
                     CommentDescription = comment.CommentDescription,
                     CreatedAt = comment.CreatedAt,

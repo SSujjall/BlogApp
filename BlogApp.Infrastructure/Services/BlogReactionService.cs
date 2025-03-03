@@ -19,7 +19,7 @@ namespace BlogApp.Infrastructure.Services
     public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper, 
         IBlogService blogService) : IBlogReactionService
     {
-        protected readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
+        private readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
         private readonly IMapper _mapper = mapper;
         private readonly IBlogService _blogService = blogService;
 

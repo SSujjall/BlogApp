@@ -20,7 +20,7 @@ const menuData = [
   isAuthenticated() && {
     icon: "article",
     name: "My Posts",
-    link: "/my-posts",
+    link: "/blog/my-posts",
     type: "single",
   },
   isAuthenticated() && {
