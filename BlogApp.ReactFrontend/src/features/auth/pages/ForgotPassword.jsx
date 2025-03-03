@@ -18,8 +18,11 @@ const ForgotPassword = () => {
         onClick={handleBackClick}
       />
 
-      <form className="border shadow-md p-4 rounded-lg sm:min-w-96 transition-transform">
-        <h1 className="text-3xl text-center mb-5">Forgot Password</h1>
+      <form className="text-center border shadow-md p-4 rounded-lg sm:min-w-96 transition-transform">
+        <h1 className="text-3xl mb-2">Forgot Password</h1>
+        <p className="mb-5 text-gray-500">
+          Enter your email address, we will send you reset link.
+        </p>
         <CommonInputField
           type={"text"}
           icon={"person"}

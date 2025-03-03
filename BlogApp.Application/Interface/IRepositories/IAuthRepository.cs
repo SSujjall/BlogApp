@@ -1,4 +1,7 @@
-﻿using BlogApp.Domain.Entities;
+﻿using BlogApp.Application.DTOs;
+using BlogApp.Application.Helpers.GoogleAuthService.Model;
+using BlogApp.Application.Helpers.HelperModels;
+using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Interface.IRepositories
 {
