@@ -8,6 +8,7 @@ export const BlogCard = ({
   userReactions,
   onVote,
   showFullContent = false,
+  isAuthenticated = false,
 }) => {
   return (
     <div className="border p-4 rounded-lg shadow-sm">
@@ -30,25 +31,40 @@ export const BlogCard = ({
         <p className="text-gray-600">{blog.description}</p>
       </Link>
 
-      <div className="flex flex-row mt-3 items-center">
-        <VoteButtons
-          blogId={blog.blogId}
-          upVoteCount={blog.upVoteCount}
-          downVoteCount={blog.downVoteCount}
-          userReactions={userReactions}
-          onVote={onVote}
-        />
+      <div className="flex flex-row mt-3 items-center justify-between">
+        <section className="flex items-center">
+          <VoteButtons
+            blogId={blog.blogId}
+            upVoteCount={blog.upVoteCount}
+            downVoteCount={blog.downVoteCount}
+            userReactions={userReactions}
+            onVote={onVote}
+          />
 
-        {!showFullContent ? (
-          <Link to={`/blog/blogById/${blog.blogId}`}>
+          {!showFullContent ? (
+            <Link to={`/blog/blogById/${blog.blogId}`}>
+              <Button icon={"forum"} />
+            </Link>
+          ) : (
             <Button icon={"forum"} />
-          </Link>
-        ) : (
-          <Button icon={"forum"} />
-        )}
-        <span className="-ml-2 text-gray-700">
-          {blog.commentCount} {blog.commentCount === 1 ? "Comment" : "Comments"}
-        </span>
+          )}
+          <span className="-ml-2 text-gray-700">
+            {blog.commentCount}{" "}
+            {blog.commentCount === 1 ? "Comment" : "Comments"}
+          </span>
+        </section>
+
+        <section>
+          {isAuthenticated && (
+            <Link to={`/blog/edit/${blog.blogId}`}>
+              <Button
+                icon={"edit"}
+                text={"edit"}
+                className={"hover:bg-gray-200"}
+              />
+            </Link>
+          )}
+        </section>
       </div>
     </div>
   );

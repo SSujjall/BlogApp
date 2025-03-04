@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 using AutoMapper;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.HelperModels;
@@ -110,6 +105,22 @@ namespace BlogApp.Infrastructure.Services
                 { "NotFound", "Vote not found." }
             };
             return ApiResponse<CommentReactionDTO>.Failed(errors, "Vote Not Found.", System.Net.HttpStatusCode.NotFound);
+        }
+
+        public async Task<ApiResponse<IEnumerable<GetAllUserCommentReactionDTO>>> GetAllUserCommentReactions(string userId)
+        {
+            Expression<Func<CommentReaction, bool>> filter = (x => x.UserId == userId);
+            var commentReactions = await _commentReactionRepo.FindAllByConditionAsync(filter);
+            if (commentReactions.Any())
+            {
+                var response = _mapper.Map<IEnumerable<GetAllUserCommentReactionDTO>>(commentReactions);
+                return ApiResponse<IEnumerable<GetAllUserCommentReactionDTO>>.Success(response, "All User's Comment Votes Fetched Successfully.");
+            }
+            var errors = new Dictionary<string, string>
+            {
+                { "NotFound", "User has not voted any comments." }
+            };
+            return ApiResponse<IEnumerable<GetAllUserCommentReactionDTO>>.Failed(errors, "Vote Not Found.", System.Net.HttpStatusCode.NotFound);
         }
     }
 }

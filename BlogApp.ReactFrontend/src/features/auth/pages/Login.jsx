@@ -50,6 +50,7 @@ const Login = () => {
       setTokens(response.data.jwtToken, response.data.refreshToken);
       showSuccessToast("Logged in successfully");
       navigate("/");
+      window.location.reload();
     } else {
       showErrorToast("Google Login Failed");
     }

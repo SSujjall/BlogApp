@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Reflection.Metadata;
 using AutoMapper;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
@@ -74,6 +73,27 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<BlogsDTO>.Failed(null, "No Blog Found.");
         }
 
+        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetBlogsByUserId(string userId)
+        {
+            var reqFilter = new GetRequest<Blogs>()
+            {
+                Filter = (x => x.UserId == userId && x.IsDeleted == false)
+            };
+            var result = await _blogRepository.GetAll(reqFilter);
+            if (result.Any())
+            {
+                // mapping response model
+                var response = _mapper.Map<IEnumerable<BlogsDTO>>(result);
+                return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "Blogs Fetched for User");
+            }
+
+            var errors = new Dictionary<string, string>
+            {
+                {"Blogs", "No Blogs Available For User"}
+            };
+            return ApiResponse<IEnumerable<BlogsDTO>>.Failed(errors, "Blogs Not Found", HttpStatusCode.NoContent);
+        }
+
         public async Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto)
         {
             string? imageUrl = null;
@@ -100,7 +120,7 @@ namespace BlogApp.Infrastructure.Services
             var result = await _blogRepository.Add(request);
             if (result != null)
             {
-                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
+                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using 'result.UserId' instead of fetching everything.
                 #region response model mapping
                 var response = new BlogsDTO
                 {

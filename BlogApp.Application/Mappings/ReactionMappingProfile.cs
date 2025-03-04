@@ -24,6 +24,8 @@ namespace BlogApp.Application.Mappings
 
             CreateMap<CommentReaction, AddOrUpdateCommentReactionDTO>();
             CreateMap<AddOrUpdateCommentReactionDTO, CommentReaction>();
+
+            CreateMap<CommentReaction, GetAllUserCommentReactionDTO>();
             #endregion
         }
     }

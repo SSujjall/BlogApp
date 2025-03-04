@@ -59,5 +59,22 @@ namespace BlogApp.API.Controllers
             }
             return Ok(response);
         }
+
+        [HttpGet("get-all-user-comment-reactions")]
+        public async Task<IActionResult> GetAllUserCommentReaction()
+        {
+            var userId = User?.FindFirst("UserId")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized("User invalid");
+            }
+
+            var response = await _commentReactionService.GetAllUserCommentReactions(userId);
+            if (response.Status == false)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
     }
 }
