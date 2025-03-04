@@ -2,6 +2,11 @@ import CommonInputField from "../../../components/common/CommonInputField";
 import Button from "../../../components/common/Button";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { signup } from "../service/signupService";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "../../../common/utils/toastHelper";
 
 const initFieldValues = {
   username: "",
@@ -12,6 +17,7 @@ const initFieldValues = {
 
 const Signup = () => {
   const [values, setValues] = useState(initFieldValues);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -19,6 +25,33 @@ const Signup = () => {
       ...values,
       [name]: value,
     });
+  };
+
+  const handleSignup = async () => {
+    const payload = {
+      username: values.username,
+      email: values.email,
+      password: values.password,
+    };
+
+    setIsLoading(true);
+    try {
+      const apiResponse = await signup(payload);
+      if (apiResponse.statusCode === 200) {
+        showSuccessToast(apiResponse.message);
+      } else {
+        let errorMessage = apiResponse.message;
+        if (apiResponse.errors) {
+          const errorMessages = Object.values(apiResponse.errors).join(" ");
+          errorMessage = `${apiResponse.message} ${errorMessages}`;
+        }
+        showErrorToast(errorMessage);
+      }
+    } catch {
+      showErrorToast("Error Occured");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -79,11 +112,12 @@ const Signup = () => {
         <Button
           text="Signup"
           className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
-          onClick={(e) => {
-            e.preventDefault(),
-              console.log("Signup button clicked, values: ", values);
-          }}
+          onClick={handleSignup}
+          disabled={isLoading}
         />
+        {isLoading && (
+          <div className="h-5 w-5 border-4 m-auto mt-2 border-t-black rounded-full animate-spin"></div>
+        )}
 
         <p className="mt-3">
           Already have an account?&nbsp;

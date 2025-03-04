@@ -35,7 +35,7 @@ namespace BlogApp.API.Controllers
             var response = await _authService.RegisterUser(registerDto);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                return StatusCode((int)response.StatusCode, response);
+                return Accepted(response);
             }
 
             var verificationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token = response.Data.EmailConfirmToken, email = registerDto.Email }, Request.Scheme);
