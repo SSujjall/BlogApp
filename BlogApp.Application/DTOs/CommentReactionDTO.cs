@@ -16,4 +16,10 @@ namespace BlogApp.Application.DTOs
         public int CommentId { get; set; }
         public VoteType ReactionType { get; set; }
     }
+
+    public class GetAllUserCommentReactionDTO
+    {
+        public int CommentId { get; set; }
+        public VoteType ReactionType { get; set; }
+    }
 }

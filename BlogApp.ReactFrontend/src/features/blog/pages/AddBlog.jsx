@@ -15,6 +15,7 @@ const initFieldValues = {
 const AddBlog = () => {
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // request constants
   const [values, setValues] = useState(initFieldValues);
@@ -68,6 +69,7 @@ const AddBlog = () => {
 
   const onPostClick = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await createBlog(values);
       if (response) {
@@ -75,6 +77,8 @@ const AddBlog = () => {
       }
     } catch (error) {
       console.error("Error creating blog:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -144,11 +148,15 @@ const AddBlog = () => {
           )}
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-4 items-center">
+          {isLoading && (
+            <div className="w-5 h-5 mr-2 border-4 border-t-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+          )}
           <Button
             text="Post"
             className="bg-black text-white px-10"
             onClick={onPostClick}
+            disabled={isLoading}
           />
         </div>
       </div>

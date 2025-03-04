@@ -1,8 +1,59 @@
 import CommonInputField from "../../../components/common/CommonInputField";
 import Button from "../../../components/common/Button";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { signup } from "../service/signupService";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "../../../common/utils/toastHelper";
+
+const initFieldValues = {
+  username: "",
+  email: "",
+  phone: "",
+  password: "",
+};
 
 const Signup = () => {
+  const [values, setValues] = useState(initFieldValues);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setValues({
+      ...values,
+      [name]: value,
+    });
+  };
+
+  const handleSignup = async () => {
+    const payload = {
+      username: values.username,
+      email: values.email,
+      password: values.password,
+    };
+
+    setIsLoading(true);
+    try {
+      const apiResponse = await signup(payload);
+      if (apiResponse.statusCode === 200) {
+        showSuccessToast(apiResponse.message);
+      } else {
+        let errorMessage = apiResponse.message;
+        if (apiResponse.errors) {
+          const errorMessages = Object.values(apiResponse.errors).join(" ");
+          errorMessage = `${apiResponse.message} ${errorMessages}`;
+        }
+        showErrorToast(errorMessage);
+      }
+    } catch {
+      showErrorToast("Error Occured");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex justify-center items-center">
       <Link to={"/"}>
@@ -20,24 +71,36 @@ const Signup = () => {
           icon={"person"}
           placeholder={"Username"}
           classProp={"py-3 mb-3"}
+          name={"username"}
+          onChange={handleFieldChange}
+          value={values.username}
         />
         <CommonInputField
           type={"text"}
           icon={"mail"}
           placeholder={"Email"}
           classProp={"py-3 mb-3"}
+          name={"email"}
+          onChange={handleFieldChange}
+          value={values.email}
         />
         <CommonInputField
           type={"text"}
           icon={"call"}
           placeholder={"Phone"}
           classProp={"py-3 mb-3"}
+          name={"phone"}
+          onChange={handleFieldChange}
+          value={values.phone}
         />
         <CommonInputField
           type={"password"}
           icon={"password"}
           placeholder={"Password"}
           classProp={"py-3 mb-3"}
+          name={"password"}
+          onChange={handleFieldChange}
+          value={values.password}
         />
         <CommonInputField
           type={"password"}
@@ -49,7 +112,12 @@ const Signup = () => {
         <Button
           text="Signup"
           className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
+          onClick={handleSignup}
+          disabled={isLoading}
         />
+        {isLoading && (
+          <div className="h-5 w-5 border-4 m-auto mt-2 border-t-black rounded-full animate-spin"></div>
+        )}
 
         <p className="mt-3">
           Already have an account?&nbsp;

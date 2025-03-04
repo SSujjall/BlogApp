@@ -19,7 +19,7 @@ namespace BlogApp.Infrastructure.Services
     public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper, 
         IBlogService blogService) : IBlogReactionService
     {
-        protected readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
+        private readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
         private readonly IMapper _mapper = mapper;
         private readonly IBlogService _blogService = blogService;
 
@@ -119,14 +119,9 @@ namespace BlogApp.Infrastructure.Services
             Expression<Func<BlogReaction, bool>> filter = x => x.UserId == userId;
             var vote = await _blogReactionRepo.FindAllByConditionAsync(filter);
 
-            if (vote != null)
+            if (vote.Any())
             {
-                var response = new List<GetAllUserReactionDTO>();
-                foreach (var item in vote)
-                {
-                    var reaction = _mapper.Map<GetAllUserReactionDTO>(item);
-                    response.Add(reaction);
-                }
+                var response = _mapper.Map<IEnumerable<GetAllUserReactionDTO>>(vote);
                 return ApiResponse<IEnumerable<GetAllUserReactionDTO>>.Success(response, "All User's Blog Votes Fetched Successfully.");
             }
 
