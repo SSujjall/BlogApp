@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Reflection.Metadata;
 using AutoMapper;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
@@ -83,23 +82,8 @@ namespace BlogApp.Infrastructure.Services
             var result = await _blogRepository.GetAll(reqFilter);
             if (result.Any())
             {
-                #region response model mapping using LINQ
-                var response = result.Select(res => new BlogsDTO
-                {
-                    BlogId = res.BlogId,
-                    User = new BlogUser
-                    {
-                        UserId = res.UserId,
-                        Name = res.User.UserName ?? ""
-                    },
-                    Title = res.Title,
-                    Description = res.Description,
-                    ImageUrl = res.ImageUrl,
-                    UpVoteCount = res.UpVoteCount,
-                    DownVoteCount = res.DownVoteCount,
-                    CommentCount = res.CommentCount
-                });
-                #endregion
+                // mapping response model
+                var response = _mapper.Map<IEnumerable<BlogsDTO>>(result);
                 return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "Blogs Fetched for User");
             }
 

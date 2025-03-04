@@ -12,8 +12,20 @@ namespace BlogApp.API.Controllers
     [ApiController]
     public class CommentController(ICommentService _commentService) : ControllerBase
     {
+        [HttpGet("get-every-comment-TEST")]
+        public async Task<IActionResult> GetAllComments()
+        {
+            var response = await _commentService.GetAllComment();
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+
         [AllowAnonymous]
-        [HttpGet("get-all")]
+        [HttpGet("get-all/{blogId}")]
         public async Task<IActionResult> GetAllComments(int blogId)
         {
             var response = await _commentService.GetAllCommentByBlogId(blogId);

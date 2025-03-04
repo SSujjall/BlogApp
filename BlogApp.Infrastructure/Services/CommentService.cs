@@ -1,28 +1,23 @@
 ﻿using AutoMapper;
-using Azure;
 using BlogApp.Application.DTOs;
-using BlogApp.Application.Helpers;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
-using BlogApp.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Security.Cryptography.Xml;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Services
 {
     public class CommentService(ICommentRepository _commentRepository, IBaseRepository<CommentHistory> _commentHistoryRepo, 
         IMapper _mapper, IUserRepository _userRepository, IBlogService _blogService) : ICommentService
     {
+        public async Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllComment()
+        {
+            var result = await _commentRepository.GetAll(null);
+            var response = _mapper.Map<IEnumerable<CommentDTO>>(result);
+            return ApiResponse<IEnumerable<CommentDTO>>.Success(response, "All Comments fetched.");
+        }
+
         public async Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllCommentByBlogId(int blogId)
         {
             var requestFilter = new GetRequest<Comments>
