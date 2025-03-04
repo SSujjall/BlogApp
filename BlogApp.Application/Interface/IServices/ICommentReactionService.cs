@@ -13,5 +13,7 @@ namespace BlogApp.Application.Interface.IServices
         Task<ApiResponse<IEnumerable<CommentReactionDTO>>> GetAllCommentVotes(int commentId);
         Task<ApiResponse<string>> VoteComment(AddOrUpdateCommentReactionDTO model, string userId);
         Task<ApiResponse<CommentReactionDTO>> GetCommentVoteById(int id);
+        Task<ApiResponse<IEnumerable<GetAllUserCommentReactionDTO>>> GetAllUserCommentReactions(string userId);
+
     }
 }

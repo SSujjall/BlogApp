@@ -59,7 +59,7 @@ namespace BlogApp.Application.Helpers.GoogleAuthService.Service
             {
                 user = new Users
                 {
-                    UserName = payload.Email,
+                    UserName = payload.Email.Split('@').First().ToString(),
                     Email = payload.Email,
                     EmailConfirmed = true
                 };

@@ -12,6 +12,7 @@ namespace BlogApp.Application.Interface.IServices
 {
     public interface ICommentService
     {
+        Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllComment();
         Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllCommentByBlogId(int blogId);
         Task<ApiResponse<CommentDTO>> AddComment(AddCommentDTO dto, string userId);
         Task<ApiResponse<CommentDTO>> UpdateComment(UpdateCommentDTO dto, string userId);
