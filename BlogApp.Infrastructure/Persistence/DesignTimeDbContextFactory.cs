@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BlogApp.Infrastructure.Persistence
 {
-    class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         public AppDbContext CreateDbContext(string[] args)
         {
