@@ -49,7 +49,7 @@ jobs:
           username: ${{ secrets.MONSTERASP_FTP_USER }}
           password: ${{ secrets.MONSTERASP_FTP_PASS }}
           local-dir: ./publish/
-          # server-dir: /wwwroot/blogapp/
+          server-dir: /wwwroot/
 
       # Apply database migrations
       - name: Apply database migrations
