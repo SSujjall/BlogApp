@@ -19,9 +19,16 @@ namespace BlogApp.Infrastructure.DI
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            //services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlServer(configuration.GetConnectionString("BlogDB"),
+            //    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)).UseLazyLoadingProxies(), ServiceLifetime.Transient);
+
+            // enable retry on failure when connnecting db
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("BlogDB"),
-                b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)).UseLazyLoadingProxies(), ServiceLifetime.Transient);
+                     sqlOptions => sqlOptions.EnableRetryOnFailure())
+                                             .UseLazyLoadingProxies(), ServiceLifetime.Transient
+            );
 
 
             services.AddIdentity<Users, IdentityRole>(options =>
