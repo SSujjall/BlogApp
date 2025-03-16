@@ -1,17 +1,14 @@
-using BlogApp.Infrastructure.DI;
-using BlogApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using System.Text;
+using BlogApp.Application.Helpers.CloudinaryService.Config;
+using BlogApp.Application.Helpers.EmailService.Config;
+using BlogApp.Application.Helpers.GoogleAuthService.Config;
+using BlogApp.Application.Mappings;
+using BlogApp.Domain.Configs;
+using BlogApp.Infrastructure.DI;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using BlogApp.Domain.Configs;
-using CloudinaryDotNet;
-using BlogApp.Application.Helpers.EmailService.Config;
-using BlogApp.Application.Helpers.CloudinaryService.Config;
-using BlogApp.Application.Mappings;
-using Microsoft.AspNetCore.Authentication.Google;
-using BlogApp.Application.Helpers.GoogleAuthService.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,11 +115,11 @@ builder.Services.AddAutoMapper(typeof(ReactionMappingProfile));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog API v1"));
-}
+//}
 
 app.UseHttpsRedirection();
 

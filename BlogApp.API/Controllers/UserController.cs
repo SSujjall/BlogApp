@@ -34,10 +34,13 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Test()
+        [HttpGet("test")]
+        public IActionResult Test()
         {
-            return Ok();
+            return Ok(new
+            {
+                data= "Hello World"
+            });
         }
     }
 }
