@@ -1,7 +1,7 @@
 import { makeRequest } from "../../../common/services/api";
 
 export const getCommentsByBlogId = async (blogId) => {
-  return makeRequest("GET", `/Comment/get-all?blogId=${blogId}`);
+  return makeRequest("GET", `/Comment/get-all/${blogId}`);
 };
 
 export const createComment = async (blogId, commentData) => {
