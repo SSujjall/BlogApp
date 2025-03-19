@@ -17,6 +17,7 @@ namespace BlogApp.Application.Helpers.GoogleAuthService.Service
     /// in oauth credentials in Google Cloud Console, the redirect URI must have
     /// localhost with port url and
     /// https://developers.google.com/oauthplayground for using google playground for creating testing tokens
+    /// and the url of the production if deployed. (right now its in vercel)
 
     // 1. Get a Google ID Token for Testing
     // You need a valid Google ID token to test your API.
@@ -47,7 +48,7 @@ namespace BlogApp.Application.Helpers.GoogleAuthService.Service
 
         public async Task<ApiResponse<LoginResponseDTO>> HandleGoogleLogin(GoogleLoginDTO model)
         {
-            var payload = await VerifyGoogleToken(model.Token);
+            var payload = await this.VerifyGoogleToken(model.Token);
             if (payload == null)
             {
                 var errors = new Dictionary<string, string> { { "Token", "Invalid google token." } };
