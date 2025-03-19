@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getToken } from "../utils/tokenHelper";
 
-const API_URL = "https://localhost:7108/api";
+// const API_URL = import.meta.env.VITE_API_BASE_URL;
 // const API_URL = "https://1kt2mff1-7108.inc1.devtunnels.ms/api";
+const API_URL = import.meta.env.VITE_PROD_API_BASE_URL;
 
 // Create an Axios instance with base configuration
 const api = axios.create({

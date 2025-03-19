@@ -43,7 +43,7 @@ const Login = () => {
 
   const handleGoogleLogin = async (credentialResponse) => {
     const googleToken = credentialResponse.credential;
-    console.log("Google Token:", googleToken);
+    // console.log("Google Token:", googleToken);
 
     const response = await loginWithGoogle(googleToken);
     if (response) {
