@@ -74,3 +74,11 @@ Before running the application, ensure you have the following installed:
    ```
 
 ---
+
+### YOU NEED .ENV FILE IN ROOT DIRECTORY FOR RUNNING IN LOCAL ENVIRONMENT.
+.env FILE TEMPLATE:
+```bash
+   VITE_GOOGLE_CLIENT_ID=your-google-client-id
+   VITE_API_BASE_URL=https://localhost:7108/api
+   VITE_PROD_API_BASE_URL=your-production-api-base-url
+```
