@@ -31,7 +31,12 @@ namespace BlogApp.Infrastructure.Services
             // Check if the username already exists
             if (await _authRepository.UsernameExists(registerDto.Username))
             {
-                var errors = new Dictionary<string, string> { { "Username", "Username already exists" } };
+                var errors = new Dictionary<string, string> { { "Username", "Username already used." } };
+                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.");
+            }
+            if (await _authRepository.EmailExists(registerDto.Email))
+            {
+                var errors = new Dictionary<string, string> { { "Email", "Email already used." } };
                 return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.");
             }
 
