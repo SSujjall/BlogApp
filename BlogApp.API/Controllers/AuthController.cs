@@ -105,7 +105,7 @@ namespace BlogApp.API.Controllers
             var response = await _authService.LoginUser(model);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                return StatusCode((int)response.StatusCode, response);
+                return Accepted(response);
             }
 
             return Ok(response);

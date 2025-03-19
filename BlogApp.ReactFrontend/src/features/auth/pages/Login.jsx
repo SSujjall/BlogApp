@@ -3,7 +3,7 @@ import Button from "../../../components/common/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { loginWithGoogle } from "../service/loginService";
+import { login, loginWithGoogle } from "../service/loginService";
 import { setTokens } from "../../../common/utils/tokenHelper";
 import {
   showSuccessToast,
@@ -24,21 +24,56 @@ import {
 */
 }
 
+const initFieldValues = {
+  username: "",
+  email: ""
+};
+
 const Login = () => {
+  const [values, setValues] = useState(initFieldValues);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    console.log("Login clicked");
-    setIsButtonDisabled(true);
-    setIsLoading(true);
-    // Set a timer to re-enable the button after 3 seconds
-    setTimeout(() => {
-      setIsButtonDisabled(false);
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setValues({
+      ...values,
+      [name]: value,
+    });
+  };
+
+  const handleLogin = async () => {
+    const payload = {
+      username: values.username,
+      password: values.password,
+    };
+
+    try {
+      setIsLoading(true);
+      setIsButtonDisabled(true);
+
+      const apiResponse = await login(payload);
+      if (apiResponse.statusCode === 200) {
+        setTokens(apiResponse.data.jwtToken, apiResponse.data.refreshToken);
+        navigate("/");
+        window.location.reload();
+        showSuccessToast(apiResponse.message);
+      } else {
+        let errorMessage = apiResponse.message;
+        if (apiResponse.errors) {
+          const errorMessages = Object.values(apiResponse.errors).join(" ");
+          errorMessage = `${apiResponse.message}. ${errorMessages}`;
+        }
+        showErrorToast(errorMessage);
+      }
+    } catch {
+      showErrorToast("Error Logging In");
+    } finally {
       setIsLoading(false);
-    }, 3000);
+      setIsButtonDisabled(false);
+    }
   };
 
   const handleGoogleLogin = async (credentialResponse) => {
@@ -48,9 +83,9 @@ const Login = () => {
     const response = await loginWithGoogle(googleToken);
     if (response) {
       setTokens(response.data.jwtToken, response.data.refreshToken);
-      showSuccessToast("Logged in successfully");
       navigate("/");
-      window.location.reload();
+      // window.location.reload();
+      showSuccessToast("Logged in successfully");
     } else {
       showErrorToast("Google Login Failed");
     }
@@ -73,12 +108,18 @@ const Login = () => {
           icon={"person"}
           placeholder={"Username or email"}
           classProp={"py-3 mb-3"}
+          name={"username"}
+          onChange={handleFieldChange}
+          value={values.username}
         />
         <CommonInputField
           type={"password"}
           icon={"password"}
           placeholder={"Password"}
           classProp={"py-3 mb-3"}
+          name={"password"}
+          onChange={handleFieldChange}
+          value={values.password}
         />
 
         <div className="flex justify-between">

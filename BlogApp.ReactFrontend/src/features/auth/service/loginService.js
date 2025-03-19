@@ -13,3 +13,12 @@ export const loginWithGoogle = async (googleToken) => {
     return null;
   }
 };
+
+export const login = async (data) => {
+  try {
+    return await makeRequest("POST", "/Auth/login", data);
+  } catch (error) {
+    console.error("Error login:", error);
+    return null;
+  }
+};
