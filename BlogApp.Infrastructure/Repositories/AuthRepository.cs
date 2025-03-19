@@ -36,5 +36,11 @@ namespace BlogApp.Infrastructure.Repositories
             var userExists = await _userManager.FindByNameAsync(username);
             return userExists != null ? true : false;
         }
+
+        public async Task<bool> EmailExists(string email)
+        {
+            var emailExists = await _userManager.FindByEmailAsync(email);
+            return emailExists != null ? true : false;
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace BlogApp.Application.Interface.IRepositories
         public Task<bool> CreateNewUser(Users user, string password);
         public Task<string> GetUserRole(Users user);
         Task<bool> UsernameExists(string username);
+        Task<bool> EmailExists(string email);
     }
 }

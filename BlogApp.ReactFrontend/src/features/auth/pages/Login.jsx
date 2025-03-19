@@ -127,6 +127,7 @@ const Login = () => {
           <GoogleLogin
             onSuccess={handleGoogleLogin}
             onError={() => console.log("Google Login Failed")}
+            logo_alignment="center"
           />
         </GoogleOAuthProvider>
       </form>
