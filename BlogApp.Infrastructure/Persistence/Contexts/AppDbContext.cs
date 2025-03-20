@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlogApp.Infrastructure.Persistence
+namespace BlogApp.Infrastructure.Persistence.Contexts
 {
     public class AppDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
     {

@@ -5,7 +5,7 @@ using BlogApp.Application.Helpers.TokenHelper;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
-using BlogApp.Infrastructure.Persistence;
+using BlogApp.Infrastructure.Persistence.Contexts;
 using BlogApp.Infrastructure.Repositories;
 using BlogApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;

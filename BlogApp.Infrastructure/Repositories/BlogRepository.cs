@@ -1,11 +1,11 @@
 ﻿using System.Reflection.Metadata;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Entities;
-using BlogApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Domain.Shared;
+using BlogApp.Infrastructure.Persistence.Contexts;
 
 namespace BlogApp.Infrastructure.Repositories
 {

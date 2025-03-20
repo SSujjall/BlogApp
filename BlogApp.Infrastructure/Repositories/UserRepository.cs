@@ -1,6 +1,6 @@
 ﻿using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Entities;
-using BlogApp.Infrastructure.Persistence;
+using BlogApp.Infrastructure.Persistence.Contexts;
 
 namespace BlogApp.Infrastructure.Repositories
 {
