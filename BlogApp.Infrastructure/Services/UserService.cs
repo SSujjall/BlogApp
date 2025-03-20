@@ -4,7 +4,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
-using BlogApp.Infrastructure.Persistence;
+using BlogApp.Infrastructure.Persistence.Contexts;
 using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Infrastructure.Services

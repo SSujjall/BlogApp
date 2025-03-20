@@ -1,6 +1,4 @@
 using BlogApp.Infrastructure.DI;
-using BlogApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +10,8 @@ using BlogApp.Application.Helpers.CloudinaryService.Config;
 using BlogApp.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.Google;
 using BlogApp.Application.Helpers.GoogleAuthService.Config;
+using Microsoft.AspNetCore.RateLimiting;
+using BlogApp.Infrastructure.Persistence.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +20,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var configuration = builder.Configuration;
 
-builder.Services.AddAuthorization(); // THIS IS NEEDED FOR [AUTHORIZE] to WORK!!!!!!!!!!!
-
-// JWT
+#region Authentication JWT Config
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,14 +42,20 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
         };
     });
-    //.AddGoogle(GoogleDefaults.AuthenticationScheme, opt =>
-    //{
-    //    opt.ClientId = builder.Configuration["Authentications:Google:ClientId"];
-    //    opt.ClientSecret = builder.Configuration["Authentications:Google:ClientSecret"];
-    //    opt.SaveTokens = true;
-    //});
+//.AddGoogle(GoogleDefaults.AuthenticationScheme, opt =>
+//{
+//    opt.ClientId = builder.Configuration["Authentications:Google:ClientId"];
+//    opt.ClientSecret = builder.Configuration["Authentications:Google:ClientSecret"];
+//    opt.SaveTokens = true;
+//});
+#endregion
 
-// Swagger configuration
+builder.Services.AddAuthorization(); // THIS IS NEEDED FOR [AUTHORIZE] to WORK!!!!!!!!!!!
+
+// Automapper Config
+builder.Services.AddAutoMapper(typeof(ReactionMappingProfile));
+
+#region Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "BlogApp.API", Version = "v1" });
@@ -76,8 +80,9 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+#endregion
 
-// CORS policy
+#region CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -85,6 +90,7 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
+#endregion
 
 #region Set Config to Models and Register service
 // settings the values of jwt from configuration to the JWTSettings class
@@ -107,13 +113,53 @@ var googleConfig = builder.Configuration.GetSection("Authentications:Google");
 builder.Services.Configure<GoogleConfig>(googleConfig);
 #endregion
 
+#region Rate Limiting for API
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("ReadPolicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 60;
+    });
+
+    options.AddFixedWindowLimiter("WritePolicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 20;
+    });
+
+    options.AddFixedWindowLimiter("VotePolicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 30;
+    });
+
+    options.AddConcurrencyLimiter("ConcurrentPolicy", opt =>
+    {
+        opt.PermitLimit = 10; // Limits to 10 concurrent requests
+    });
+
+    //options.RejectionStatusCode = 429;
+
+    // custom resposne for rate limit exceeded
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try later again... ", cancellationToken: token);
+    };
+});
+#endregion
+
+#region Health Check Configuration
+builder.Services.AddHealthChecks()
+    .AddCheck<DbHealthCheck>("Database Health Check");
+#endregion
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-// Automapper
-builder.Services.AddAutoMapper(typeof(ReactionMappingProfile));
 
 var app = builder.Build();
 
@@ -130,6 +176,8 @@ app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRateLimiter(); // Using rate limiter for limiting api calls.
 
 app.MapControllers();
 

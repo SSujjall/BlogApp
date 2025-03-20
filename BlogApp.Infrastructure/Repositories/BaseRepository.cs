@@ -1,6 +1,6 @@
 ﻿using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
-using BlogApp.Infrastructure.Persistence;
+using BlogApp.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

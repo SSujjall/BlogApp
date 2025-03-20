@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using Azure;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.EmailService.Model;
 using BlogApp.Application.Helpers.EmailService.Service;
@@ -10,6 +9,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BlogApp.API.Controllers
 {
@@ -105,7 +105,7 @@ namespace BlogApp.API.Controllers
             var response = await _authService.LoginUser(model);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                return StatusCode((int)response.StatusCode, response);
+                return Accepted(response);
             }
 
             return Ok(response);

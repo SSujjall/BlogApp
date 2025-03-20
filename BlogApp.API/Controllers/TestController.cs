@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BlogApp.API.Controllers
 {
@@ -7,6 +8,7 @@ namespace BlogApp.API.Controllers
     [ApiController]
     public class TestController : ControllerBase
     {
+        [EnableRateLimiting("FixedPolicy")]
         [HttpGet("check")]
         public IActionResult Get()
         {
