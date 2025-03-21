@@ -266,6 +266,11 @@ namespace BlogApp.Infrastructure.Services
                 return ApiResponse<string>.Failed(new Dictionary<string, string> { { "User", "User not found" } }, "Logout Failed.");
             }
 
+            if (user.RefreshToken == null || user.RefreshTokenExpiry == null)
+            {
+                return ApiResponse<string>.Failed(new Dictionary<string, string> { { "User", "User already logged out" } }, "Logout Failed.");
+            }
+
             user.RefreshToken = null;
             user.RefreshTokenExpiry = null;
             await _userManager.UpdateAsync(user);
