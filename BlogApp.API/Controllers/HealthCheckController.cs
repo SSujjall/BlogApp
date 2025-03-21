@@ -23,9 +23,15 @@ namespace BlogApp.API.Controllers
 
             var response = new HealthCheckResponse
             {
-                Status = healthReport.Status.ToString(),
-                Message = healthReport.Status == HealthStatus.Healthy ? "Database is healthy" : "Database is unhealthy",
-                Timestamp = DateTime.UtcNow
+                OverallStatus = healthReport.Status.ToString(),
+                Message = healthReport.Status == HealthStatus.Healthy ? "All systems are healthy" : "One or more systems are unhealthy",
+                Timestamp = DateTime.UtcNow,
+                Checks = healthReport.Entries.Select(entry => new HealthCheckItem
+                {
+                    Component = entry.Key,
+                    Status = entry.Value.Status.ToString(),
+                    Description = entry.Value.Description ?? entry.Value.Exception?.Message
+                }).ToList()
             };
 
             return Ok(response);

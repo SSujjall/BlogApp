@@ -8,7 +8,7 @@ namespace BlogApp.API.Controllers
     [ApiController]
     public class TestController : ControllerBase
     {
-        [EnableRateLimiting("FixedPolicy")]
+        [EnableRateLimiting("ReadPolicy")]
         [HttpGet("check")]
         public IActionResult Get()
         {

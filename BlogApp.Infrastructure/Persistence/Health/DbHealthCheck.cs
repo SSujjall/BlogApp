@@ -18,11 +18,11 @@ namespace BlogApp.Infrastructure.Persistence.Health
             try
             {
                 await _dbContext.Database.ExecuteSqlRawAsync("Select 1;", cancellationToken);
-                return HealthCheckResult.Healthy("Database is Healthy");
+                return HealthCheckResult.Healthy("Database is reachable");
             }
             catch (Exception ex)
             {
-                return HealthCheckResult.Unhealthy("Database is Unhealthy", exception: ex);
+                return HealthCheckResult.Unhealthy("Database is not reachable", exception: ex);
             }
         }
     }

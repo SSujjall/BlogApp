@@ -5,11 +5,13 @@ using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace BlogApp.API.Controllers
 {
+    [EnableRateLimiting("WritePolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class BlogController : ControllerBase
@@ -21,6 +23,7 @@ namespace BlogApp.API.Controllers
             _blogService = blogService;
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [AllowAnonymous]
         [HttpGet("get-blogs")]
         public async Task<IActionResult> GetBlogs([FromQuery] string? sortBy, [FromQuery] int? skip, [FromQuery] int? take, [FromQuery] string? search)
@@ -48,6 +51,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [AllowAnonymous]
         [HttpGet("get-by-id/{id}")]
         public async Task<IActionResult> GetBlog(int id)
@@ -61,6 +65,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [Authorize]
         [HttpGet("get-user-blogs")]
         public async Task<IActionResult> GetUserBlogs()

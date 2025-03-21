@@ -1,10 +1,11 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Interface.IServices;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BlogApp.API.Controllers
 {
+    [EnableRateLimiting("ReadPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class CommentReactionController : ControllerBase
@@ -26,6 +27,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("VotePolicy")]
         [HttpPost("vote")]
         public async Task<IActionResult> VoteComment(AddOrUpdateCommentReactionDTO model)
         {

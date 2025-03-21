@@ -5,13 +5,16 @@ using BlogApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BlogApp.API.Controllers
 {
+    [EnableRateLimiting("WritePolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class CommentController(ICommentService _commentService) : ControllerBase
     {
+        [EnableRateLimiting("ReadPolicy")]
         [HttpGet("get-every-comment-TEST")]
         public async Task<IActionResult> GetAllComments()
         {
@@ -23,7 +26,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-
+        [EnableRateLimiting("ReadPolicy")]
         [AllowAnonymous]
         [HttpGet("get-all/{blogId}")]
         public async Task<IActionResult> GetAllComments(int blogId)

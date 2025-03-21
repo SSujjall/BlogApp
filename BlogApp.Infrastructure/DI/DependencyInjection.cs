@@ -6,6 +6,7 @@ using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Persistence.Contexts;
+using BlogApp.Infrastructure.Persistence.Health;
 using BlogApp.Infrastructure.Repositories;
 using BlogApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,7 @@ namespace BlogApp.Infrastructure.DI
             //    options.UseSqlServer(configuration.GetConnectionString("BlogDB"),
             //    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)).UseLazyLoadingProxies(), ServiceLifetime.Transient);
 
+            // Register DbContext
             // enable retry on failure when connnecting db
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("BlogDB"),
@@ -30,7 +32,7 @@ namespace BlogApp.Infrastructure.DI
                                              .UseLazyLoadingProxies(), ServiceLifetime.Transient
             );
 
-
+            #region Identity Configuration
             services.AddIdentity<Users, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
@@ -41,8 +43,7 @@ namespace BlogApp.Infrastructure.DI
                 options.Password.RequireLowercase = false;
             }).AddEntityFrameworkStores<AppDbContext>()
               .AddDefaultTokenProviders();
-
-            services.AddDbContext<AppDbContext>();
+            #endregion
 
             #region Register Repositories
             services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -65,6 +66,13 @@ namespace BlogApp.Infrastructure.DI
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            #endregion
+
+            #region Add Health Check Configuration
+            services.AddHealthChecks()
+                .AddCheck<DbHealthCheck>("Database")
+                .AddCheck<SmtpHealthCheck>("SMTP")
+                .AddCheck<CloudinaryHealthCheck>("Cloudinary");
             #endregion
 
             return services;

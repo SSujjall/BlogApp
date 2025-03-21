@@ -8,8 +8,16 @@ namespace BlogApp.Application.Helpers.HelperModels
 {
     public class HealthCheckResponse
     {
-        public string Status { get; set; }
+        public string OverallStatus { get; set; }
         public string Message { get; set; }
         public DateTime Timestamp { get; set; }
+        public List<HealthCheckItem> Checks { get; set; }
+    }
+
+    public class HealthCheckItem
+    {
+        public string Component { get; set; }
+        public string Status { get; set; }
+        public string Description { get; set; }
     }
 }

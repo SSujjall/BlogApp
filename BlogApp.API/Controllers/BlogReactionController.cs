@@ -1,12 +1,12 @@
-﻿using Azure;
-using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BlogApp.API.Controllers
 {
+    [EnableRateLimiting("ReadPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class BlogReactionController : ControllerBase
@@ -45,6 +45,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("VotePolicy")]
         [Authorize]
         [HttpPost("vote")]
         public async Task<IActionResult> VoteBlog(AddOrUpdateBlogReactionDTO model)

@@ -11,7 +11,6 @@ using BlogApp.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.Google;
 using BlogApp.Application.Helpers.GoogleAuthService.Config;
 using Microsoft.AspNetCore.RateLimiting;
-using BlogApp.Infrastructure.Persistence.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -148,11 +147,6 @@ builder.Services.AddRateLimiter(options =>
         await context.HttpContext.Response.WriteAsync("Too many requests. Please try later again... ", cancellationToken: token);
     };
 });
-#endregion
-
-#region Health Check Configuration
-builder.Services.AddHealthChecks()
-    .AddCheck<DbHealthCheck>("Database Health Check");
 #endregion
 
 // Add services to the container.

@@ -1,6 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.EmailService.Model;
 using BlogApp.Application.Helpers.EmailService.Service;
 using BlogApp.Application.Helpers.GoogleAuthService.Model;
@@ -10,9 +8,12 @@ using BlogApp.Application.Interface.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 
 namespace BlogApp.API.Controllers
 {
+    [EnableRateLimiting("WritePolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -40,10 +41,11 @@ namespace BlogApp.API.Controllers
 
             var verificationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token = response.Data.EmailConfirmToken, email = registerDto.Email }, Request.Scheme);
             var emailMessage = new EmailMessage(new[] { registerDto.Email }, "Please confirm your email", $"Please confirm your email by clicking the link: {verificationLink}");
-            _emailService.SendEmail(emailMessage);
+            _emailService.SendEmailAsync(emailMessage);
             return Ok(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
@@ -65,13 +67,14 @@ namespace BlogApp.API.Controllers
             {
                 var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Auth", new { token = response.Data.ForgotPasswordToken, email }, Request.Scheme);
                 var message = new EmailMessage(new string[] { email }, "Password Reset Link", $"Click the link to reset password: {forgotPasswordLink!}");
-                _emailService.SendEmail(message);
+                _emailService.SendEmailAsync(message);
                 return Ok(response);
             }
 
             return BadRequest(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [HttpGet("get-reset-password-model")]
         public async Task<IActionResult> ResetPassword(string token, string email)
         {
@@ -150,6 +153,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [HttpGet("auth-test")]
         [Authorize]
         public async Task<IActionResult> AuthorizeTest()
