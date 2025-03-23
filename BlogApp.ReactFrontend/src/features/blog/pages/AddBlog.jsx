@@ -20,12 +20,26 @@ const AddBlog = () => {
   // request constants
   const [values, setValues] = useState(initFieldValues);
 
+  const [valid, setValid] = useState({
+    title: true,
+    description: true,
+    imageFile: true,
+  });
+
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
     setValues({
       ...values,
       [name]: value,
     });
+
+    // Remove red border once the user types
+    if (name === "title" || name === "description") {
+      setValid((prev) => ({
+        ...prev,
+        [name]: value.trim() !== "", // Check if field is non-empty
+      }));
+    }
   };
 
   const handleFileChange = (event) => {
@@ -38,6 +52,10 @@ const AddBlog = () => {
       });
       setPreview(URL.createObjectURL(selectedFile)); // Set preview URL
     }
+    setValid((prev) => ({
+      ...prev,
+      imageFile: selectedFile !== null, // Ensure file is selected
+    }));
   };
 
   const handleDragOver = (event) => {
@@ -55,6 +73,10 @@ const AddBlog = () => {
       });
       setPreview(URL.createObjectURL(droppedFile)); // Set preview URL
     }
+    setValid((prev) => ({
+      ...prev,
+      imageFile: droppedFile !== null, // Ensure file is selected
+    }));
   };
 
   const handleDeleteImage = () => {
@@ -69,16 +91,29 @@ const AddBlog = () => {
 
   const onPostClick = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      const response = await createBlog(values);
-      if (response) {
-        showSuccessToast("Blog created successfully!");
+
+    const isTitleValid = values.title.trim() !== "";
+    const isDescriptionValid = values.description.trim() !== "";
+    const isImageValid = values.imageFile !== null;
+
+    setValid({
+      title: isTitleValid,
+      description: isDescriptionValid,
+      imageFile: isImageValid,
+    });
+
+    if (isTitleValid && isDescriptionValid && isImageValid) {
+      setIsLoading(true);
+      try {
+        const response = await createBlog(values);
+        if (response) {
+          showSuccessToast("Blog created successfully!");
+        }
+      } catch (error) {
+        console.error("Error creating blog:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error creating blog:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -90,14 +125,15 @@ const AddBlog = () => {
         <CommonInputField
           name="title"
           placeholder="Title"
-          classProp="py-3 mb-3"
+          classProp={`py-3 mb-3 ${valid.title ? "" : "border-2 border-red-500"}`}
           onChange={handleFieldChange}
           value={values.title}
         />
 
         <textarea
           name="description"
-          className="px-4 py-3 w-full border rounded-md outline-none focus-within:border-black transition-colors"
+          className={`px-4 py-3 w-full border rounded-md outline-none focus-within:border-black 
+            transition-colors ${valid.description ? "" : "border-2 border-red-500"}`}
           placeholder="Description"
           rows={10}
           onChange={handleFieldChange}
@@ -106,7 +142,8 @@ const AddBlog = () => {
 
         {/* File Upload Area */}
         <div
-          className="mt-4 border-2 border-dashed border-gray-400 rounded-md text-center cursor-pointer hover:border-black transition-colors relative overflow-hidden"
+          className={`mt-4 border-2 border-dashed ${valid.imageFile ? 'border-gray-400' : 'border-red-500'} 
+            rounded-md text-center cursor-pointer hover:border-black transition-colors relative overflow-hidden`}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >

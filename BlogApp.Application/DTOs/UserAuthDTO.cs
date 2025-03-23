@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BlogApp.Application.DTOs
 {
@@ -66,9 +67,10 @@ namespace BlogApp.Application.DTOs
         public string RefreshToken { get; set; }
     }
 
-    public class UpdateUserDTO
+    public class UpdateUserPwDTO
     {
-        public string? Id { get; set; }
+        [JsonIgnore]
+        public string? UserId { get; set; }
 
         [Required(ErrorMessage = "Current password is required")]
         public string CurrentPassword { get; set; }

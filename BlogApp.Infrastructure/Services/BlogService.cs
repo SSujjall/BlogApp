@@ -10,8 +10,13 @@ using BlogApp.Domain.Shared;
 
 namespace BlogApp.Infrastructure.Services
 {
-    public class BlogService(IBlogRepository _blogRepository, ICloudinaryService _cloudinary,
-        IBaseRepository<BlogHistory> _blogHistoryRepo, IMapper _mapper, IUserRepository _userRepository) : IBlogService
+    public class BlogService(
+        IBlogRepository _blogRepository,
+        ICloudinaryService _cloudinary,
+        IBaseRepository<BlogHistory> _blogHistoryRepo,
+        IMapper _mapper,
+        IUserRepository _userRepository
+    ) : IBlogService
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request)
         {

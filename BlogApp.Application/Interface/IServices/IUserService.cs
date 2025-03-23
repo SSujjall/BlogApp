@@ -5,9 +5,10 @@ namespace BlogApp.Application.Interface.IServices
 {
     public interface IUserService
     {
-        Task<ApiResponse<IEnumerable<UserDTO>>> GetAll();
-        Task<ApiResponse<string>> DeleteUser(string id);
-        Task<ApiResponse<UpdateUserDTO>> UpdateUser(UpdateUserDTO updateUserDTO, List<string> errors);
+        Task<ApiResponse<IEnumerable<UserDTO>>> GetAllUsers();
         Task<ApiResponse<UserDTO>> GetUserById(string userId);
+        Task<ApiResponse<string>> DeleteUser(string id);
+        Task<ApiResponse<string>> ChangeUserPassword(UpdateUserPwDTO updateUserDTO);
+        Task<ApiResponse<UserProfileDTO>> UpdateUserDetail(UserProfileReqDTO dto);
     }
 }

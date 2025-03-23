@@ -77,7 +77,7 @@ namespace BlogApp.Application.Helpers.GoogleAuthService.Service
 
             #region generate and update jwt & refresh token with expiry in db
             var jwtToken = await _tokenService.GenerateJwtToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken();
+            var refreshToken = await _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiry = DateTime.Now.AddDays(7);

@@ -14,9 +14,9 @@ export const BlogCard = ({
     <div className="border p-4 rounded-lg shadow-sm">
       <Link to={`/blog/blogById/${blog.blogId}`}>
         <h2
-          className={`font-semibold ${
-            showFullContent ? "text-3xl" : "text-2xl"
-          }`}
+          className={`font-semibold 
+            ${showFullContent ? "text-3xl" : "text-2xl"}
+            ${!showFullContent ? "line-clamp-1" : ""}`}
         >
           {blog.title}
         </h2>
