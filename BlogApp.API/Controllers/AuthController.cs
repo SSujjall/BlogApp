@@ -41,7 +41,7 @@ namespace BlogApp.API.Controllers
 
             var verificationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token = response.Data.EmailConfirmToken, email = registerDto.Email }, Request.Scheme);
             var emailMessage = new EmailMessage(new[] { registerDto.Email }, "Please confirm your email", $"Please confirm your email by clicking the link: {verificationLink}");
-            _emailService.SendEmailAsync(emailMessage);
+            await _emailService.SendEmailAsync(emailMessage);
             return Ok(response);
         }
 
@@ -67,7 +67,7 @@ namespace BlogApp.API.Controllers
             {
                 var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Auth", new { token = response.Data.ForgotPasswordToken, email }, Request.Scheme);
                 var message = new EmailMessage(new string[] { email }, "Password Reset Link", $"Click the link to reset password: {forgotPasswordLink!}");
-                _emailService.SendEmailAsync(message);
+                await _emailService.SendEmailAsync(message);
                 return Ok(response);
             }
 
