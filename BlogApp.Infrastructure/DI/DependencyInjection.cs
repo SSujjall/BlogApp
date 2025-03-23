@@ -29,7 +29,7 @@ namespace BlogApp.Infrastructure.DI
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("BlogDB"),
                      sqlOptions => sqlOptions.EnableRetryOnFailure())
-                                             .UseLazyLoadingProxies(), ServiceLifetime.Transient
+                                             .UseLazyLoadingProxies(), ServiceLifetime.Scoped
             );
 
             #region Identity Configuration

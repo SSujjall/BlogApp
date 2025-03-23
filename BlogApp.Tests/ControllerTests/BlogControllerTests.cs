@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Net;
 
-namespace BlogApp.Tests
+namespace BlogApp.Tests.ControllerTests
 {
     [TestFixture]
     public class BlogControllerTests
@@ -39,7 +39,7 @@ namespace BlogApp.Tests
                 }
             };
 
-            var resp = ApiResponse<IEnumerable<BlogsDTO>>.Success(mockBlogs, "All Blogs Listed", System.Net.HttpStatusCode.OK, 1);
+            var resp = ApiResponse<IEnumerable<BlogsDTO>>.Success(mockBlogs, "All Blogs Listed", HttpStatusCode.OK, 1);
             _mockBlogService.Setup(s => s.GetAllBlogs(It.IsAny<GetRequest<Blogs>>())).ReturnsAsync(resp);
 
             // Act

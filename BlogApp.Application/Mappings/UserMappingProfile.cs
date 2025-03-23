@@ -19,7 +19,9 @@ namespace BlogApp.Application.Mappings
 
             // reverse mapping for request (UserDTO to Users)
             CreateMap<UserDTO, Users>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId)); 
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));
+
+            CreateMap<Users, UserProfileDTO>();
         }
     }
 }

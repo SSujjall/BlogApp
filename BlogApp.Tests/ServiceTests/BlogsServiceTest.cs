@@ -7,7 +7,7 @@ using BlogApp.Infrastructure.Services;
 using Moq;
 using System.Net;
 
-namespace BlogApp.Tests;
+namespace BlogApp.Tests.ServiceTests;
 
 [TestFixture]
 public class BlogsServiceTest

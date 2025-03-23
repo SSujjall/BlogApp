@@ -125,7 +125,7 @@ namespace BlogApp.Infrastructure.Services
 
             #region generate and update jwt & refresh token with expiry in db
             string generatedToken = await _tokenService.GenerateJwtToken(user);
-            string refreshToken = _tokenService.GenerateRefreshToken();
+            string refreshToken = await _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiry = DateTime.Now.AddDays(7);
@@ -170,7 +170,7 @@ namespace BlogApp.Infrastructure.Services
 
             #region update refresh token for user
             string newJwtToken = await _tokenService.GenerateJwtToken(user);
-            string newRefreshToken = _tokenService.GenerateRefreshToken();
+            string newRefreshToken = await _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
             /*

@@ -50,7 +50,7 @@ namespace BlogApp.Application.Helpers.TokenHelper
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string GenerateRefreshToken()
+        public async Task<string> GenerateRefreshToken()
         {
             var randomNumber = new byte[128];
             using var rng = RandomNumberGenerator.Create();
