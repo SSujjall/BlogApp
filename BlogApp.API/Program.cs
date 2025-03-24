@@ -19,6 +19,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var configuration = builder.Configuration;
 
+// USE ENVIRONMENT VARIABLES (Necessary for using secrets in production through environment variables)
+configuration.AddEnvironmentVariables();
+
 #region Authentication JWT Config
 builder.Services.AddAuthentication(options =>
 {
