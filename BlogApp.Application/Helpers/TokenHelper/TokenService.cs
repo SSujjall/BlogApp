@@ -47,7 +47,7 @@ namespace BlogApp.Application.Helpers.TokenHelper
                 signingCredentials: credentials
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return await Task.Run(() => new JwtSecurityTokenHandler().WriteToken(token));
         }
 
         public async Task<string> GenerateRefreshToken()
@@ -55,10 +55,10 @@ namespace BlogApp.Application.Helpers.TokenHelper
             var randomNumber = new byte[128];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            return await Task.FromResult(Convert.ToBase64String(randomNumber));
         }
 
-        public ClaimsPrincipal? GetTokenPrincipal(string token)
+        public async Task<ClaimsPrincipal?> GetTokenPrincipal(string token)
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
@@ -70,17 +70,27 @@ namespace BlogApp.Application.Helpers.TokenHelper
                 ValidateLifetime = false, // Don't validate expiration, we check expiration manually
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken securityToken;
-            ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
-            var jwtToken = securityToken as JwtSecurityToken;
-
-            if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            return await Task.Run(() =>
             {
-                return null;
-            }
+                try
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    SecurityToken securityToken;
+                    ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+                    var jwtToken = securityToken as JwtSecurityToken;
 
-            return principal;
+                    if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return null;
+                    }
+
+                    return principal;
+                }
+                catch
+                {
+                    return null;
+                }
+            });
         }
     }
 }

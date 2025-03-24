@@ -145,7 +145,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<LoginResponseDTO>> RefreshToken(RefreshTokenRequestDTO model)
         {
-            var principal = _tokenService.GetTokenPrincipal(model.JwtToken);
+            var principal = await _tokenService.GetTokenPrincipal(model.JwtToken);
             if (principal == null)
             {
                 return ApiResponse<LoginResponseDTO>.Failed(new Dictionary<string, string> { { "Token", "Invalid access token" } }, "Refresh Token Failed", HttpStatusCode.Unauthorized);
