@@ -28,7 +28,7 @@ namespace BlogApp.Infrastructure.DI
             // enable retry on failure when connnecting db
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("BlogDB"),
-                     sqlOptions => sqlOptions.EnableRetryOnFailure())
+                     sqlOptions => sqlOptions.EnableRetryOnFailure(3))
                                              .UseLazyLoadingProxies(), ServiceLifetime.Scoped
             );
 
