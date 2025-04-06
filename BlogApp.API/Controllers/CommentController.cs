@@ -40,6 +40,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateComment(AddCommentDTO dto)
         {
@@ -57,6 +58,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateComment(UpdateCommentDTO dto)
         {
@@ -74,6 +76,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteComment(int commentId)
         {

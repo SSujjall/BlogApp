@@ -102,6 +102,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser(LoginDTO model)
         {
@@ -115,6 +116,7 @@ namespace BlogApp.API.Controllers
         }
 
         #region Google Auth
+        [EnableRateLimiting("ReadPolicy")]
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLogin(GoogleLoginDTO model)
         {
@@ -128,6 +130,7 @@ namespace BlogApp.API.Controllers
         }
         #endregion
 
+        [EnableRateLimiting("ReadPolicy")]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken(RefreshTokenRequestDTO model)
         {
@@ -140,6 +143,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("ReadPolicy")]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -163,7 +167,7 @@ namespace BlogApp.API.Controllers
             var jwt = new JwtSecurityToken(jwtToken);
             var res = $"Authenticated! {Environment.NewLine}";
             res += $"{Environment.NewLine} Jwt Exp Time: {jwt.ValidTo.ToLocalTime()}, " +
-                $"Time: {DateTime.Now.ToLongTimeString()}";
+                $"Current Time: {DateTime.Now.ToLongTimeString()}";
             return Ok(res);
         }
     }

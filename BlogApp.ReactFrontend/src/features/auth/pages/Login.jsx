@@ -31,7 +31,6 @@ const initFieldValues = {
 
 const Login = () => {
   const [values, setValues] = useState(initFieldValues);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const navigate = useNavigate();
@@ -52,7 +51,6 @@ const Login = () => {
 
     try {
       setIsLoading(true);
-      setIsButtonDisabled(true);
 
       const apiResponse = await login(payload);
       if (apiResponse.statusCode === 200) {
@@ -72,7 +70,6 @@ const Login = () => {
       showErrorToast("Error Logging In");
     } finally {
       setIsLoading(false);
-      setIsButtonDisabled(false);
     }
   };
 
@@ -137,16 +134,13 @@ const Login = () => {
           </Link>
         </div>
 
-        <button
-          className="bg-black text-white rounded hover:bg-gray-700 w-full py-3 mt-5 flex items-center justify-center"
+        <Button 
           onClick={handleLogin}
-          disabled={isButtonDisabled}
-        >
-          {isLoading && (
-            <div className="w-5 h-5 mr-2 border-4 border-t-4 border-gray-300 border-t-white rounded-full animate-spin"></div>
-          )}
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
+          disabled={isLoading}
+          className={"bg-black text-white rounded hover:bg-gray-700 w-full py-3 mt-5 flex items-center justify-center"}
+          text={isLoading ? "Logging in..." : "Login"}
+          isLoading={isLoading}
+        />
 
         <p className="mt-3">
           Don&apos;t have an account?&nbsp;

@@ -11,6 +11,7 @@ using BlogApp.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.Google;
 using BlogApp.Application.Helpers.GoogleAuthService.Config;
 using Microsoft.AspNetCore.RateLimiting;
+using BlogApp.Infrastructure.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -166,6 +167,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog API v1"));
 }
+
+//if (!app.Environment.IsDevelopment())
+//{
+    app.UseErrorHandling();
+//}
 
 app.UseHttpsRedirection();
 
