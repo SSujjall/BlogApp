@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Configs;
 using BlogApp.Domain.Entities;
@@ -42,7 +38,7 @@ namespace BlogApp.Application.Helpers.TokenHelper
             var token = new JwtSecurityToken(
                 issuer: _jwtConfig.ValidIssuer,
                 audience: _jwtConfig.ValidAudience,
-                expires: DateTime.Now.AddMinutes(20), // 20 minutes expiration for JWT Token
+                expires: DateTime.Now.AddMinutes(15), // 15 minutes expiration for JWT Token
                 claims: claims,
                 signingCredentials: credentials
             );

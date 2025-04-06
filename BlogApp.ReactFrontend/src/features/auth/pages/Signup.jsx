@@ -114,6 +114,7 @@ const Signup = () => {
           className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
           onClick={handleSignup}
           disabled={isLoading}
+          isLoading={isLoading}
         />
         {isLoading && (
           <div className="h-5 w-5 border-4 m-auto mt-2 border-t-black rounded-full animate-spin"></div>
