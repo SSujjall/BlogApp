@@ -9,6 +9,7 @@ import {
   showSuccessToast,
   showErrorToast,
 } from "../../../common/utils/toastHelper";
+import { useAuth } from "../../../common/contexts/AuthContext";
 
 {
   /* FOR GOOGLE LOGIN:
@@ -34,6 +35,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const navigate = useNavigate();
+  const { login: loginWithContext } = useAuth();
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -54,9 +56,8 @@ const Login = () => {
 
       const apiResponse = await login(payload);
       if (apiResponse.statusCode === 200) {
-        setTokens(apiResponse.data.jwtToken, apiResponse.data.refreshToken);
+        loginWithContext(apiResponse.data.jwtToken, apiResponse.data.refreshToken);
         navigate("/");
-        window.location.reload();
         showSuccessToast(apiResponse.message);
       } else {
         let errorMessage = apiResponse.message;
