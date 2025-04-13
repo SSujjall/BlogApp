@@ -25,6 +25,26 @@ export const AuthProvider = ({ children }) => {
     setRefreshToken(null);
   };
 
+  // const tryRefreshToken = async () => {
+  //   if (!refreshToken) return logout();
+
+  //   try {
+  //     console.log("token hai ", token);
+  //     console.log("refreshToken hai ", refreshToken);
+  //     const response = await refreshTokenCall(token, refreshToken);
+  //     login(response.data.jwtToken, response.data.refreshToken);
+  //     console.log("refresh token is called haiiiiii");
+  //   } catch {
+  //     logout();
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (isTokenExpired(token)) {
+  //     tryRefreshToken();
+  //   }
+  // }, []);
+
   return (
     <AuthContext.Provider
       value={{

@@ -1,6 +1,5 @@
 /**
- * ! This File is deprecated
- * * AuthContext.jsx is used instead of this file.
+ * * AuthContext.jsx uses this file.
  */
 
 
@@ -30,3 +29,18 @@ export const removeTokens = () => {
 export const isAuthenticated = () => {
   return !!getToken(); // Returns true if the token exists
 };
+
+export const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  const [, payload] = token.split('.');
+  if (!payload) return true;
+
+  try {
+    const decoded = JSON.parse(atob(payload));
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    return decoded.exp < currentTime; // Check if the token has expired
+  } catch {
+    return true; // If there's an error, assume the token is expired
+  }
+}
