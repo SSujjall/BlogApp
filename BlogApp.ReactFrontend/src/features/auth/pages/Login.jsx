@@ -27,7 +27,8 @@ import { useAuth } from "../../../common/contexts/AuthContext";
 
 const initFieldValues = {
   username: "",
-  email: ""
+  email: "",
+  password: ""
 };
 
 const Login = () => {

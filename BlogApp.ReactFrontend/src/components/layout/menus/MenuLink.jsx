@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import menuData from "../../../routes/menuData";
+import getMenuData from "../../../routes/menuData";
+import { useAuth } from "../../../common/contexts/AuthContext";
 
 const MenuLink = () => {
   const [openMenus, setOpenMenus] = useState({});
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  const menuData = getMenuData(isAuthenticated);
 
   const toggleMenu = (menuName) => {
     setOpenMenus((prev) => ({

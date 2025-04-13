@@ -4,13 +4,13 @@ import Button from "../../common/Button";
 import CommonInputField from "../../common/CommonInputField";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { isAuthenticated } from "../../../common/utils/tokenHelper";
+import { useAuth } from "../../../common/contexts/AuthContext";
 
 const TopBar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
-  const authStatus = isAuthenticated();
+  const { isAuthenticated } = useAuth();
 
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchContainerRef = useRef(null);
@@ -106,7 +106,7 @@ const TopBar = ({ toggleSidebar }) => {
         {/* Login and user action buttons */}
         {!showMobileSearch && (
           <>
-            {!authStatus ? (
+            {!isAuthenticated ? (
               <Button
                 text="Login"
                 onClick={handleLoginClick}

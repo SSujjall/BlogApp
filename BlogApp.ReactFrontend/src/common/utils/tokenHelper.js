@@ -1,3 +1,9 @@
+/**
+ * ! This File is deprecated
+ * * AuthContext.jsx is used instead of this file.
+ */
+
+
 // Get the token from localStorage
 export const getToken = () => {
   return localStorage.getItem("token");
