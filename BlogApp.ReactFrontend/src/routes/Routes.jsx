@@ -7,6 +7,7 @@ import Signup from "../features/auth/pages/Signup";
 import ForgotPassword from "../features/auth/pages/ForgotPassword";
 import AddBlog from "../features/blog/pages/AddBlog";
 import MyBlogPosts from "../features/blog/pages/MyBlogPosts";
+import RedirectIfAuthenticated from "../routes/RedirectIfAuthenticated";
 
 const AppRoutes = () => {
   return (
@@ -21,9 +22,30 @@ const AppRoutes = () => {
         <Route path="/blog/my-posts" element={<MyBlogPosts />} />
 
         {/* Auth Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/login"
+          element={
+            <RedirectIfAuthenticated>
+              <Login />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <RedirectIfAuthenticated>
+              <Signup />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <RedirectIfAuthenticated>
+              <ForgotPassword />
+            </RedirectIfAuthenticated>
+          }
+        />
 
         {/* 404 Not Found */}
         <Route path="*" element={<NotFound />} />
