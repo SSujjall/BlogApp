@@ -4,13 +4,13 @@ import Layout from "../../../components/layout/Layout";
 import { getUserBlogs } from "../service/blogService";
 import { BlogCard } from "../components/BlogCard";
 import { updateBlogVotes } from "../helpers/voteHelpers";
-import { isAuthenticated } from "../../../common/utils/tokenHelper";
+import { useAuth } from "../../../common/contexts/AuthContext";
 
 const MyBlogPosts = () => {
   const [myBlogs, setMyBlogs] = useState([]);
   const { userReactions, handleVote } = useVoting();
   const [isLoading, setIsLoading] = useState(true);
-  const authStatus = isAuthenticated();
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     const fetchMyBlogs = async () => {
@@ -66,7 +66,7 @@ const MyBlogPosts = () => {
               blog={blog}
               userReactions={userReactions}
               onVote={handleVoteClick}
-              isAuthenticated={authStatus}
+              ownBlog={isAuthenticated}
             />
           ))}
       </div>

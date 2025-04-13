@@ -33,6 +33,15 @@ export const useVoting = () => {
     fetchUserReactions();
   }, []);
 
+
+  // * Reset user reactions when the user logs out
+  // * This is important to avoid showing the previous user's reactions
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUserReactions({});
+    }
+  }, [isAuthenticated]);
+
   const handleVote = async (blogId, reactionType, onVoteSuccess) => {
     // Check if the user is autneticated or not
     if (!isAuthenticated) {

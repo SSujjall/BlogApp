@@ -8,7 +8,7 @@ export const BlogCard = ({
   userReactions,
   onVote,
   showFullContent = false,
-  isAuthenticated = false,
+  ownBlog = false,
 }) => {
   return (
     <div className="border p-4 rounded-lg shadow-sm">
@@ -55,7 +55,7 @@ export const BlogCard = ({
         </section>
 
         <section>
-          {isAuthenticated && (
+          {ownBlog && (
             <Link to={`/blog/edit/${blog.blogId}`}>
               <Button
                 icon={"edit"}
