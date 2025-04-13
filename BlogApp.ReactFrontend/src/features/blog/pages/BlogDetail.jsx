@@ -13,6 +13,7 @@ import { useVoting } from "../hooks/useVoting";
 import { updateBlogVotes } from "../helpers/voteHelpers";
 import Button from "../../../components/common/Button";
 import { Dot } from "lucide-react";
+import { CommentVoteButtons } from "../components/CommentVoteButtons";
 
 const BlogDetail = () => {
   const { blogId } = useParams();
@@ -175,19 +176,9 @@ const BlogDetail = () => {
                   <p className="text-gray-700 ml-11">
                     {comment.commentDescription}
                   </p>
-
+                  
                   {/* Vote buttons */}
-                  <div className="flex flex-row gap-1 items-center ml-11 mt-2">
-                    <Button
-                      icon={"arrow_circle_up"}
-                      className={"p-0 text-sky-500 drop-shadow-md"}
-                    />
-                    <p className="-ml-3 text-xs">vote</p>
-                    <Button
-                      icon={"arrow_circle_down"}
-                      className={"p-0 text-red-500 drop-shadow-md"}
-                    />
-                  </div>
+                  <CommentVoteButtons />
                 </div>
               ))
             )}

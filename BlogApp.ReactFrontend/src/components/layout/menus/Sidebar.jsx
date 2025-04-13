@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import Button from "../../common/Button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../common/contexts/AuthContext";
+import { showSuccessToast } from "../../../common/utils/toastHelper";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Sidebar = ({ visible, toggleSidebar }) => {
   const handleLogoutClick = () => {
     navigate("/");
     contextLogout();
-    window.location.reload();
+    showSuccessToast("Logout successful");
   };
 
   return (
