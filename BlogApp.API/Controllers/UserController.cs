@@ -14,7 +14,7 @@ namespace BlogApp.API.Controllers
     public class UserController(IUserService _userService, ICloudinaryService _cloudinary) : ControllerBase
     {
         [Authorize]
-        [HttpGet("get-user-from-token")]
+        [HttpGet("who-am-i")]
         public async Task<IActionResult> GetUserByToken()
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -27,7 +27,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        //[Authorize(Roles = "Superadmin,admin")]
+        [Authorize(Roles = "Superadmin,admin")]
         [HttpGet("get-all")]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
