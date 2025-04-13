@@ -4,14 +4,11 @@ import MenuLink from "./MenuLink";
 import PropTypes from "prop-types";
 import Button from "../../common/Button";
 import { useNavigate } from "react-router-dom";
-import {
-  isAuthenticated,
-  removeTokens,
-} from "../../../common/utils/tokenHelper";
+import { useAuth } from "../../../common/contexts/AuthContext";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
   const navigate = useNavigate();
-  const authStatus = isAuthenticated();
+  const { isAuthenticated, logout: contextLogout } = useAuth();
 
   // Handle screen size changes
   useEffect(() => {
@@ -28,7 +25,7 @@ const Sidebar = ({ visible, toggleSidebar }) => {
 
   const handleLogoutClick = () => {
     navigate("/");
-    removeTokens();
+    contextLogout();
     window.location.reload();
   };
 
@@ -47,7 +44,7 @@ const Sidebar = ({ visible, toggleSidebar }) => {
       <div className="hidden lg:block w-72 bg-gray-100 border-r border-gray-300 h-screen p-4 pt-20 text-white">
         <div className="flex flex-col justify-between h-full">
           <MenuLink />
-          {authStatus && (
+          {isAuthenticated && (
             <Button
               icon={"logout"}
               text={"Logout"}
@@ -77,7 +74,7 @@ const Sidebar = ({ visible, toggleSidebar }) => {
 
         <div className="flex flex-col justify-between h-full">
           <MenuLink />
-          {authStatus && (
+          {isAuthenticated && (
             <Button
               icon={"logout"}
               text={"Logout"}

@@ -4,11 +4,12 @@ import {
   showErrorToast,
   showWarningToast,
 } from "../../../common/utils/toastHelper";
-import { isAuthenticated } from "../../../common/utils/tokenHelper";
+import { useAuth } from "../../../common/contexts/AuthContext";
 // import { useNavigate } from "react-router-dom";
 
 export const useVoting = () => {
   const [userReactions, setUserReactions] = useState({});
+  const { isAuthenticated } = useAuth();
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export const useVoting = () => {
 
   const handleVote = async (blogId, reactionType, onVoteSuccess) => {
     // Check if the user is autneticated or not
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       showWarningToast("Please login to vote");
       return false;
       // navigate('/login');
