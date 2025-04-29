@@ -34,4 +34,8 @@
     <ProjectReference Include="..\BlogApp.Domain\BlogApp.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Helpers\SignalR\Hubs\HubTypesDocs.cs" />
+  </ItemGroup>
+
 </Project>

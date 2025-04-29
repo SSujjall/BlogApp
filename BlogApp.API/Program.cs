@@ -153,6 +153,10 @@ builder.Services.AddRateLimiter(options =>
 });
 #endregion
 
+#region Register SignalR
+builder.Services.AddSignalR();
+#endregion
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -172,6 +176,11 @@ if (app.Environment.IsDevelopment())
 //{
     app.UseErrorHandling();
 //}
+
+#region SignalR Hubs
+app.MapHub<BlogApp.Application.Helpers.SignalR.Hubs.WeakTypedHubs.NotificationHub>("notiHub");
+app.MapHub<BlogApp.Application.Helpers.SignalR.Hubs.StrongTypedHubs.NotificationsHub>("strNotiHub");
+#endregion
 
 app.UseHttpsRedirection();
 

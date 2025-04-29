@@ -5,6 +5,7 @@ import CommonInputField from "../../common/CommonInputField";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuth } from "../../../common/contexts/AuthContext";
+import NotificationBadge from "../../common/NotificationBadge";
 
 const TopBar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
@@ -73,9 +74,8 @@ const TopBar = ({ toggleSidebar }) => {
       {/* Middle Search div */}
       <div
         ref={searchContainerRef}
-        className={`${
-          showMobileSearch ? "flex-1" : "hidden sm:flex flex-1"
-        } justify-center py-xs`}
+        className={`${showMobileSearch ? "flex-1" : "hidden sm:flex flex-1"
+          } justify-center py-xs`}
       >
         <form className="w-full max-w-[560px] mx-auto" onSubmit={handleSearch}>
           <CommonInputField
@@ -90,9 +90,8 @@ const TopBar = ({ toggleSidebar }) => {
 
       {/* Right div with Login button */}
       <div
-        className={`${
-          showMobileSearch ? "" : "pl-5"
-        } gap-1 flex items-center justify-end`}
+        className={`${showMobileSearch ? "" : "pl-5"
+          } gap-1 flex items-center justify-end`}
       >
         {/* Mobile search icon - only visible on small screens */}
         {!showMobileSearch && (
@@ -115,7 +114,10 @@ const TopBar = ({ toggleSidebar }) => {
                 className={"text-white bg-gray-800 hover:bg-gray-700"}
               />
             ) : (
-              <div className="flex gap-1">
+              <div className="flex">
+                <NotificationBadge
+                  numberOfNoti={10} />
+
                 <Button
                   icon={"add"}
                   text={"Create"}
