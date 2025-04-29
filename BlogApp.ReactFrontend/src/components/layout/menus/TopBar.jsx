@@ -114,7 +114,7 @@ const TopBar = ({ toggleSidebar }) => {
                 className={"text-white bg-gray-800 hover:bg-gray-700"}
               />
             ) : (
-              <div className="flex">
+              <div className="flex gap-1">
                 <NotificationBadge
                   numberOfNoti={10} />
 

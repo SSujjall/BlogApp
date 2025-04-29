@@ -1,7 +1,15 @@
+import { useNavigate } from "react-router-dom"
+
 const NotificationBadge = ({ numberOfNoti }) => {
+  const navigate = useNavigate();
+  
+  const onButtonClick = () => {
+    navigate("/notifications");
+  }
+  
   return (
-    <div class="flex px-0.5 items-center">
-      <button class="relative flex">
+    <div className="flex px-2 items-center hover:bg-gray-200 rounded transition-colors">
+      <button className="relative flex" onClick={onButtonClick}>
         <i
           className="material-symbols-rounded"
         >
