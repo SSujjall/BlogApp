@@ -6,6 +6,9 @@ using StackExchange.Redis;
 
 namespace BlogApp.Infrastructure.Redis_Cache.Service
 {
+    /*
+     * Redis is hosted in cloud.redis.io
+     */
     public class RedisCache : IRedisCache, IDisposable
     {
         private readonly ISubscriber _subscriber;
