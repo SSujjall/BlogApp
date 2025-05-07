@@ -1,11 +1,9 @@
-﻿using System.Reflection.Metadata;
-using BlogApp.Application.Interface.IRepositories;
+﻿using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 using BlogApp.Application.Helpers.HelperModels;
-using BlogApp.Domain.Shared;
 using BlogApp.Infrastructure.Persistence.Contexts;
+using BlogApp.Application.DTOs;
 
 namespace BlogApp.Infrastructure.Repositories
 {
@@ -17,7 +15,7 @@ namespace BlogApp.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<(IEnumerable<Blogs>, int)> GetFilteredBlogs(GetRequest<Blogs> request)
+        public async Task<GetFilteredBlogsDTO> GetFilteredBlogs(GetRequest<Blogs> request)
         {
             var query = _dbContext.Blogs.AsQueryable().Where(x => x.IsDeleted == false);
 
@@ -58,7 +56,15 @@ namespace BlogApp.Infrastructure.Repositories
                 query = query.Take(request.Take.Value);
             }
             var paginatedData = await query.ToListAsync();
-            return (paginatedData, totalCount);
+
+            #region res map
+            var response = new GetFilteredBlogsDTO
+            {
+                Blogs = paginatedData,
+                Count = totalCount
+            };
+            #endregion
+            return response;
         }
     }
 }
