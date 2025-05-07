@@ -7,7 +7,7 @@ namespace BlogApp.Application.Interface.IServices
 {
     public interface IBlogService
     {
-        Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request);
+        Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, object requestForCache);
         Task<ApiResponse<BlogsDTO>> GetBlogById(int id);
         Task<ApiResponse<IEnumerable<BlogsDTO>>> GetBlogsByUserId(string userId);
         Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto);

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BlogApp.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace BlogApp.Application.DTOs
 {
@@ -12,6 +13,12 @@ namespace BlogApp.Application.DTOs
         public int UpVoteCount { get; set; }
         public int DownVoteCount { get; set; }
         public int CommentCount { get; set; }
+    }
+
+    public class GetFilteredBlogsDTO
+    {
+        public IEnumerable<Blogs> Blogs { get; set; }
+        public int Count { get; set; }
     }
 
     public class BlogUser

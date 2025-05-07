@@ -5,7 +5,11 @@ import PropTypes from "prop-types";
 import Button from "../../common/Button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../common/contexts/AuthContext";
-import { showSuccessToast } from "../../../common/utils/toastHelper";
+import { logout } from "../../../features/auth/service/logoutService";
+import {
+  showSuccessToast,
+  showErrorToast,
+} from "../../../common/utils/toastHelper";
 
 const Sidebar = ({ visible, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -24,10 +28,25 @@ const Sidebar = ({ visible, toggleSidebar }) => {
     return () => mediaQuery.removeEventListener("change", handleResize);
   }, [visible, toggleSidebar]);
 
-  const handleLogoutClick = () => {
-    navigate("/");
-    contextLogout();
-    showSuccessToast("Logout successful");
+  const handleLogoutClick = async () => {
+    try {
+      const apiResponse = await logout();
+      if (apiResponse.statusCode === 200) {
+        navigate("/");
+
+        contextLogout();
+        showSuccessToast("Logout successful");
+      } else {
+        let errorMessage = apiResponse.message;
+        if (apiResponse.errors) {
+          const errorMessages = Object.values(apiResponse.errors).join(" ");
+          errorMessage = `${apiResponse.message}. ${errorMessages}`;
+        }
+        showErrorToast(errorMessage);
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (

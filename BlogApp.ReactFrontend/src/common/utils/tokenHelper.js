@@ -39,7 +39,7 @@ export const isTokenExpired = (token) => {
   try {
     const decoded = JSON.parse(atob(payload));
     const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-    return decoded.exp < currentTime; // Check if the token has expired
+    return currentTime > decoded.exp ; // Check if the token has expired
   } catch {
     return true; // If there's an error, assume the token is expired
   }

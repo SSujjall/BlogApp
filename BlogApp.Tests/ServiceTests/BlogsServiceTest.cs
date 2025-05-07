@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Entities;
+using BlogApp.Infrastructure.Redis_Cache.Service;
 using BlogApp.Infrastructure.Services;
 using Moq;
 using System.Net;
@@ -17,6 +19,7 @@ public class BlogsServiceTest
     private Mock<IBaseRepository<BlogHistory>> _mockBlogHistoryRepo;
     private Mock<IMapper> _mockMapper;
     private Mock<IUserRepository> _mockUserRepo;
+    private Mock<IRedisCache> _mockRedisCache;
 
     private BlogService _blogService;
 
@@ -28,13 +31,15 @@ public class BlogsServiceTest
         _mockBlogHistoryRepo = new Mock<IBaseRepository<BlogHistory>>();
         _mockMapper = new Mock<IMapper>();
         _mockUserRepo = new Mock<IUserRepository>();
+        _mockRedisCache = new Mock<IRedisCache>();
 
         _blogService = new BlogService(
             _mockBlogRepo.Object,
             _mockCloudinary.Object,
             _mockBlogHistoryRepo.Object,
             _mockMapper.Object,
-            _mockUserRepo.Object
+            _mockUserRepo.Object,
+            _mockRedisCache.Object
         );
     }
 
@@ -58,11 +63,19 @@ public class BlogsServiceTest
             }
         };
 
+        var totalCount = 1;
+
+        var getBlogsResult = new GetFilteredBlogsDTO
+        {
+            Blogs = blogs,
+            Count = totalCount
+        };
+
         _mockBlogRepo
            .Setup(r => r.GetFilteredBlogs(It.IsAny<GetRequest<Blogs>>()))
-           .ReturnsAsync((blogs, 1));
+           .ReturnsAsync(getBlogsResult);
 
-        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>());
+        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new { });
 
         // Assert
         Assert.IsNotNull(result);
@@ -77,10 +90,10 @@ public class BlogsServiceTest
         // Arrange
         _mockBlogRepo
             .Setup(r => r.GetFilteredBlogs(It.IsAny<GetRequest<Blogs>>()))
-            .ReturnsAsync((null, 0));
+            .ReturnsAsync(new Application.DTOs.GetFilteredBlogsDTO());
 
         // Act
-        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>());
+        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new { });
 
         // Assert
         Assert.IsNotNull(result);

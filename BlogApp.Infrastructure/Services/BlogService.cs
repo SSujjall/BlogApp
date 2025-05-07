@@ -1,12 +1,15 @@
 ﻿using System.Net;
+using System.Text.Json;
 using AutoMapper;
 using BlogApp.Application.DTOs;
+using BlogApp.Application.Helpers.AppHelpers;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
+using BlogApp.Infrastructure.Redis_Cache.Service;
 
 namespace BlogApp.Infrastructure.Services
 {
@@ -15,18 +18,26 @@ namespace BlogApp.Infrastructure.Services
         ICloudinaryService _cloudinary,
         IBaseRepository<BlogHistory> _blogHistoryRepo,
         IMapper _mapper,
-        IUserRepository _userRepository
+        IUserRepository _userRepository,
+        IRedisCache _redisCache
     ) : IBlogService
     {
-        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request)
+        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, object requestForCache)
         {
-            var result = await _blogRepository.GetFilteredBlogs(request);
-            if (result.Item1 != null)
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("get-filtered-blogs", requestForCache);
+            var result = await _redisCache.GetOrCreateCache(
+                cacheKey,
+                async () => await _blogRepository.GetFilteredBlogs(request),
+                TimeSpan.FromDays(1)
+            );
+
+            //var result = await _blogRepository.GetFilteredBlogs(request);
+            if (result.Blogs != null)
             {
                 #region response model mapping
                 var response = new List<BlogsDTO>();
 
-                foreach (var item in result.Item1)
+                foreach (var item in result.Blogs)
                 {
                     var blog = new BlogsDTO
                     {
@@ -46,14 +57,20 @@ namespace BlogApp.Infrastructure.Services
                     response.Add(blog);
                 }
                 #endregion
-                return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "All Blogs Listed", HttpStatusCode.OK, result.Item2);
+                return ApiResponse<IEnumerable<BlogsDTO>>.Success(response, "All Blogs Listed", HttpStatusCode.OK, result.Count);
             }
             return ApiResponse<IEnumerable<BlogsDTO>>.Failed(null, "Failed to load data");
         }
 
         public async Task<ApiResponse<BlogsDTO>> GetBlogById(int id)
         {
-            var result = await _blogRepository.GetById(id);
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{id}");
+            var result = await _redisCache.GetOrCreateCache(
+                cacheKey,
+                async () => await _blogRepository.GetById(id),
+                TimeSpan.FromDays(1)
+            );
+            //var result = await _blogRepository.GetById(id);
             if (result != null && result.IsDeleted == false)
             {
                 #region response model mapping
@@ -190,7 +207,13 @@ namespace BlogApp.Infrastructure.Services
                 existingBlog.UpdatedAt = DateTime.Now;
                 #endregion
 
-                var result = await _blogRepository.Update(existingBlog);
+                var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{dto.BlogId}");
+                var result = await _redisCache.UpdateDataAndInvalidateCache(
+                    cacheKey,
+                    async () => await _blogRepository.Update(existingBlog)
+                );
+
+                //var result = await _blogRepository.Update(existingBlog);
                 if (result != null)
                 {
                     #region response model mapping
