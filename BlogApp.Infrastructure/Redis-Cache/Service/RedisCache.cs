@@ -11,17 +11,19 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
         private readonly ISubscriber _subscriber;
         private readonly IDistributedCache _distributedCache;
         private readonly IConnectionMultiplexer _redisCache;
+        //private readonly IDatabase _db;
         private readonly string _cacheInvalidationChannel = "cache-invalidation";
 
         public RedisCache(
-            IDistributedCache distributedCache, 
+            IDistributedCache distributedCache,
             IConnectionMultiplexer redisCache)
         {
             _distributedCache = distributedCache;
             _redisCache = redisCache;
             _subscriber = _redisCache.GetSubscriber();
+            //_db = _redisCache.GetDatabase();
 
-            // Subscribe to cache invalidation messages
+            /// Subscribe to cache invalidation messages
             _subscriber.Subscribe(_cacheInvalidationChannel, HandleCacheInvalidationMessage);
         }
 
@@ -47,8 +49,10 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
                 WriteIndented = true
             };
 
+            //var x = await _db.StringGetAsync("testkey"); // Getting "string" type from redis
+
             //await _distributedCache.RemoveAsync(key);
-            var cacheData = await _distributedCache.GetStringAsync(key);
+            var cacheData = await _distributedCache.GetStringAsync(key); // gets "hash" type from redis
             if (!string.IsNullOrEmpty(cacheData))
                 return JsonSerializer.Deserialize<T>(cacheData, jsonOpts)!;
 
