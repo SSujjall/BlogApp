@@ -7,12 +7,14 @@ using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Persistence.Contexts;
 using BlogApp.Infrastructure.Persistence.Health;
+using BlogApp.Infrastructure.Redis_Cache.Service;
 using BlogApp.Infrastructure.Repositories;
 using BlogApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace BlogApp.Infrastructure.DI
 {
@@ -73,6 +75,37 @@ namespace BlogApp.Infrastructure.DI
                 .AddCheck<DbHealthCheck>("Database")
                 .AddCheck<SmtpHealthCheck>("SMTP")
                 .AddCheck<CloudinaryHealthCheck>("Cloudinary");
+            #endregion
+
+            #region Register Redis Distributed Cache Instance
+            //// Register Redis Connection
+            //builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+            //{
+            //    var redisConString = builder.Configuration["RedisConfig:RedisConString"];
+            //    return ConnectionMultiplexer.Connect(redisConString);
+            //});
+
+            // Register Redis Connection, written in more simpler way
+            services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect(configuration["RedisConfig:RedisConString"]!)
+            );
+
+            ////if you dont need advanced redis features
+            //builder.Services.AddStackExchangeRedisCache(opt =>
+            //{
+            //    string connection = builder.Configuration["RedisConfig:RedisConString"];
+            //    opt.Configuration = connection;
+            //});
+
+            //// Register Redis Distributed Cache
+            services.AddStackExchangeRedisCache(opts =>
+            {
+                opts.Configuration = configuration["RedisConfig:RedisConString"];
+                //opts.InstanceName = "BlogApp"; // This adds a prefix to the keys in redis (not needed)
+            });
+
+            //// Register redis interface and service
+            services.AddScoped<IRedisCache, RedisCache>();
             #endregion
 
             return services;

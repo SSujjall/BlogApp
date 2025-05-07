@@ -42,7 +42,17 @@ namespace BlogApp.API.Controllers
                 }
             };
 
-            var response = await _blogService.GetAllBlogs(request);
+            var requestForCache = new
+            {
+                Filter = search ?? "null",
+                //OrderBy = request.Filter?.ToString() ?? "null",
+                Skip = skip,
+                Take = take,
+                SortBy = sortBy,
+            };
+
+
+            var response = await _blogService.GetAllBlogs(request, requestForCache);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 return StatusCode((int)response.StatusCode, response);
