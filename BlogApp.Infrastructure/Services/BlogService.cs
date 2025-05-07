@@ -64,7 +64,13 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<BlogsDTO>> GetBlogById(int id)
         {
-            var result = await _blogRepository.GetById(id);
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{id}");
+            var result = await _redisCache.GetOrCreateCache(
+                cacheKey,
+                async () => await _blogRepository.GetById(id),
+                TimeSpan.FromDays(1)
+            );
+            //var result = await _blogRepository.GetById(id);
             if (result != null && result.IsDeleted == false)
             {
                 #region response model mapping
@@ -201,7 +207,13 @@ namespace BlogApp.Infrastructure.Services
                 existingBlog.UpdatedAt = DateTime.Now;
                 #endregion
 
-                var result = await _blogRepository.Update(existingBlog);
+                var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{dto.BlogId}");
+                var result = await _redisCache.UpdateDataAndInvalidateCache(
+                    cacheKey,
+                    async () => await _blogRepository.Update(existingBlog)
+                );
+
+                //var result = await _blogRepository.Update(existingBlog);
                 if (result != null)
                 {
                     #region response model mapping

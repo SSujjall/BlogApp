@@ -70,7 +70,7 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
             return data;
         }
 
-        public async Task<T> UpdateDataAndInvalidateCache<T>(string key, Func<Task<T>> exec, TimeSpan expiry)
+        public async Task<T> UpdateDataAndInvalidateCache<T>(string key, Func<Task<T>> exec)
         {
             var updatedData = await exec();
 
