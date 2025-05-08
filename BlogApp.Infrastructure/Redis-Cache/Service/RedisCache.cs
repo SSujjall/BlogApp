@@ -77,7 +77,7 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
         {
             var updatedData = await exec();
 
-            var invalidationMsg = new
+            var invalidationMsg = new CacheInvalidationMessage
             {
                 Key = key,
                 Timestamp = DateTime.UtcNow
@@ -91,6 +91,16 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
         public async Task RemoveKey(string key)
         {
             await _distributedCache.RemoveAsync(key);
+        }
+
+        public async Task DeleteKeysByPrefix(string prefix)
+        {
+            var server = _redisCache.GetServer(_redisCache.GetEndPoints().First());
+
+            foreach (var key in server.Keys(pattern: $"{prefix}"))
+            {
+                await _distributedCache.RemoveAsync(key.ToString());
+            }
         }
 
         public void Dispose()

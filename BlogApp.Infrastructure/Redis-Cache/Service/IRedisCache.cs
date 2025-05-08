@@ -11,5 +11,6 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
         Task<T> GetOrCreateCache<T>(string key, Func<Task<T>> exec, TimeSpan expiry);
         Task<T> UpdateDataAndInvalidateCache<T>(string key, Func<Task<T>> exec);
         Task RemoveKey(string key);
+        Task DeleteKeysByPrefix(string prefix);
     }
 }

@@ -10,6 +10,7 @@ namespace BlogApp.Domain.Shared
     {
         #region Blog Keys
         public const string GetAllBlogs = "GetAllBlogs";
+        public const string GetAllBlogsPrefix = "GetAllBlogs*";
         public const string GetBlogById = "GetBlogById";
         #endregion
     }

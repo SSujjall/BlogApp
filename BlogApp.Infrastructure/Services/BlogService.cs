@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Text.Json;
 using AutoMapper;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.AppHelpers;
@@ -24,7 +23,7 @@ namespace BlogApp.Infrastructure.Services
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, CacheRequestItems requestForCache)
         {
-            var cacheKey = RedisCacheHelper.GenerateCacheKey("GetAllBlogs", requestForCache);
+            var cacheKey = RedisCacheHelper.GenerateCacheKey(CacheKeys.GetAllBlogs, requestForCache);
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
                 async () => await _blogRepository.GetFilteredBlogs(request),
@@ -213,6 +212,9 @@ namespace BlogApp.Infrastructure.Services
                     async () => await _blogRepository.Update(existingBlog)
                 );
 
+                // Invalidate GetAllBlogs key
+                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogs);
+
                 //var result = await _blogRepository.Update(existingBlog);
                 if (result != null)
                 {
@@ -312,8 +314,16 @@ namespace BlogApp.Infrastructure.Services
                 );
 
                 // Also invalidate the GetAllBlogs cache since vote counts have changed
-                var allBlogsCacheKey = RedisCacheHelper.GenerateCacheKey("GetAllBlogs", new CacheRequestItems { });
-                await _redisCache.RemoveKey(allBlogsCacheKey);
+                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+
+                // This will match any key containing the specific filter
+                //await DeleteKeysByPatternAsync("*Filter:asd*");
+
+                // This will match any key containing "Filter:" segment
+                //await DeleteKeysByPatternAsync("*Filter:*");
+
+                // This will match keys with specific pagination
+                //await DeleteKeysByPatternAsync("*Skip:0-Take:10*");
                 #endregion
             }
         }
