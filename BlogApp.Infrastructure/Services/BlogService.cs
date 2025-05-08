@@ -22,9 +22,9 @@ namespace BlogApp.Infrastructure.Services
         IRedisCache _redisCache
     ) : IBlogService
     {
-        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, object requestForCache)
+        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, CacheRequestItems requestForCache)
         {
-            var cacheKey = RedisCacheHelper.GenerateCacheKey("get-filtered-blogs", requestForCache);
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("GetAllBlogs", requestForCache);
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
                 async () => await _blogRepository.GetFilteredBlogs(request),
@@ -64,7 +64,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<BlogsDTO>> GetBlogById(int id)
         {
-            var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{id}");
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = id.ToString() });
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
                 async () => await _blogRepository.GetById(id),
@@ -207,7 +207,7 @@ namespace BlogApp.Infrastructure.Services
                 existingBlog.UpdatedAt = DateTime.Now;
                 #endregion
 
-                var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{dto.BlogId}");
+                var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = dto.BlogId.ToString() });
                 var result = await _redisCache.UpdateDataAndInvalidateCache(
                     cacheKey,
                     async () => await _blogRepository.Update(existingBlog)
@@ -303,7 +303,18 @@ namespace BlogApp.Infrastructure.Services
                 blog.UpVoteCount = Math.Max(0, blog.UpVoteCount);
                 blog.DownVoteCount = Math.Max(0, blog.DownVoteCount);
 
-                await _blogRepository.Update(blog);
+                #region Invalidate Cache
+                var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = model.BlogId.ToString() });
+                // Update the blog and invalidate the cache
+                await _redisCache.UpdateDataAndInvalidateCache(
+                    cacheKey,
+                    async () => await _blogRepository.Update(blog)
+                );
+
+                // Also invalidate the GetAllBlogs cache since vote counts have changed
+                var allBlogsCacheKey = RedisCacheHelper.GenerateCacheKey("GetAllBlogs", new CacheRequestItems { });
+                await _redisCache.RemoveKey(allBlogsCacheKey);
+                #endregion
             }
         }
 

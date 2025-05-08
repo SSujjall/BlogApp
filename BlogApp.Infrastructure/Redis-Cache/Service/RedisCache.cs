@@ -88,6 +88,11 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
             return updatedData;
         }
 
+        public async Task RemoveKey(string key)
+        {
+            await _distributedCache.RemoveAsync(key);
+        }
+
         public void Dispose()
         {
             _subscriber.Unsubscribe(_cacheInvalidationChannel);

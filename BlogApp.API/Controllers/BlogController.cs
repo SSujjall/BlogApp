@@ -3,6 +3,7 @@ using BlogApp.Application.Helpers;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -42,15 +43,14 @@ namespace BlogApp.API.Controllers
                 }
             };
 
-            var requestForCache = new
+            var requestForCache = new CacheRequestItems
             {
-                Filter = search ?? "null",
+                Filter = !string.IsNullOrEmpty(search) ? search.ToLower() : "",
                 //OrderBy = request.Filter?.ToString() ?? "null",
-                Skip = skip,
-                Take = take,
-                SortBy = sortBy,
+                Skip = (skip ?? 0).ToString(),
+                Take = (take ?? 10).ToString(),
+                SortBy = !string.IsNullOrEmpty(sortBy) ? sortBy.ToLower() : "",
             };
-
 
             var response = await _blogService.GetAllBlogs(request, requestForCache);
             if (response.StatusCode != HttpStatusCode.OK)
