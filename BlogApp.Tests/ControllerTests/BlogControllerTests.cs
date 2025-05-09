@@ -6,6 +6,7 @@ using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Net;
+using BlogApp.Domain.Shared;
 
 namespace BlogApp.Tests.ControllerTests
 {
@@ -40,7 +41,7 @@ namespace BlogApp.Tests.ControllerTests
             };
 
             var resp = ApiResponse<IEnumerable<BlogsDTO>>.Success(mockBlogs, "All Blogs Listed", HttpStatusCode.OK, 1);
-            _mockBlogService.Setup(s => s.GetAllBlogs(It.IsAny<GetRequest<Blogs>>(), It.IsAny<object>)).ReturnsAsync(resp);
+            _mockBlogService.Setup(s => s.GetAllBlogs(It.IsAny<GetRequest<Blogs>>(), It.IsAny<CacheRequestItems>())).ReturnsAsync(resp);
 
             // Act
             var result = await _controller.GetBlogs("popularity", 0, 10, "Test");
@@ -60,7 +61,7 @@ namespace BlogApp.Tests.ControllerTests
         {
             // Arrange
             var response = ApiResponse<IEnumerable<BlogsDTO>>.Failed(null, "Service error", HttpStatusCode.InternalServerError);
-            _mockBlogService.Setup(s => s.GetAllBlogs(It.IsAny<GetRequest<Blogs>>(), It.IsAny<object>)).ReturnsAsync(response);
+            _mockBlogService.Setup(s => s.GetAllBlogs(It.IsAny<GetRequest<Blogs>>(), It.IsAny<CacheRequestItems>())).ReturnsAsync(response);
 
             // Act
             var result = await _controller.GetBlogs(null, null, null, null);
