@@ -175,7 +175,7 @@ namespace BlogApp.Infrastructure.Services
                     return ApiResponse<BlogsDTO>.Failed(authError, "Unauthorized blog update attempt.");
                 }
 
-                #region Upload Image
+                #region Upload Image (Upload validation is in UploadImage method itself)
                 var imageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
 
                 // If the new image is uploaded check if there is image in old blog and delete it.
@@ -200,8 +200,8 @@ namespace BlogApp.Infrastructure.Services
                 #endregion
 
                 #region request model mapping
-                existingBlog.Title = dto.Title;
-                existingBlog.Description = dto.Description;
+                existingBlog.Title = !string.IsNullOrEmpty(dto.Title) ? dto.Title : existingBlog.Title;
+                existingBlog.Description = !string.IsNullOrEmpty(dto.Description) ? dto.Description : existingBlog.Description;
                 existingBlog.ImageUrl = imageUrl ?? existingBlog.ImageUrl;
                 existingBlog.UpdatedAt = DateTime.Now;
                 #endregion
