@@ -81,9 +81,8 @@ const Login = () => {
 
     const response = await loginWithGoogle(googleToken);
     if (response) {
-      setTokens(response.data.jwtToken, response.data.refreshToken);
+      loginWithContext(response.data.jwtToken, response.data.refreshToken);
       navigate("/");
-      // window.location.reload();
       showSuccessToast("Logged in successfully");
     } else {
       showErrorToast("Google Login Failed");
