@@ -72,7 +72,7 @@ const BlogDetail = () => {
             commentDescription: newComment,
             createdAt: new Date().toISOString(),
             user: {
-              name: "You",
+              name: apiRes.data.user.name,
             },
           },
         ]);

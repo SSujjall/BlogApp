@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Text.Json;
 using AutoMapper;
 using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.AppHelpers;
@@ -22,9 +21,9 @@ namespace BlogApp.Infrastructure.Services
         IRedisCache _redisCache
     ) : IBlogService
     {
-        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, object requestForCache)
+        public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, CacheRequestItems requestForCache)
         {
-            var cacheKey = RedisCacheHelper.GenerateCacheKey("get-filtered-blogs", requestForCache);
+            var cacheKey = RedisCacheHelper.GenerateCacheKey(CacheKeys.GetAllBlogs, requestForCache);
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
                 async () => await _blogRepository.GetFilteredBlogs(request),
@@ -64,7 +63,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<BlogsDTO>> GetBlogById(int id)
         {
-            var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{id}");
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = id.ToString() });
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
                 async () => await _blogRepository.GetById(id),
@@ -176,7 +175,7 @@ namespace BlogApp.Infrastructure.Services
                     return ApiResponse<BlogsDTO>.Failed(authError, "Unauthorized blog update attempt.");
                 }
 
-                #region Upload Image
+                #region Upload Image (Upload validation is in UploadImage method itself)
                 var imageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
 
                 // If the new image is uploaded check if there is image in old blog and delete it.
@@ -201,17 +200,20 @@ namespace BlogApp.Infrastructure.Services
                 #endregion
 
                 #region request model mapping
-                existingBlog.Title = dto.Title;
-                existingBlog.Description = dto.Description;
+                existingBlog.Title = !string.IsNullOrEmpty(dto.Title) ? dto.Title : existingBlog.Title;
+                existingBlog.Description = !string.IsNullOrEmpty(dto.Description) ? dto.Description : existingBlog.Description;
                 existingBlog.ImageUrl = imageUrl ?? existingBlog.ImageUrl;
                 existingBlog.UpdatedAt = DateTime.Now;
                 #endregion
 
-                var cacheKey = RedisCacheHelper.GenerateCacheKey("blog", $"{dto.BlogId}");
+                var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = dto.BlogId.ToString() });
                 var result = await _redisCache.UpdateDataAndInvalidateCache(
                     cacheKey,
                     async () => await _blogRepository.Update(existingBlog)
                 );
+
+                // Invalidate GetAllBlogs key
+                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogs);
 
                 //var result = await _blogRepository.Update(existingBlog);
                 if (result != null)
@@ -303,7 +305,26 @@ namespace BlogApp.Infrastructure.Services
                 blog.UpVoteCount = Math.Max(0, blog.UpVoteCount);
                 blog.DownVoteCount = Math.Max(0, blog.DownVoteCount);
 
-                await _blogRepository.Update(blog);
+                #region Invalidate Cache
+                var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = model.BlogId.ToString() });
+                // Update the blog and invalidate the cache
+                await _redisCache.UpdateDataAndInvalidateCache(
+                    cacheKey,
+                    async () => await _blogRepository.Update(blog)
+                );
+
+                // Also invalidate the GetAllBlogs cache since vote counts have changed
+                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+
+                // This will match any key containing the specific filter
+                //await DeleteKeysByPatternAsync("*Filter:asd*");
+
+                // This will match any key containing "Filter:" segment
+                //await DeleteKeysByPatternAsync("*Filter:*");
+
+                // This will match keys with specific pagination
+                //await DeleteKeysByPatternAsync("*Skip:0-Take:10*");
+                #endregion
             }
         }
 
