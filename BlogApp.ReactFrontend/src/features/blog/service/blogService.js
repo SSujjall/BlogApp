@@ -21,7 +21,7 @@ export const getBlogById = async (blogId) => {
 };
 
 export const createBlog = async (blogData) => {
-  console.log(blogData);
+  // console.log(blogData);
   const formData = new FormData();
   formData.append("Title", blogData.title);
   formData.append("Description", blogData.description);
@@ -34,4 +34,16 @@ export const createBlog = async (blogData) => {
 
 export const getUserBlogs = async () => {
   return await makeRequest("GET", "/Blog/get-user-blogs", null, true);
-}
+};
+
+export const updateBlog = async (paramBlogId, blogUpdatedData) => {
+  const formData = new FormData();
+  formData.append("BlogId", paramBlogId);
+  formData.append("Title", blogUpdatedData.title);
+  formData.append("Description", blogUpdatedData.description);
+  if (blogUpdatedData.imageFile) {
+    formData.append("ImageUrl", blogUpdatedData.imageFile); // Ensure this matches DTO
+  }
+
+  return await makeRequest("PUT", "Blog/update", formData, true);
+};

@@ -75,7 +75,7 @@ public class BlogsServiceTest
            .Setup(r => r.GetFilteredBlogs(It.IsAny<GetRequest<Blogs>>()))
            .ReturnsAsync(getBlogsResult);
 
-        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new { });
+        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new Domain.Shared.CacheRequestItems { });
 
         // Assert
         Assert.IsNotNull(result);
@@ -93,7 +93,7 @@ public class BlogsServiceTest
             .ReturnsAsync(new Application.DTOs.GetFilteredBlogsDTO());
 
         // Act
-        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new { });
+        var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new Domain.Shared.CacheRequestItems { });
 
         // Assert
         Assert.IsNotNull(result);

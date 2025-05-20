@@ -12,25 +12,50 @@ export const BlogCard = ({
 }) => {
   return (
     <div className="border p-4 rounded-lg shadow-sm">
-      <Link to={`/blog/blogById/${blog.blogId}`}>
-        <h2
-          className={`font-semibold 
+      {/* Blog title, description and image. */}
+      <>
+        {!showFullContent ? (
+          <Link to={`/blog/blogById/${blog.blogId}`}>
+            <h2
+              className={`font-semibold 
             ${showFullContent ? "text-3xl" : "text-2xl"}
             ${!showFullContent ? "line-clamp-1" : ""}`}
-        >
-          {blog.title}
-        </h2>
-        <p className="mb-2 text-sm text-gray-500">By {blog.user.name}</p>
-        <div className="w-full aspect-video mb-4 border rounded-lg">
-          <img
-            src={blog.imageUrl}
-            alt={blog.title}
-            className="w-full h-full object-contain bg-gray-100 rounded-lg"
-          />
-        </div>
-        <p className="text-gray-600">{blog.description}</p>
-      </Link>
-
+            >
+              {blog.title}
+            </h2>
+            <p className="mb-2 text-sm text-gray-500">By {blog.user.name}</p>
+            <div className="w-full aspect-video mb-4 border rounded-lg">
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-full object-contain bg-gray-100 rounded-lg"
+              />
+            </div>
+            <p className="text-gray-600">{blog.description}</p>
+          </Link>
+        ) : (
+          <>
+            <h2
+              className={`font-semibold 
+            ${showFullContent ? "text-3xl" : "text-2xl"}
+            ${!showFullContent ? "line-clamp-1" : ""}`}
+            >
+              {blog.title}
+            </h2>
+            <p className="mb-2 text-sm text-gray-500">By {blog.user.name}</p>
+            <div className="w-full aspect-video mb-4 border rounded-lg">
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-full object-contain bg-gray-100 rounded-lg"
+              />
+            </div>
+            <p className="text-gray-600">{blog.description}</p>
+          </>
+        )}
+      </>
+      
+      {/* Vote and comment buttons */}
       <div className="flex flex-row mt-3 items-center justify-between">
         <section className="flex items-center">
           <VoteButtons

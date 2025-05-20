@@ -8,6 +8,7 @@ import ForgotPassword from "../features/auth/pages/ForgotPassword";
 import AddBlog from "../features/blog/pages/AddBlog";
 import MyBlogPosts from "../features/blog/pages/MyBlogPosts";
 import RedirectIfAuthenticated from "../routes/RedirectIfAuthenticated";
+import EditBlog from "../features/blog/pages/EditBlog";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/blog/blogById/:blogId" element={<BlogDetail />} />
         <Route path="/blog/addBlog" element={<AddBlog />} />
         <Route path="/blog/my-posts" element={<MyBlogPosts />} />
+        <Route path="/blog/edit/:blogId" element={<EditBlog />} />
 
         {/* Auth Routes */}
         <Route

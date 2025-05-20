@@ -10,7 +10,7 @@ const MyBlogPosts = () => {
   const [myBlogs, setMyBlogs] = useState([]);
   const { userReactions, handleVote } = useVoting();
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchMyBlogs = async () => {
