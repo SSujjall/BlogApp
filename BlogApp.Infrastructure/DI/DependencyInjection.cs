@@ -68,6 +68,7 @@ namespace BlogApp.Infrastructure.DI
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            services.AddScoped<IPlaygroundService, PlaygroundService>();
             #endregion
 
             #region Add Health Check Configuration
