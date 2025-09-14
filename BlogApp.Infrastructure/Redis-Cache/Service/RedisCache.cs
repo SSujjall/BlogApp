@@ -103,6 +103,12 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
             }
         }
 
+        public List<string> GetAllKeys()
+        {
+            var server = _redisCache.GetServer(_redisCache.GetEndPoints().First());
+            return server.Keys().Select(k => k.ToString()).ToList();
+        }
+
         public void Dispose()
         {
             _subscriber.Unsubscribe(_cacheInvalidationChannel);
