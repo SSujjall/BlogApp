@@ -23,7 +23,12 @@ namespace BlogApp.Infrastructure.Services
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, CacheRequestItems requestForCache)
         {
-            var cacheKey = RedisCacheHelper.GenerateCacheKey(CacheKeys.GetAllBlogs, requestForCache);
+            // [DEV] checking if the key is being deleted or not
+            //var y = _redisCache.GetAllKeys();
+            //await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+            //var y2 = _redisCache.GetAllKeys();
+
+            var cacheKey = RedisCacheHelper.GenerateCacheKey(CacheKeys.GetAllBlogsNameForHelper, requestForCache);
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
                 async () => await _blogRepository.GetFilteredBlogs(request),
@@ -159,6 +164,10 @@ namespace BlogApp.Infrastructure.Services
                     CommentCount = result.CommentCount
                 };
                 #endregion
+
+                // Invalidate GetAllBlogs key
+                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+
                 return ApiResponse<BlogsDTO>.Success(response, "Blog created successfully.");
             }
             return ApiResponse<BlogsDTO>.Failed(null, "Failed to create a new blog.");
@@ -213,7 +222,7 @@ namespace BlogApp.Infrastructure.Services
                 );
 
                 // Invalidate GetAllBlogs key
-                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogs);
+                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
 
                 //var result = await _blogRepository.Update(existingBlog);
                 if (result != null)
