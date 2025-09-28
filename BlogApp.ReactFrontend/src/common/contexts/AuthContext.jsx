@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
+import { removeTokens, setTokens } from "../utils/tokenHelper";
 
 const AuthContext = createContext();
 
@@ -12,15 +13,23 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!token;
 
   const login = (newToken, newRefreshToken) => {
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("refreshToken", newRefreshToken);
+    // localStorage.setItem("token", newToken);
+    // localStorage.setItem("refreshToken", newRefreshToken);
+
+    // using tokenHelper.js
+    setTokens(newToken, newRefreshToken);
+
     setToken(newToken);
     setRefreshToken(newRefreshToken);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+    // localStorage.removeItem("token");
+    // localStorage.removeItem("refreshToken");
+
+    // using tokenHelper.js
+    removeTokens();
+    
     setToken(null);
     setRefreshToken(null);
   };

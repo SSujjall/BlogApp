@@ -9,21 +9,25 @@ import AddBlog from "../features/blog/pages/AddBlog";
 import MyBlogPosts from "../features/blog/pages/MyBlogPosts";
 import RedirectIfAuthenticated from "../routes/RedirectIfAuthenticated";
 import EditBlog from "../features/blog/pages/EditBlog";
+import ProtectedRoute from "./ProtectedRoutes";
 
 const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/** Protected Routes **/}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
 
-        {/* Blog Routes */}
-        <Route path="/blog/filter/:sortBy" element={<Home />} />
-        <Route path="/blog/blogById/:blogId" element={<BlogDetail />} />
-        <Route path="/blog/addBlog" element={<AddBlog />} />
-        <Route path="/blog/my-posts" element={<MyBlogPosts />} />
-        <Route path="/blog/edit/:blogId" element={<EditBlog />} />
+          {/* Blog Routes */}
+          <Route path="/blog/filter/:sortBy" element={<Home />} />
+          <Route path="/blog/blogById/:blogId" element={<BlogDetail />} />
+          <Route path="/blog/addBlog" element={<AddBlog />} />
+          <Route path="/blog/my-posts" element={<MyBlogPosts />} />
+          <Route path="/blog/edit/:blogId" element={<EditBlog />} />
+        </Route>
 
-        {/* Auth Routes */}
+        {/* Public/Auth Routes */}
         <Route
           path="/login"
           element={
