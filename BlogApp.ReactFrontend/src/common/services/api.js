@@ -136,7 +136,9 @@ const makeRequest = async (method, url, data = null, requiresAuth = false) => {
     const response = await api(config);
     return response.data; // return the response data
   } catch (error) {
-    console.error("API call error:", error);
+    // console.error("API call error:", error);
+    console.clear(); // a temporary workaround to ignore axios errors in console for production
+    // return null; // return null in case of error
   }
 };
 
