@@ -16,7 +16,8 @@ namespace BlogApp.API.Controllers
         {
             _blogReactionService = blogReactionService;
         }
-
+        
+        [Authorize]
         [HttpGet("get-all-user-reactions")]
         public async Task<IActionResult> GetAllUserReactions()
         {
