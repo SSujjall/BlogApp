@@ -1,5 +1,7 @@
+using System.Net;
 using BlogApp.Infrastructure.DI;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +12,7 @@ using BlogApp.Application.Helpers.CloudinaryService.Config;
 using BlogApp.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.Google;
 using BlogApp.Application.Helpers.GoogleAuthService.Config;
+using BlogApp.Application.Helpers.HelperModels;
 using Microsoft.AspNetCore.RateLimiting;
 using BlogApp.Infrastructure.Middlewares;
 
@@ -43,6 +46,35 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = configuration["JWT:ValidAudience"],
             ValidIssuer = configuration["JWT:ValidIssuer"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
+        };
+        
+        // Custom responses
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                context.HandleResponse(); // Skip default
+
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+
+                var result = JsonSerializer.Serialize(
+                    ApiResponse<string>.Failed(null, "Unauthorized: Token is missing or invalid", HttpStatusCode.Unauthorized)
+                );
+
+                return context.Response.WriteAsync(result);
+            },
+            OnForbidden = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+
+                var result = JsonSerializer.Serialize(
+                    ApiResponse<string>.Failed(null, "Forbidden: You don’t have permission", HttpStatusCode.Forbidden)
+                );
+
+                return context.Response.WriteAsync(result);
+            }
         };
     });
 //.AddGoogle(GoogleDefaults.AuthenticationScheme, opt =>

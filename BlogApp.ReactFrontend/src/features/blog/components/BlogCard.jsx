@@ -1,7 +1,11 @@
 /* eslint-disable react/prop-types */
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { VoteButtons } from "./VoteButtons";
 import Button from "../../../components/common/Button";
+import ConfirmModal from "../components/ConfirmModal";
+import { deleteBlog } from "../service/blogService";
+import { showErrorToast, showSuccessToast } from "../../../common/utils/toastHelper";
 
 export const BlogCard = ({
   blog,
@@ -9,7 +13,31 @@ export const BlogCard = ({
   onVote,
   showFullContent = false,
   ownBlog = false,
+  onDeleted // used in MyBlogPosts.jsx to remove the deleted blog from the list
 }) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleBlogDelete = async () => {
+    try {
+      const res = await deleteBlog(blog.blogId);
+
+      if (res?.statusCode === 200) {
+        if (onDeleted) onDeleted(blog.blogId);
+        setShowConfirm(false);
+        showSuccessToast(res.message || "Blog deleted successfully.");
+      }
+    } catch (error) {
+      // TODO: Need to update the error handling, this is not working properly
+      // TODO: the axios is not letting the response to reach here because of 4** errors thrown.
+      const errMsg =
+      error?.response?.data?.message || // backend message
+      error?.message || // JS error message
+      "Error occurred when deleting blog. Please try again.";
+
+      showErrorToast(errMsg);
+    }
+  }
+
   return (
     <div className="border p-4 rounded-lg shadow-sm">
       {/* Blog title, description and image. */}
@@ -81,14 +109,32 @@ export const BlogCard = ({
 
         <section>
           {ownBlog && (
-            <Link to={`/blog/edit/${blog.blogId}`}>
+            <div className="flex gap-2">
+              <Link to={`/blog/edit/${blog.blogId}`}>
+                <Button
+                  icon={"edit"}
+                  text={"edit"}
+                  className={"hover:bg-gray-200"}
+                />
+              </Link>
+
               <Button
-                icon={"edit"}
-                text={"edit"}
-                className={"hover:bg-gray-200"}
+                icon={"delete"}
+                text={"delete"}
+                className={"hover:bg-red-500 hover:text-white"}
+                onClick={() => setShowConfirm(true)}
               />
-            </Link>
+            </div>
           )}
+
+          {/* Blog Delete confirmation modal */}
+          <ConfirmModal
+            isOpen={showConfirm}
+            title="Delete Blog"
+            message="Are you sure you want to delete this blog? This action cannot be undone."
+            onConfirm={handleBlogDelete}
+            onCancel={() => setShowConfirm(false)}
+          />
         </section>
       </div>
     </div>

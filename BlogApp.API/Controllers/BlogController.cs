@@ -133,10 +133,10 @@ namespace BlogApp.API.Controllers
         }
 
         [Authorize]
-        [HttpDelete("delete")]
+        [HttpDelete("delete/{id:int}")]
         public async Task<IActionResult> DeleteBlog(int id)
         {
-            var userId = User.FindFirst("UserId").Value;
+            var userId = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(ApiResponse<string>.Failed(null, "User not authenticated."));
