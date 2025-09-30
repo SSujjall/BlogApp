@@ -44,6 +44,13 @@ const MyBlogPosts = () => {
     );
   };
 
+  // A callback to remove deleted blog from state
+  const handleBlogDeleted = (deletedBlogId) => {
+    setMyBlogs((prevBlogs) =>
+      prevBlogs.filter((blog) => blog.blogId !== deletedBlogId)
+    );
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -67,6 +74,7 @@ const MyBlogPosts = () => {
               userReactions={userReactions}
               onVote={handleVoteClick}
               ownBlog={isAuthenticated}
+              onDeleted={handleBlogDeleted}
             />
           ))}
       </div>

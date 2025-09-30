@@ -47,3 +47,7 @@ export const updateBlog = async (paramBlogId, blogUpdatedData) => {
 
   return await makeRequest("PUT", "Blog/update", formData, true);
 };
+
+export const deleteBlog = async (blogId) => {
+  return await makeRequest("DELETE", `/Blog/delete/${blogId}`, null, true);
+}

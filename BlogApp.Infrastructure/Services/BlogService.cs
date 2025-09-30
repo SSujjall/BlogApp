@@ -271,6 +271,11 @@ namespace BlogApp.Infrastructure.Services
                     }
                     blog.IsDeleted = true;
                     await _blogRepository.Update(blog); // Softdelete
+                    
+                    // Invalidate Cache after delete
+                    await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+                    // TODO: implement cache for blogById and UserSpecificBlog and when deleting, invalidate them too.
+                    
                     return ApiResponse<string>.Success(null, "Blog Deleted Successfully");
                 }
                 catch (Exception ex)
