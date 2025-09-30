@@ -27,14 +27,14 @@ const Home = () => {
     const fetchBlogs = async () => {
       setIsLoading(true);
       try {
-        const data = await getBlogs({
+        const apiRes = await getBlogs({
           sortBy,
           search,
           skip: page * pageSize,
           take: pageSize,
         });
-        setBlogs(data.data);
-        setTotalBlogs(data.totalCount);
+        setBlogs(Array.isArray(apiRes?.data) ? apiRes.data : []);
+        setTotalBlogs(typeof apiRes?.totalCount === "number" ? apiRes.totalCount : 0);
       } catch {
         // showErrorToast("Error fetching blogs");
       } finally {
@@ -84,12 +84,24 @@ const Home = () => {
     );
   }
 
-  if (blogs.length === 0 && search) {
+   if (blogs.length === 0 && search) {
     return (
       <Layout>
         <div className="flex justify-center items-center min-h-[50vh]">
           <p className="text-lg text-gray-600">
             No blogs found matching your search
+          </p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (blogs.length === 0) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <p className="text-lg text-gray-600">
+            No blogs found.
           </p>
         </div>
       </Layout>
