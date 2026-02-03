@@ -51,9 +51,12 @@ namespace BlogApp.Tests.ControllerTests
             Assert.IsNotNull(okResult);
 
             var returnedRes = okResult.Value as ApiResponse<IEnumerable<BlogsDTO>>;
-            Assert.IsNotNull(returnedRes);
-            Assert.AreEqual(HttpStatusCode.OK, returnedRes.StatusCode);
-            Assert.AreEqual(1, returnedRes.Data.Count());
+            Assert.Multiple(() =>
+            {
+                Assert.That(returnedRes, Is.Not.Null);
+                Assert.That(returnedRes!.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(returnedRes.Data.Count(), Is.EqualTo(1));
+            });
         }
 
         [Test]
@@ -68,8 +71,8 @@ namespace BlogApp.Tests.ControllerTests
 
             // Assert
             var statusCodeResult = result as ObjectResult;
-            Assert.IsNotNull(statusCodeResult);
-            Assert.AreEqual((int)HttpStatusCode.InternalServerError, statusCodeResult.StatusCode);
+            Assert.That(statusCodeResult, Is.Not.Null);
+            Assert.That(statusCodeResult.StatusCode, Is.EqualTo((int)HttpStatusCode.InternalServerError));
         }
     }
 }

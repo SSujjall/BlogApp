@@ -78,10 +78,13 @@ public class BlogsServiceTest
         var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new Domain.Shared.CacheRequestItems { });
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-        Assert.AreEqual(1, result.Data.Count());
-        Assert.AreEqual("Test Blog", result.Data.First().Title);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(result.Data.Count(), Is.EqualTo(1));
+            Assert.That(result.Data.First().Title, Is.EqualTo("Test Blog"));
+        });
     }
 
     [Test]
@@ -96,8 +99,11 @@ public class BlogsServiceTest
         var result = await _blogService.GetAllBlogs(new GetRequest<Blogs>(), new Domain.Shared.CacheRequestItems { });
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
-        Assert.IsNull(result.Data);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            Assert.That(result.Data, Is.Null);
+        });
     }
 }
