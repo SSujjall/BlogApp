@@ -51,7 +51,7 @@ namespace BlogApp.Infrastructure.Services
                     throw new ServiceException(errors, HttpStatusCode.Conflict);
                 }
 
-                // Add user to the user role
+                // Add user to the 'User' role
                 var addToRoleResult = await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
                 if (!addToRoleResult.Succeeded)
                 {
@@ -77,27 +77,20 @@ namespace BlogApp.Infrastructure.Services
         public async Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);
-
             if (user == null)
             {
-                var errors = new Dictionary<string, string> { { "Username", "Userame does not exist." } };
-                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.NotFound);
+                return InvalidLoginResponse();
+            }
+            if (user.EmailConfirmed == false)
+            {
+                var errors = new Dictionary<string, string> { { "UnverifiedEmail", "Email is not verified. Please verify email first and try again" } };
+                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
             }
 
             var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
             if (isPasswordCorrect == false)
             {
-                var errors = new Dictionary<string, string> { { "Password", "Invalid password" } };
-                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
-            }
-
-            var isEmailVerified = await _userManager.IsEmailConfirmedAsync(user);
-
-            if (isEmailVerified == false)
-            {
-                var errors = new Dictionary<string, string> { { "Email", "Email not verified" } };
-                return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
+                return InvalidLoginResponse();
             }
 
             #region generate and update jwt & refresh token with expiry in db
@@ -118,6 +111,16 @@ namespace BlogApp.Infrastructure.Services
             #endregion
 
             return ApiResponse<LoginResponseDTO>.Success(response, "User Validated");
+        }
+
+        private ApiResponse<LoginResponseDTO> InvalidLoginResponse()
+        {
+            var errors = new Dictionary<string, string>
+            {
+                { "InvalidCredentials", "Invalid username or password." }
+            };
+
+            return ApiResponse<LoginResponseDTO>.Failed(errors, "Login failed", HttpStatusCode.Unauthorized);
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> RefreshToken(RefreshTokenRequestDTO model)
