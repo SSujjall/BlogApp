@@ -161,6 +161,7 @@ namespace BlogApp.Infrastructure.Services
                     };
                     throw new ServiceException(errors, HttpStatusCode.ServiceUnavailable);
                 }
+                await _blogRepository.SaveChangesAsync();
 
                 var userDetail = await _userRepository.GetByIdAsync(result.UserId); // create a separate method in repo for just getting username and userId using 'result.UserId' instead of fetching everything.
                 #region response model mapping
