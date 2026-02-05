@@ -9,6 +9,6 @@ namespace BlogApp.Application.Helpers.EmailService.Service
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(EmailMessage message);
+        Task<bool> SendEmailAsync(EmailMessage message);
     }
 }

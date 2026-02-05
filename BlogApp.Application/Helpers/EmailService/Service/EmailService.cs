@@ -1,5 +1,6 @@
 ﻿using BlogApp.Application.Helpers.EmailService.Config;
 using BlogApp.Application.Helpers.EmailService.Model;
+using Microsoft.Extensions.Logging;
 using MimeKit;
 
 namespace BlogApp.Application.Helpers.EmailService.Service
@@ -7,12 +8,18 @@ namespace BlogApp.Application.Helpers.EmailService.Service
     public class EmailService : IEmailService
     {
         private readonly EmailConfig _emailConfig;
-        public EmailService(EmailConfig emailConfig) => _emailConfig = emailConfig;
+        private readonly ILogger<EmailService> _logger;
 
-        public async Task SendEmailAsync(EmailMessage message)
+        public EmailService(EmailConfig emailConfig, ILogger<EmailService> logger)
+        {
+            _emailConfig = emailConfig;
+            _logger = logger;
+        }
+
+        public async Task<bool> SendEmailAsync(EmailMessage message)
         {
             var emailMessage = CreateEmailMessage(message);
-            await Send(emailMessage);
+            return await Send(emailMessage);
         }
 
         private MimeMessage CreateEmailMessage(EmailMessage message)
@@ -26,9 +33,9 @@ namespace BlogApp.Application.Helpers.EmailService.Service
             return emailMessage;
         }
 
-        private async Task Send(MimeMessage mailMessage)
+        private async Task<bool> Send(MimeMessage mailMessage)
         {
-            var client = new MailKit.Net.Smtp.SmtpClient();
+            using var client = new MailKit.Net.Smtp.SmtpClient();
 
             try
             {
@@ -36,15 +43,20 @@ namespace BlogApp.Application.Helpers.EmailService.Service
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
                 await client.AuthenticateAsync(_emailConfig.Username, _emailConfig.Password);
                 await client.SendAsync(mailMessage);
+                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException();
+                _logger.LogError(ex, "Error sending email to {Recipients}", string.Join(",", mailMessage.To));
+                return false;
             }
             finally
             {
-                await client.DisconnectAsync(true);
-                client.Dispose();
+                if (client.IsConnected)
+                {
+                    await client.DisconnectAsync(true);
+                }
+                //client.Dispose(); // no need for dispose as we are using the 'using' keyword for 'client'
             }
         }
     }

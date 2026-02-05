@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Mail;
 
 namespace BlogApp.API.Controllers
 {
@@ -19,15 +20,21 @@ namespace BlogApp.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IEmailService _emailService;
+        //private readonly IEmailService _emailService;
         private readonly IGoogleAuthService _googleAuthService;
+        private readonly IBackgroundEmailQueue _emailQueue;
 
-        public AuthController(IAuthService authService, IEmailService emailService,
-                              IGoogleAuthService googleAuthService)
+        public AuthController(
+            IAuthService authService, 
+            //IEmailService emailService,
+            IGoogleAuthService googleAuthService,
+            IBackgroundEmailQueue emailQueue
+        )
         {
             _authService = authService;
-            _emailService = emailService;
+            //_emailService = emailService;
             _googleAuthService = googleAuthService;
+            _emailQueue = emailQueue;
         }
 
         [HttpPost("register")]
@@ -41,7 +48,9 @@ namespace BlogApp.API.Controllers
 
             var verificationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token = response.Data.EmailConfirmToken, email = registerDto.Email }, Request.Scheme);
             var emailMessage = new EmailMessage(new[] { registerDto.Email }, "Please confirm your email", $"Please confirm your email by clicking the link: {verificationLink}");
-            await _emailService.SendEmailAsync(emailMessage);
+            //await _emailService.SendEmailAsync(emailMessage);
+
+            _emailQueue.QueueEmail(emailMessage); // Instead of waiting for the email service, now it is run in the background
             return Ok(response);
         }
 
@@ -67,7 +76,8 @@ namespace BlogApp.API.Controllers
             {
                 var forgotPasswordLink = Url.Action(nameof(ResetPassword), "Auth", new { token = response.Data.ForgotPasswordToken, email }, Request.Scheme);
                 var message = new EmailMessage(new string[] { email }, "Password Reset Link", $"Click the link to reset password: {forgotPasswordLink!}");
-                await _emailService.SendEmailAsync(message);
+                //await _emailService.SendEmailAsync(message);
+                _emailQueue.QueueEmail(message); // Instead of waiting for the email service, now it is run in the background
                 return Ok(response);
             }
 
