@@ -9,7 +9,7 @@ namespace BlogApp.Infrastructure.Repositories
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         private readonly AppDbContext _dbContext;
-        protected readonly DbSet<T> _dbSet; // for reaction repo
+        protected readonly DbSet<T> _dbSet;
 
         public BaseRepository(AppDbContext dbContext)
         {
@@ -17,25 +17,25 @@ namespace BlogApp.Infrastructure.Repositories
             _dbSet = dbContext.Set<T>();
         }
 
-        public async Task<T> Add(T entity)
+        public async Task<T> AddAsync(T entity)
         {
             var result = await _dbContext.Set<T>().AddAsync(entity);
-            _dbContext.SaveChanges();
             return result.Entity;
         }
 
-        public async Task Delete(T entity)
+        public Task<T> Update(T entity)
+        {
+            var result = _dbContext.Set<T>().Update(entity);
+            return Task.FromResult(result.Entity);
+        }
+
+        public Task Delete(T entity)
         {
             _dbContext.Remove(entity);
-            await _dbContext.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
-        public async Task<T> FindSingleByConditionAsync(Expression<Func<T, bool>> expression)
-        {
-            return await _dbContext.Set<T>().FirstOrDefaultAsync(expression);
-        }
-
-        public async Task<IEnumerable<T>> GetAll(GetRequest<T>? request)
+        public async Task<IEnumerable<T>> GetAllAsync(GetRequest<T>? request)
         {
             var query = _dbContext.Set<T>().AsQueryable();
 
@@ -64,27 +64,24 @@ namespace BlogApp.Infrastructure.Repositories
             return result;
         }
 
-        public async Task<T>? GetById(object entityId)
+        public async Task<T?> GetByIdAsync(object entityId)
         {
-            var result = await _dbContext.FindAsync<T>(entityId);
-            return result;
+            return await _dbContext.FindAsync<T>(entityId);
         }
 
-        public async Task SaveChangesAsync()
+        public async Task<T> FindSingleByConditionAsync(Expression<Func<T, bool>> expression)
         {
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task<T> Update(T entity)
-        {
-            var result = _dbContext.Update(entity);
-            await SaveChangesAsync();
-            return result.Entity;
+            return await _dbContext.Set<T>().FirstOrDefaultAsync(expression);
         }
 
         public async Task<IEnumerable<T>> FindAllByConditionAsync(Expression<Func<T, bool>> expression)
         {
             return await _dbContext.Set<T>().Where(expression).ToListAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

@@ -3,17 +3,12 @@ namespace BlogApp.Application.Helpers.HelperModels
 {
     public class ApiResponse<T>
     {
+        public HttpStatusCode StatusCode { get; set; }
         public bool Status { get; set; }
         public string Message { get; set; }
         public T Data { get; set; }
-        public HttpStatusCode StatusCode { get; set; }
         public Dictionary<string, string> Errors { get; set; }
         public int? TotalCount { get; set; }
-
-        private ApiResponse()
-        {
-            Errors = new Dictionary<string, string>();
-        }
 
         public static ApiResponse<T> Success(T data, string message, HttpStatusCode statusCode = HttpStatusCode.OK, int? totalCount = null)
         {
@@ -23,7 +18,8 @@ namespace BlogApp.Application.Helpers.HelperModels
                 Message = message,
                 Data = data,
                 StatusCode = statusCode,
-                TotalCount = totalCount
+                TotalCount = totalCount,
+                Errors = null
             };
         }
 

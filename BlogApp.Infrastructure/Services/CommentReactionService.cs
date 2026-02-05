@@ -70,7 +70,7 @@ namespace BlogApp.Infrastructure.Services
                 {
                     var request = _mapper.Map<CommentReaction>(model);
                     request.UserId = userId; // set the userId to the one coming from parameter
-                    var response = await _commentReactionRepo.Add(request);
+                    var response = await _commentReactionRepo.AddAsync(request);
                     await _commentService.UpdateCommentVoteCount(model, false, null); // Update vote count in main comment table
                     if (response != null)
                     {

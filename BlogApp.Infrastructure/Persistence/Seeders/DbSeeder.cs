@@ -121,5 +121,19 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
                 .HasForeignKey(ch => ch.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
+
+        public static void SeedUserRole(ModelBuilder builder)
+        {
+            var userRoleId = Guid.NewGuid().ToString();
+
+            // seed user role
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Name = BlogApp.Domain.Shared.UserRoles.User.ToString(),
+                NormalizedName = BlogApp.Domain.Shared.UserRoles.User.ToString().ToUpper(),
+                Id = userRoleId,
+                ConcurrencyStamp = userRoleId
+            });
+        }
     }
 }

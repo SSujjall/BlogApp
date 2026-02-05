@@ -71,7 +71,7 @@ namespace BlogApp.Infrastructure.Services
             var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = id.ToString() });
             var result = await _redisCache.GetOrCreateCache(
                 cacheKey,
-                async () => await _blogRepository.GetById(id),
+                async () => await _blogRepository.GetByIdAsync(id),
                 TimeSpan.FromDays(1)
             );
             //var result = await _blogRepository.GetById(id);
@@ -105,7 +105,7 @@ namespace BlogApp.Infrastructure.Services
             {
                 Filter = (x => x.UserId == userId && x.IsDeleted == false)
             };
-            var result = await _blogRepository.GetAll(reqFilter);
+            var result = await _blogRepository.GetAllAsync(reqFilter);
             if (result.Any())
             {
                 // mapping response model
@@ -143,10 +143,10 @@ namespace BlogApp.Infrastructure.Services
                 ImageUrl = imageUrl
             };
             #endregion
-            var result = await _blogRepository.Add(request);
+            var result = await _blogRepository.AddAsync(request);
             if (result != null)
             {
-                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using 'result.UserId' instead of fetching everything.
+                var userDetail = await _userRepository.GetByIdAsync(result.UserId); // create a separate method in repo for just getting username and userId using 'result.UserId' instead of fetching everything.
                 #region response model mapping
                 var response = new BlogsDTO
                 {
@@ -175,7 +175,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<BlogsDTO>> UpdateBlog(UpdateBlogDTO dto, string userId)
         {
-            var existingBlog = await _blogRepository.GetById(dto.BlogId);
+            var existingBlog = await _blogRepository.GetByIdAsync(dto.BlogId);
             if (existingBlog != null)
             {
                 if (existingBlog.UserId != userId)
@@ -200,7 +200,7 @@ namespace BlogApp.Infrastructure.Services
                 #region Add to Blog History
                 var historyReq = _mapper.Map<BlogHistory>(existingBlog);
                 historyReq.CreatedAt = DateTime.Now;
-                var historyRes = await _blogHistoryRepo.Add(historyReq);
+                var historyRes = await _blogHistoryRepo.AddAsync(historyReq);
                 if (historyRes == null)
                 {
                     var error = new Dictionary<string, string>() { { "Blog History", "Add Blog History respons returned null." } };
@@ -253,7 +253,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<string>> DeleteBlog(int id, string userId)
         {
-            var blog = await _blogRepository.GetById(id);
+            var blog = await _blogRepository.GetByIdAsync(id);
             if (blog != null)
             {
                 if (blog.UserId != userId)
@@ -290,7 +290,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task UpdateBlogVoteCount(AddOrUpdateBlogReactionDTO model, bool reactionExists, VoteType? previousVote)
         {
-            var blog = await _blogRepository.GetById(model.BlogId);
+            var blog = await _blogRepository.GetByIdAsync(model.BlogId);
             if (blog != null)
             {
                 if (!reactionExists) // New reaction
@@ -344,7 +344,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task UpdateBlogCommentCount(int blogId, bool isAdding)
         {
-            var blog = await _blogRepository.GetById(blogId);
+            var blog = await _blogRepository.GetByIdAsync(blogId);
             if (blog != null)
             {
                 if (isAdding)

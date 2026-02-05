@@ -22,6 +22,9 @@ namespace BlogApp.Infrastructure.Persistence.Contexts
 
             // Seeding Entity Configurations
             DbSeeder.SeedConfigurationToDB(builder);
+
+            // Seeding User role to DB
+            DbSeeder.SeedUserRole(builder);
         }
 
         public DbSet<Users> Users { get; set; }

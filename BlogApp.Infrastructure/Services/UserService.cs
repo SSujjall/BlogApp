@@ -23,7 +23,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<IEnumerable<UserDTO>>> GetAllUsers()
         {
-            var result = await _userRepository.GetAll(null);
+            var result = await _userRepository.GetAllAsync(null);
             if (result.Any())
             {
                 var response = _mapper.Map<IEnumerable<UserDTO>>(result);
@@ -35,7 +35,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<UserDTO>> GetUserById(string userId)
         {
-            var result = await _userRepository.GetById(userId);
+            var result = await _userRepository.GetByIdAsync(userId);
             if (result != null)
             {
                 #region response model mapping
@@ -56,7 +56,7 @@ namespace BlogApp.Infrastructure.Services
         {
             Dictionary<string, string> errors;
 
-            var user = await _userRepository.GetById(updatePwDto.UserId);
+            var user = await _userRepository.GetByIdAsync(updatePwDto.UserId);
             if (user == null)
             {
                 errors = new Dictionary<string, string>() { { "User", "User Not Found" } };
