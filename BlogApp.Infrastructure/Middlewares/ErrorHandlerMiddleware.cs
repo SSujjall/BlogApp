@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using BlogApp.Application.Exceptions;
+using BlogApp.Application.Helpers.HelperModels;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace BlogApp.Infrastructure.Middlewares
 {
@@ -33,16 +36,42 @@ namespace BlogApp.Infrastructure.Middlewares
         {
             // Set the response status code
             context.Response.ContentType = "application/json";
+
+            // Service excetpions
+            if (exception is ServiceException serviceEx)
+            {
+                context.Response.StatusCode = (int)serviceEx.StatusCode;
+
+                var businessExMessage = "Request failed";
+                var businessStatusCode = context.Response.StatusCode;
+
+                var businessRes = ApiResponse<string>.Failed(
+                    serviceEx.Errors,
+                    businessExMessage,
+                    (HttpStatusCode)businessStatusCode
+                );
+
+                var json = JsonConvert.SerializeObject(businessRes);
+                return context.Response.WriteAsync(json);
+            }
+
+            // Unknown exception
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            var errorResponse = new
+            var errors = new Dictionary<string, string>
             {
-                StatusCode = context.Response.StatusCode,
-                Message = "An unexpected error occurred. Please try again later.",
-                Details = exception.Message // Optionally, log this or send more detailed info
+                { "SystemError", exception.Message }
             };
+            var message = "An unexpected error occurred. Please try again later.";
+            var statusCode = context.Response.StatusCode;
 
-            var jsonResponse = JsonConvert.SerializeObject(errorResponse);
+            var errorRes = ApiResponse<string>.Failed(
+                errors,
+                message,
+                (HttpStatusCode)statusCode
+            );
+
+            var jsonResponse = JsonConvert.SerializeObject(errorRes);
             return context.Response.WriteAsync(jsonResponse);
         }
     }

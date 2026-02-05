@@ -77,7 +77,7 @@ namespace BlogApp.Infrastructure.Services
                 {
                     var request = _mapper.Map<BlogReaction>(model);
                     request.UserId = userId; // set the userId to the one coming from parameter
-                    var response = await _blogReactionRepo.Add(request);
+                    var response = await _blogReactionRepo.AddAsync(request);
                     await _blogService.UpdateBlogVoteCount(model, false, null); // Update vote count in main blog table
                     if (response != null)
                     {

@@ -2,9 +2,9 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Domain.Configs;
 using BlogApp.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,12 +13,12 @@ namespace BlogApp.Application.Helpers.TokenHelper
     public class TokenService : ITokenService
     {
         private readonly JwtConfig _jwtConfig;
-        private readonly IAuthRepository _authRepository;
+        private readonly UserManager<Users> _userManager;
 
-        public TokenService(IOptions<JwtConfig> jwtSettings, IAuthRepository authRepository)
+        public TokenService(IOptions<JwtConfig> jwtSettings, UserManager<Users> userManager)
         {
             _jwtConfig = jwtSettings.Value;
-            _authRepository = authRepository;
+            _userManager = userManager;
         }
 
         public async Task<string> GenerateJwtToken(Users user)
@@ -26,7 +26,7 @@ namespace BlogApp.Application.Helpers.TokenHelper
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var userRole = await _authRepository.GetUserRole(user);
+            var userRole = _userManager.GetRolesAsync(user).Result.FirstOrDefault();
 
             var claims = new List<Claim>
             {

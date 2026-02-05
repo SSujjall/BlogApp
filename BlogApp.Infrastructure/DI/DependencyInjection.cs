@@ -10,6 +10,7 @@ using BlogApp.Infrastructure.Persistence.Health;
 using BlogApp.Infrastructure.Redis_Cache.Service;
 using BlogApp.Infrastructure.Repositories;
 using BlogApp.Infrastructure.Services;
+using BlogApp.Infrastructure.Services.HelperServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,7 +51,6 @@ namespace BlogApp.Infrastructure.DI
             #region Register Repositories
             services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IAuthRepository, AuthRepository>();
             services.AddTransient<IBlogRepository, BlogRepository>();
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddScoped<IBlogReactionRepository, BlogReactionRepository>();
@@ -68,6 +68,9 @@ namespace BlogApp.Infrastructure.DI
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            services.AddSingleton<IBackgroundEmailQueue, BackgroundEmailQueue>();
+            services.AddHostedService<EmailBackgroundService>();
+            services.AddScoped<ITransactionService, TransactionService>();
             #endregion
 
             #region Add Health Check Configuration

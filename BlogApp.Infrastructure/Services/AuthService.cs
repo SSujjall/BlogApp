@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using BlogApp.Application.DTOs;
+using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Helpers.TokenHelper;
-using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
@@ -12,94 +12,71 @@ namespace BlogApp.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IAuthRepository _authRepository;
         private readonly UserManager<Users> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ITokenService _tokenService;
+        private readonly ITransactionService _transactionService;
 
-        public AuthService(IAuthRepository authRepository, UserManager<Users> userManager,
-                           RoleManager<IdentityRole> roleManager, ITokenService tokenService)
+        public AuthService(
+            UserManager<Users> userManager,
+            ITokenService tokenService,
+            ITransactionService transactionService
+        )
         {
-            _authRepository = authRepository;
             _userManager = userManager;
-            _roleManager = roleManager;
             _tokenService = tokenService;
+            _transactionService = transactionService;
         }
 
         public async Task<ApiResponse<RegisterResponseDTO>> RegisterUser(RegisterDTO registerDto)
         {
-            // Check if the username already exists
-            if (await _authRepository.UsernameExists(registerDto.Username))
+            return await _transactionService.ExecuteInTransactionAsync(async () =>
             {
-                var errors = new Dictionary<string, string> { { "Username", "Username already used." } };
-                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.");
-            }
-            if (await _authRepository.EmailExists(registerDto.Email))
-            {
-                var errors = new Dictionary<string, string> { { "Email", "Email already used." } };
-                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.");
-            }
-
-            #region request model mapping
-            var user = new Users
-            {
-                UserName = registerDto.Username,
-                Email = registerDto.Email,
-                SecurityStamp = Guid.NewGuid().ToString()
-            };
-            #endregion
-
-            // Attempt to create the user
-            var createResult = await _authRepository.CreateNewUser(user, registerDto.Password);
-            if (!createResult)
-            {
-                var errors = new Dictionary<string, string> { { "User", "Error when creating user." } };
-                return ApiResponse<RegisterResponseDTO>.Failed(errors, "User Creation Failed.", HttpStatusCode.InternalServerError);
-            }
-
-            // Ensure the role exists
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User.ToString()))
-            {
-                var role = new IdentityRole(UserRoles.User.ToString())
+                #region request model mapping
+                var user = new Users
                 {
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                    UserName = registerDto.Username,
+                    Email = registerDto.Email,
+                    SecurityStamp = Guid.NewGuid().ToString()
                 };
-                var roleCreateResult = await _roleManager.CreateAsync(role);
-                if (!roleCreateResult.Succeeded)
+                #endregion
+
+                // Attempt to create the user
+                var userCreateResult = await _userManager.CreateAsync(user, registerDto.Password);
+                if (!userCreateResult.Succeeded)
                 {
-                    var errors = new Dictionary<string, string> { { "Role", "Failed to create role" } };
-                    return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
+                    var errors = userCreateResult.Errors.ToDictionary(
+                        e => e.Code,
+                        e => e.Description
+                    );
+                    throw new ServiceException(errors, HttpStatusCode.Conflict);
                 }
-            }
 
-            // Add user to the role
-            var addToRoleResult = await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
-            if (!addToRoleResult.Succeeded)
-            {
-                var errors = new Dictionary<string, string> { { "User", "Failed to assign role to user" } };
-                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Register Failed.", HttpStatusCode.InternalServerError);
-            }
+                // Add user to the user role
+                var addToRoleResult = await _userManager.AddToRoleAsync(user, UserRoles.User.ToString());
+                if (!addToRoleResult.Succeeded)
+                {
+                    var errors = addToRoleResult.Errors.ToDictionary(
+                        e => e.Code,
+                        e => e.Description
+                    );
+                    throw new ServiceException(errors, HttpStatusCode.Conflict);
+                }
 
-            #region Generate Email verification token
-            var existingUser = await _authRepository.FindByUsername(registerDto.Username);
-            if (existingUser == null)
-            {
-                var errors = new Dictionary<string, string> { { "User", "Failed to fetch newly created user." } };
-                return ApiResponse<RegisterResponseDTO>.Failed(errors, "Failed to fetch user.");
-            }
-            var emailVerificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
-            var response = new RegisterResponseDTO
-            {
-                EmailConfirmToken = emailVerificationToken
-            };
-            #endregion
+                #region Generate Email verification token
+                var emailVerificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var response = new RegisterResponseDTO
+                {
+                    EmailConfirmToken = emailVerificationToken
+                };
+                #endregion
 
-            return ApiResponse<RegisterResponseDTO>.Success(response, "User created successfully");
+                return ApiResponse<RegisterResponseDTO>.Success(response, "User created successfully");
+            });
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto)
         {
-            var user = await _authRepository.FindByUsername(loginDto.Username);
+            var user = await _userManager.FindByNameAsync(loginDto.Username);
 
             if (user == null)
             {

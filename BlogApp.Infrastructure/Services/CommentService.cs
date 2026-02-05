@@ -13,7 +13,7 @@ namespace BlogApp.Infrastructure.Services
     {
         public async Task<ApiResponse<IEnumerable<CommentDTO>>> GetAllComment()
         {
-            var result = await _commentRepository.GetAll(null);
+            var result = await _commentRepository.GetAllAsync(null);
             var response = _mapper.Map<IEnumerable<CommentDTO>>(result);
             return ApiResponse<IEnumerable<CommentDTO>>.Success(response, "All Comments fetched.");
         }
@@ -25,7 +25,7 @@ namespace BlogApp.Infrastructure.Services
                 Filter = (x => x.BlogId == blogId && x.IsDeleted == false)
             };
 
-            var result = await _commentRepository.GetAll(requestFilter);
+            var result = await _commentRepository.GetAllAsync(requestFilter);
             if (result != null)
             {
                 #region response model mapping (using LINQ instead of normal foreach loop)
@@ -59,12 +59,12 @@ namespace BlogApp.Infrastructure.Services
             };
             #endregion
 
-            var result = await _commentRepository.Add(request);
+            var result = await _commentRepository.AddAsync(request);
             if (result != null)
             {
                 await _blogService.UpdateBlogCommentCount(dto.BlogId, true); // Increase comment count
                 #region response model mapping
-                var userDetail = await _userRepository.GetById(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
+                var userDetail = await _userRepository.GetByIdAsync(result.UserId); // create a separate method in repo for just getting username and userId using result.UserId instead of fetching everything.
                 var response = new CommentDTO
                 {
                     CommentId = result.CommentId,
@@ -86,7 +86,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<CommentDTO>> UpdateComment(UpdateCommentDTO dto, string userId)
         {
-            var existingComment = await _commentRepository.GetById(dto.CommentId);
+            var existingComment = await _commentRepository.GetByIdAsync(dto.CommentId);
             if (existingComment != null)
             {
                 if (existingComment.UserId != userId)
@@ -98,7 +98,7 @@ namespace BlogApp.Infrastructure.Services
                 #region Add to Comment History
                 var historyReq = _mapper.Map<CommentHistory>(existingComment);
                 historyReq.UpdatedAt = DateTime.Now;
-                var historyRes = await _commentHistoryRepo.Add(historyReq);
+                var historyRes = await _commentHistoryRepo.AddAsync(historyReq);
                 if (historyRes == null)
                 {
                     var error = new Dictionary<string, string>() { { "Comment History", "Add Comment History respons returned null." } };
@@ -138,7 +138,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<string>> DeleteComment(int commentId, string userId)
         {
-            var comment = await _commentRepository.GetById(commentId);
+            var comment = await _commentRepository.GetByIdAsync(commentId);
             if (comment != null)
             {
                 if (comment.UserId != userId)
@@ -171,7 +171,7 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task UpdateCommentVoteCount(AddOrUpdateCommentReactionDTO model, bool reactionExists, VoteType? previousVote)
         {
-            var comment = await _commentRepository.GetById(model.CommentId);
+            var comment = await _commentRepository.GetByIdAsync(model.CommentId);
             if (comment != null)
             {
                 if (!reactionExists) // New reaction
