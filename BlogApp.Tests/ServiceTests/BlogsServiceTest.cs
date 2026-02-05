@@ -3,6 +3,7 @@ using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
+using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Redis_Cache.Service;
 using BlogApp.Infrastructure.Services;
@@ -20,6 +21,7 @@ public class BlogsServiceTest
     private Mock<IMapper> _mockMapper;
     private Mock<IUserRepository> _mockUserRepo;
     private Mock<IRedisCache> _mockRedisCache;
+    private Mock<ITransactionService> _mockTranService;
 
     private BlogService _blogService;
 
@@ -32,6 +34,7 @@ public class BlogsServiceTest
         _mockMapper = new Mock<IMapper>();
         _mockUserRepo = new Mock<IUserRepository>();
         _mockRedisCache = new Mock<IRedisCache>();
+        _mockTranService = new Mock<ITransactionService>();
 
         _blogService = new BlogService(
             _mockBlogRepo.Object,
@@ -39,7 +42,8 @@ public class BlogsServiceTest
             _mockBlogHistoryRepo.Object,
             _mockMapper.Object,
             _mockUserRepo.Object,
-            _mockRedisCache.Object
+            _mockRedisCache.Object,
+            _mockTranService.Object
         );
     }
 
