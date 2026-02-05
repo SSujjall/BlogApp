@@ -24,6 +24,13 @@ namespace BlogApp.Application.DTOs
         public string Password { get; set; }
     }
 
+    public class ResendVerificationDTO
+    {
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress]
+        public string Email { get; set; }
+    }
+
     public class RegisterResponseDTO
     {
         public string EmailConfirmToken { get; set; }
