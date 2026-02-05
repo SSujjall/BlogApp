@@ -73,19 +73,31 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
             return data;
         }
 
-        public async Task<T> UpdateDataAndInvalidateCache<T>(string key, Func<Task<T>> exec)
+        //public async Task<T> UpdateDataAndInvalidateCache<T>(string key, Func<Task<T>> exec)
+        //{
+        //    var updatedData = await exec();
+
+        //    var invalidationMsg = new CacheInvalidationMessage
+        //    {
+        //        Key = key,
+        //        Timestamp = DateTime.UtcNow
+        //    };
+
+        //    await _subscriber.PublishAsync(_cacheInvalidationChannel, JsonSerializer.Serialize(invalidationMsg));
+
+        //    return updatedData;
+        //}
+
+        public async Task InvalidateKey(string key)
         {
-            var updatedData = await exec();
+            await _distributedCache.RemoveAsync(key);
 
             var invalidationMsg = new CacheInvalidationMessage
             {
                 Key = key,
                 Timestamp = DateTime.UtcNow
             };
-
             await _subscriber.PublishAsync(_cacheInvalidationChannel, JsonSerializer.Serialize(invalidationMsg));
-
-            return updatedData;
         }
 
         public async Task RemoveKey(string key)

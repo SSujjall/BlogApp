@@ -17,6 +17,6 @@ namespace BlogApp.Application.Interface.IServices
         Task<ApiResponse<CommentDTO>> AddComment(AddCommentDTO dto, string userId);
         Task<ApiResponse<CommentDTO>> UpdateComment(UpdateCommentDTO dto, string userId);
         Task<ApiResponse<string>> DeleteComment(int commentId, string userId);
-        Task UpdateCommentVoteCount(AddOrUpdateCommentReactionDTO model, bool reactionExists, VoteType? previousVote);
+        Task<bool> UpdateCommentVoteCount(AddOrUpdateCommentReactionDTO model, bool reactionExists, VoteType? previousVote);
     }
 }

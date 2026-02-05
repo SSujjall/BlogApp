@@ -1,6 +1,6 @@
-﻿using System.Net;
-using AutoMapper;
+﻿using AutoMapper;
 using BlogApp.Application.DTOs;
+using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.AppHelpers;
 using BlogApp.Application.Helpers.CloudinaryService.Service;
 using BlogApp.Application.Helpers.HelperModels;
@@ -9,6 +9,7 @@ using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
 using BlogApp.Infrastructure.Redis_Cache.Service;
+using System.Net;
 
 namespace BlogApp.Infrastructure.Services
 {
@@ -18,7 +19,8 @@ namespace BlogApp.Infrastructure.Services
         IBaseRepository<BlogHistory> _blogHistoryRepo,
         IMapper _mapper,
         IUserRepository _userRepository,
-        IRedisCache _redisCache
+        IRedisCache _redisCache,
+        ITransactionService _tranService
     ) : IBlogService
     {
         public async Task<ApiResponse<IEnumerable<BlogsDTO>>> GetAllBlogs(GetRequest<Blogs> request, CacheRequestItems requestForCache)
@@ -122,30 +124,44 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<BlogsDTO>> CreateBlog(string userId, CreateBlogDTO dto)
         {
-            string? imageUrl = null;
-            #region Uploading Image
-            if (dto.ImageUrl != null)
-            {
-                imageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
-                if (string.IsNullOrEmpty(imageUrl))
-                {
-                    return ApiResponse<BlogsDTO>.Failed(null, "Image Upload Failed");
-                }
-            }
-            #endregion
+            string? uploadedImageUrl = null;
 
-            #region request model mapping
-            var request = new Blogs
+            try
             {
-                UserId = userId,
-                Title = dto.Title,
-                Description = dto.Description,
-                ImageUrl = imageUrl
-            };
-            #endregion
-            var result = await _blogRepository.AddAsync(request);
-            if (result != null)
-            {
+                #region Uploading Image
+                if (dto.ImageUrl != null)
+                {
+                    uploadedImageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
+                    if (string.IsNullOrEmpty(uploadedImageUrl))
+                    {
+                        var imgError = new Dictionary<string, string>
+                        {
+                            { "ImageUploadFailed", "Image upload faiiled when creating blog" }
+                        };
+                        throw new ServiceException(imgError, HttpStatusCode.ServiceUnavailable);
+                    }
+                }
+                #endregion
+
+                #region request model mapping
+                var request = new Blogs
+                {
+                    UserId = userId,
+                    Title = dto.Title,
+                    Description = dto.Description,
+                    ImageUrl = uploadedImageUrl
+                };
+                #endregion
+                var result = await _blogRepository.AddAsync(request);
+                if (result == null)
+                {
+                    var errors = new Dictionary<string, string>
+                    {
+                        { "BlogCreationFailed", "Error occured when creating new blog" }
+                    };
+                    throw new ServiceException(errors, HttpStatusCode.ServiceUnavailable);
+                }
+
                 var userDetail = await _userRepository.GetByIdAsync(result.UserId); // create a separate method in repo for just getting username and userId using 'result.UserId' instead of fetching everything.
                 #region response model mapping
                 var response = new BlogsDTO
@@ -170,85 +186,123 @@ namespace BlogApp.Infrastructure.Services
 
                 return ApiResponse<BlogsDTO>.Success(response, "Blog created successfully.");
             }
-            return ApiResponse<BlogsDTO>.Failed(null, "Failed to create a new blog.");
+            catch
+            {
+                if (!string.IsNullOrEmpty(uploadedImageUrl))
+                {
+                    await _cloudinary.DeleteImage(uploadedImageUrl);
+                }
+
+                throw; // throws the service exception for cloudinary if error occurs when uploading image
+            }
         }
 
         public async Task<ApiResponse<BlogsDTO>> UpdateBlog(UpdateBlogDTO dto, string userId)
         {
             var existingBlog = await _blogRepository.GetByIdAsync(dto.BlogId);
-            if (existingBlog != null)
+            if (existingBlog == null)
             {
-                if (existingBlog.UserId != userId)
-                {
-                    var authError = new Dictionary<string, string>() { { "Authorization", "You are not authorized to update this blog." } };
-                    return ApiResponse<BlogsDTO>.Failed(authError, "Unauthorized blog update attempt.");
-                }
+                var errors = new Dictionary<string, string>() { { "Blog", "Blog Not Found." } };
+                return ApiResponse<BlogsDTO>.Failed(errors, "Blog Update Failed");
+            }
 
+            if (existingBlog.UserId != userId)
+            {
+                var authError = new Dictionary<string, string>() { { "Authorization", "You are not authorized to update this blog." } };
+                return ApiResponse<BlogsDTO>.Failed(authError, "Unauthorized blog update attempt.", HttpStatusCode.Unauthorized);
+            }
+
+            string? newImageUrl = null;
+            string? oldImageUrl = existingBlog.ImageUrl;
+
+            try
+            {
                 #region Upload Image (Upload validation is in UploadImage method itself)
-                var imageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
-
                 // If the new image is uploaded check if there is image in old blog and delete it.
-                if (imageUrl != null)
+                if (dto.ImageUrl != null)
                 {
-                    if (!string.IsNullOrEmpty(existingBlog.ImageUrl))
+                    newImageUrl = await _cloudinary.UploadImage(dto.ImageUrl);
+
+                    if (string.IsNullOrEmpty(newImageUrl))
                     {
-                        await _cloudinary.DeleteImage(existingBlog.ImageUrl);
+                        var imgUploadError = new Dictionary<string, string>
+                    {
+                        { "ImageUploadFailed", "Failed to upload new image" }
+                    };
+
+                        throw new ServiceException(imgUploadError, HttpStatusCode.ServiceUnavailable);
                     }
                 }
                 #endregion
 
-                #region Add to Blog History
-                var historyReq = _mapper.Map<BlogHistory>(existingBlog);
-                historyReq.CreatedAt = DateTime.Now;
-                var historyRes = await _blogHistoryRepo.AddAsync(historyReq);
-                if (historyRes == null)
+                // Transaction ensure either both adding to blog history and updating blog passes or both fails.
+                var result = await _tranService.ExecuteInTransactionAsync<Blogs>(async () =>
                 {
-                    var error = new Dictionary<string, string>() { { "Blog History", "Add Blog History respons returned null." } };
-                    return ApiResponse<BlogsDTO>.Failed(error, "Error When adding Blog History.");
-                }
-                #endregion
+                    #region Add to Blog History
+                    var historyReq = _mapper.Map<BlogHistory>(existingBlog);
+                    historyReq.CreatedAt = DateTime.Now;
+                    var historyRes = await _blogHistoryRepo.AddAsync(historyReq);
+                    if (historyRes == null)
+                    {
+                        var error = new Dictionary<string, string>() { { "Blog History", "Add Blog History response returned null." } };
+                        throw new ServiceException(error, HttpStatusCode.Conflict);
+                    }
+                    #endregion
 
-                #region request model mapping
-                existingBlog.Title = !string.IsNullOrEmpty(dto.Title) ? dto.Title : existingBlog.Title;
-                existingBlog.Description = !string.IsNullOrEmpty(dto.Description) ? dto.Description : existingBlog.Description;
-                existingBlog.ImageUrl = imageUrl ?? existingBlog.ImageUrl;
-                existingBlog.UpdatedAt = DateTime.Now;
-                #endregion
+                    #region Update Blog
+                    existingBlog.Title = !string.IsNullOrEmpty(dto.Title) ? dto.Title : existingBlog.Title;
+                    existingBlog.Description = !string.IsNullOrEmpty(dto.Description) ? dto.Description : existingBlog.Description;
+                    existingBlog.ImageUrl = newImageUrl ?? existingBlog.ImageUrl;
+                    existingBlog.UpdatedAt = DateTime.Now;
+                    #endregion
 
+                    await _blogRepository.Update(existingBlog);
+                    return existingBlog;                    
+                });
+
+                #region Cache invalidation after transaction success
                 var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = dto.BlogId.ToString() });
-                var result = await _redisCache.UpdateDataAndInvalidateCache(
-                    cacheKey,
-                    async () => await _blogRepository.Update(existingBlog)
-                );
+                await _redisCache.InvalidateKey(cacheKey);
 
                 // Invalidate GetAllBlogs key
                 await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+                #endregion
 
-                //var result = await _blogRepository.Update(existingBlog);
-                if (result != null)
+                // Delete OLD image AFTER SUCCESS
+                if (newImageUrl != null && !string.IsNullOrEmpty(oldImageUrl))
                 {
-                    #region response model mapping
-                    var response = new BlogsDTO
-                    {
-                        BlogId = result.BlogId,
-                        User = new BlogUser
-                        {
-                            UserId = result.UserId,
-                            Name = result.User.UserName ?? ""
-                        },
-                        Title = result.Title,
-                        Description = result.Description,
-                        ImageUrl = result.ImageUrl,
-                        UpVoteCount = result.UpVoteCount,
-                        DownVoteCount = result.DownVoteCount,
-                        CommentCount = result.CommentCount
-                    };
-                    #endregion
-                    return ApiResponse<BlogsDTO>.Success(response, "Blog Update Successful");
+                    await _cloudinary.DeleteImage(oldImageUrl);
                 }
+
+                #region response model mapping
+                var response = new BlogsDTO
+                {
+                    BlogId = result.BlogId,
+                    User = new BlogUser
+                    {
+                        UserId = result.UserId,
+                        Name = result.User.UserName ?? ""
+                    },
+                    Title = result.Title,
+                    Description = result.Description,
+                    ImageUrl = result.ImageUrl,
+                    UpVoteCount = result.UpVoteCount,
+                    DownVoteCount = result.DownVoteCount,
+                    CommentCount = result.CommentCount
+                };
+                #endregion
+                return ApiResponse<BlogsDTO>.Success(response, "Blog Update Successful");
             }
-            var errors = new Dictionary<string, string>() { { "Blog", "Blog Not Found." } };
-            return ApiResponse<BlogsDTO>.Failed(errors, "Blog Update Failed");
+            catch
+            {
+                // COMPENSATION — delete NEW image if DB transaction failed
+                if (!string.IsNullOrEmpty(newImageUrl))
+                {
+                    await _cloudinary.DeleteImage(newImageUrl);
+                }
+
+                throw;
+            }
         }
 
         public async Task<ApiResponse<string>> DeleteBlog(int id, string userId)
@@ -266,11 +320,12 @@ namespace BlogApp.Infrastructure.Services
                     // Checking if the blog is already deleted or not
                     if (blog.IsDeleted == true)
                     {
-                        var blogError = new Dictionary<string, string>() { { "Blog", "Blog is already softdeleted." } };
+                        var blogError = new Dictionary<string, string>() { { "Blog", "Blog not found." } };
                         return ApiResponse<string>.Failed(blogError, "Blog Deletion Failed");
                     }
                     blog.IsDeleted = true;
                     await _blogRepository.Update(blog); // Softdelete
+                    await _blogRepository.SaveChangesAsync();
                     
                     // Invalidate Cache after delete
                     await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
@@ -288,58 +343,63 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<string>.Failed(errors, "Blog Deletion Failed");
         }
 
-        public async Task UpdateBlogVoteCount(AddOrUpdateBlogReactionDTO model, bool reactionExists, VoteType? previousVote)
+        public async Task<bool> UpdateBlogVoteCount(AddOrUpdateBlogReactionDTO model, bool reactionExists, VoteType? previousVote)
         {
             var blog = await _blogRepository.GetByIdAsync(model.BlogId);
-            if (blog != null)
+            if (blog == null)
             {
-                if (!reactionExists) // New reaction
-                {
-                    if (model.ReactionType == VoteType.UpVote)
-                        blog.UpVoteCount++;
-                    else if (model.ReactionType == VoteType.DownVote)
-                        blog.DownVoteCount++;
-                }
-                else // Reaction is being updated
-                {
-                    // Remove previous vote
-                    if (previousVote == VoteType.UpVote)
-                        blog.UpVoteCount--;
-                    else if (previousVote == VoteType.DownVote)
-                        blog.DownVoteCount--;
-
-                    // Apply new vote
-                    if (model.ReactionType == VoteType.UpVote)
-                        blog.UpVoteCount++;
-                    else if (model.ReactionType == VoteType.DownVote)
-                        blog.DownVoteCount++;
-                }
-
-                // Ensure no negative votes
-                blog.UpVoteCount = Math.Max(0, blog.UpVoteCount);
-                blog.DownVoteCount = Math.Max(0, blog.DownVoteCount);
-
-                #region Invalidate Cache
-                var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = model.BlogId.ToString() });
-                // Update the blog and invalidate the cache
-                await _redisCache.UpdateDataAndInvalidateCache(
-                    cacheKey,
-                    async () => await _blogRepository.Update(blog)
-                );
-
-                // Also invalidate the GetAllBlogs cache since vote counts have changed
-                await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
-
-                // This will match any key containing the specific filter
-                //await DeleteKeysByPatternAsync("*Filter:asd*");
-
-                // This will match any key containing "Filter:" segment
-                //await DeleteKeysByPatternAsync("*Filter:*");
-
-                // This will match keys with specific pagination
-                //await DeleteKeysByPatternAsync("*Skip:0-Take:10*");
-                #endregion
+                return false;
             }
+
+            if (!reactionExists) // New reaction
+            {
+                if (model.ReactionType == VoteType.UpVote)
+                    blog.UpVoteCount++;
+                else if (model.ReactionType == VoteType.DownVote)
+                    blog.DownVoteCount++;
+            }
+            else // Reaction is being updated
+            {
+                // Remove previous vote
+                if (previousVote == VoteType.UpVote)
+                    blog.UpVoteCount--;
+                else if (previousVote == VoteType.DownVote)
+                    blog.DownVoteCount--;
+
+                // Apply new vote
+                if (model.ReactionType == VoteType.UpVote)
+                    blog.UpVoteCount++;
+                else if (model.ReactionType == VoteType.DownVote)
+                    blog.DownVoteCount++;
+            }
+
+            // Ensure no negative votes
+            blog.UpVoteCount = Math.Max(0, blog.UpVoteCount);
+            blog.DownVoteCount = Math.Max(0, blog.DownVoteCount);
+
+            // Update blog and save changes
+            await _blogRepository.Update(blog);
+            await _blogRepository.SaveChangesAsync();
+
+            #region Invalidate Cache
+            // Update the blog and invalidate the cache
+            var cacheKey = RedisCacheHelper.GenerateCacheKey("GetBlogById", new CacheRequestItems { Id = model.BlogId.ToString() });
+            await _redisCache.InvalidateKey(cacheKey);
+
+            // Also invalidate the GetAllBlogs cache since vote counts have changed
+            await _redisCache.DeleteKeysByPrefix(CacheKeys.GetAllBlogsPrefix);
+
+            // This will match any key containing the specific filter
+            //await DeleteKeysByPatternAsync("*Filter:asd*");
+
+            // This will match any key containing "Filter:" segment
+            //await DeleteKeysByPatternAsync("*Filter:*");
+
+            // This will match keys with specific pagination
+            //await DeleteKeysByPatternAsync("*Skip:0-Take:10*");
+            #endregion
+
+            return true;
         }
 
         public async Task UpdateBlogCommentCount(int blogId, bool isAdding)
@@ -354,11 +414,20 @@ namespace BlogApp.Infrastructure.Services
 
                 try
                 {
-                    await _blogRepository.Update(blog);
+                    var updatedBlog = await _blogRepository.Update(blog);
+                    if (updatedBlog == null)
+                    {
+                        var errors = new Dictionary<string, string>
+                        {
+                            { "UpdateBlogFailed", "Error occured when updating blog" }
+                        };
+                        throw new ServiceException(errors, HttpStatusCode.InternalServerError);
+                    }
+                    await _blogRepository.SaveChangesAsync();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    throw new Exception(ex.Message);
+                    throw;
                 }
             }
         }

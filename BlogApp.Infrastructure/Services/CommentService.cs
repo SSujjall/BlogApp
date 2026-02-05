@@ -5,6 +5,7 @@ using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Shared;
+using System.Reflection.Metadata;
 
 namespace BlogApp.Infrastructure.Services
 {
@@ -169,39 +170,44 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<string>.Failed(errors, "Comment Deletion failed.");
         }
 
-        public async Task UpdateCommentVoteCount(AddOrUpdateCommentReactionDTO model, bool reactionExists, VoteType? previousVote)
+        public async Task<bool> UpdateCommentVoteCount(AddOrUpdateCommentReactionDTO model, bool reactionExists, VoteType? previousVote)
         {
             var comment = await _commentRepository.GetByIdAsync(model.CommentId);
-            if (comment != null)
+            if (comment == null)
             {
-                if (!reactionExists) // New reaction
-                {
-                    if (model.ReactionType == VoteType.UpVote)
-                        comment.UpVoteCount++;
-                    else if (model.ReactionType == VoteType.DownVote)
-                        comment.DownVoteCount++;
-                }
-                else // Reaction is being updated
-                {
-                    // Remove previous vote
-                    if (previousVote == VoteType.UpVote)
-                        comment.UpVoteCount--;
-                    else if (previousVote == VoteType.DownVote)
-                        comment.DownVoteCount--;
-
-                    // Apply new vote
-                    if (model.ReactionType == VoteType.UpVote)
-                        comment.UpVoteCount++;
-                    else if (model.ReactionType == VoteType.DownVote)
-                        comment.DownVoteCount++;
-                }
-
-                // Ensure no negative votes
-                comment.UpVoteCount = Math.Max(0, comment.UpVoteCount);
-                comment.DownVoteCount = Math.Max(0, comment.DownVoteCount);
-
-                await _commentRepository.Update(comment);
+                return false;
             }
+
+            if (!reactionExists) // New reaction
+            {
+                if (model.ReactionType == VoteType.UpVote)
+                    comment.UpVoteCount++;
+                else if (model.ReactionType == VoteType.DownVote)
+                    comment.DownVoteCount++;
+            }
+            else // Reaction is being updated
+            {
+                // Remove previous vote
+                if (previousVote == VoteType.UpVote)
+                    comment.UpVoteCount--;
+                else if (previousVote == VoteType.DownVote)
+                    comment.DownVoteCount--;
+
+                // Apply new vote
+                if (model.ReactionType == VoteType.UpVote)
+                    comment.UpVoteCount++;
+                else if (model.ReactionType == VoteType.DownVote)
+                    comment.DownVoteCount++;
+            }
+
+            // Ensure no negative votes
+            comment.UpVoteCount = Math.Max(0, comment.UpVoteCount);
+            comment.DownVoteCount = Math.Max(0, comment.DownVoteCount);
+
+            await _commentRepository.Update(comment);
+            await _commentRepository.SaveChangesAsync();
+
+            return true;
         }
     }
 }

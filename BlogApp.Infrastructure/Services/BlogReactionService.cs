@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
+using System.Net;
 using AutoMapper;
-using Azure.Core;
 using BlogApp.Application.DTOs;
+using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
@@ -17,11 +12,12 @@ using BlogApp.Domain.Shared;
 namespace BlogApp.Infrastructure.Services
 {
     public class BlogReactionService(IBlogReactionRepository blogReactionRepo, IMapper mapper, 
-        IBlogService blogService) : IBlogReactionService
+        IBlogService blogService, ITransactionService tranService) : IBlogReactionService
     {
         private readonly IBlogReactionRepository _blogReactionRepo = blogReactionRepo;
         private readonly IMapper _mapper = mapper;
         private readonly IBlogService _blogService = blogService;
+        private readonly ITransactionService _tranService = tranService;
 
         public async Task<ApiResponse<IEnumerable<BlogReactionDTO>>> GetAllBlogVotes(int blogId)
         {
@@ -41,59 +37,80 @@ namespace BlogApp.Infrastructure.Services
 
         public async Task<ApiResponse<string>> VoteBlog(AddOrUpdateBlogReactionDTO model, string userId)
         {
-            Expression<Func<BlogReaction, bool>> filter = (x => x.BlogId == model.BlogId && x.UserId == userId);
-            var existingReaction = await _blogReactionRepo.FindSingleByConditionAsync(filter);
-            if (existingReaction != null)
+            return await _tranService.ExecuteInTransactionAsync(async () =>
             {
-                var previousVote = existingReaction.ReactionType;
-
-                if (previousVote == model.ReactionType)
+                Expression<Func<BlogReaction, bool>> filter = (x => x.BlogId == model.BlogId && x.UserId == userId);
+                var existingReaction = await _blogReactionRepo.FindSingleByConditionAsync(filter);
+                if (existingReaction != null)
                 {
-                    var errors = new Dictionary<string, string> { { "Same Vote", $"Cannot {previousVote} again." } };
-                    return ApiResponse<string>.Failed(errors, "Blog vote failed.");
-                }
+                    var previousVote = existingReaction.ReactionType;
 
-                if (model.ReactionType == VoteType.None)
-                {
-                    await _blogReactionRepo.Delete(existingReaction);
+                    // Prevent voting the same reaction twice
+                    if (previousVote == model.ReactionType)
+                    {
+                        var errors = new Dictionary<string, string> { { "SameVote", $"Cannot {previousVote} again." } };
+                        throw new ServiceException(errors, HttpStatusCode.BadRequest);
+                    }
+
+                    // Remove vote if user sets it to None
+                    if (model.ReactionType == VoteType.None)
+                    {
+                        await _blogReactionRepo.Delete(existingReaction);
+                    }
+                    else
+                    {
+                        // Update existing reaction
+                        existingReaction.ReactionType = model.ReactionType;
+                        await _blogReactionRepo.Update(existingReaction);
+                    }
+
+                    // Update vote counts in main blog table
+                    var success = await _blogService.UpdateBlogVoteCount(model, true, previousVote);
+                    if (success == false)
+                    {
+                        var errors = new Dictionary<string, string> { { "ErrorBlogVote", $"Error occured when updating the blog's vote count" } };
+                        throw new ServiceException(errors, HttpStatusCode.InternalServerError);
+                    }
+
+                    return ApiResponse<string>.Success(null, $"blog vote changed from {previousVote.ToString()} to {model.ReactionType.ToString()}");
                 }
                 else
                 {
-                    existingReaction.ReactionType = model.ReactionType;
-                    await _blogReactionRepo.Update(existingReaction);
-                }
+                    // Cannot remove vote if it doesn't exist
+                    if (model.ReactionType == VoteType.None)
+                    {
+                        var error = new Dictionary<string, string>
+                        {
+                            { "VoteNotFound", "Cannot remove a vote that doesn't exist." }
+                        };
+                        throw new ServiceException(error, HttpStatusCode.BadRequest);
+                    }
 
-                await _blogService.UpdateBlogVoteCount(model, true, previousVote); // Update vote count in main blog table
-                return ApiResponse<string>.Success(null, $"blog vote changed from {previousVote.ToString()} to {model.ReactionType.ToString()}");
-            }
-            else
-            {
-                if (model.ReactionType == VoteType.None)
-                {
-                    return ApiResponse<string>.Failed(null, "Cannot remove a vote that doesn't exist.");
-                }
-
-                try
-                {
+                    // Add new reaction
                     var request = _mapper.Map<BlogReaction>(model);
                     request.UserId = userId; // set the userId to the one coming from parameter
-                    var response = await _blogReactionRepo.AddAsync(request);
-                    await _blogService.UpdateBlogVoteCount(model, false, null); // Update vote count in main blog table
-                    if (response != null)
+                    var addBlogReactonRes = await _blogReactionRepo.AddAsync(request);
+                    var updateBlogVoteRes = await _blogService.UpdateBlogVoteCount(model, false, null); // Update vote count in main blog table
+                    if (addBlogReactonRes == null)
                     {
-                        return ApiResponse<string>.Success(null, $"Blog voted as {request.ReactionType.ToString()}.");
+                        var error = new Dictionary<string, string>
+                        {
+                            { "ErrorAddingVote", "Error occured when adding vote" }
+                        };
+                        throw new ServiceException(error, HttpStatusCode.InternalServerError);
                     }
-                    return ApiResponse<string>.Failed(null, "Blog vote failed.");
-                }
-                catch (Exception e)
-                {
-                    var errors = new Dictionary<string, string>
+                    if (updateBlogVoteRes == false)
                     {
-                        { "Exception", $"{e.Message}" }
-                    };
-                    return ApiResponse<string>.Failed(errors, "Exception Occured.");
+                        var error = new Dictionary<string, string>
+                        {
+                            { "ErrorUpdatingBlogVote", "Error occured when updating blog's vote" }
+                        };
+                        throw new ServiceException(error, HttpStatusCode.InternalServerError);
+                    }
+                    return ApiResponse<string>.Success(null, $"Blog voted as {request.ReactionType.ToString()}.");
+                    
                 }
-            }
+            });
         }
 
         public async Task<ApiResponse<BlogReactionDTO>> GetBlogVoteById(int id)
