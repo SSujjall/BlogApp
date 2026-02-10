@@ -3,8 +3,8 @@ using BlogApp.Application.Helpers.HelperModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System.Net;
+using System.Text.Json;
 
 namespace BlogApp.Infrastructure.Middlewares
 {
@@ -42,7 +42,7 @@ namespace BlogApp.Infrastructure.Middlewares
             {
                 context.Response.StatusCode = (int)serviceEx.StatusCode;
 
-                var businessExMessage = "Request failed";
+                var businessExMessage = "Request failed.";
                 var businessStatusCode = context.Response.StatusCode;
 
                 var businessRes = ApiResponse<string>.Failed(
@@ -51,7 +51,12 @@ namespace BlogApp.Infrastructure.Middlewares
                     (HttpStatusCode)businessStatusCode
                 );
 
-                var json = JsonConvert.SerializeObject(businessRes);
+                var json = JsonSerializer.Serialize(
+                    businessRes, 
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
                 return context.Response.WriteAsync(json);
             }
 
@@ -71,7 +76,12 @@ namespace BlogApp.Infrastructure.Middlewares
                 (HttpStatusCode)statusCode
             );
 
-            var jsonResponse = JsonConvert.SerializeObject(errorRes);
+            var jsonResponse = JsonSerializer.Serialize(
+                errorRes, 
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
             return context.Response.WriteAsync(jsonResponse);
         }
     }

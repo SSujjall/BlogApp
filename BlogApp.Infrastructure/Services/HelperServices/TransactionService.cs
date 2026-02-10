@@ -36,7 +36,7 @@ namespace BlogApp.Infrastructure.Services.HelperServices
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Transaction failed");
+                    _logger.LogError(ex, "Transaction failed.");
                     throw;
                 }
             });

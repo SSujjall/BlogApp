@@ -10,6 +10,7 @@ import MyBlogPosts from "../features/blog/pages/MyBlogPosts";
 import RedirectIfAuthenticated from "../routes/RedirectIfAuthenticated";
 import EditBlog from "../features/blog/pages/EditBlog";
 import ProtectedRoute from "./ProtectedRoutes";
+import ResendVerification from "../features/auth/pages/ResendVerification";
 
 const AppRoutes = () => {
   return (
@@ -49,6 +50,14 @@ const AppRoutes = () => {
           element={
             <RedirectIfAuthenticated>
               <ForgotPassword />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/resend-verification"
+          element={
+            <RedirectIfAuthenticated>
+              <ResendVerification />
             </RedirectIfAuthenticated>
           }
         />
