@@ -81,7 +81,7 @@ const Signup = () => {
           value={values.username}
         />
         <CommonInputField
-          type={"text"}
+          type={"email"}
           icon={"mail"}
           placeholder={"Email"}
           classProp={"py-3 mb-3"}

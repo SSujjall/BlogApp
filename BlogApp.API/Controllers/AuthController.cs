@@ -80,7 +80,8 @@ namespace BlogApp.API.Controllers
             #region Dummy Response for Securiy
             var dummyRes = ApiResponse<string>.Success(
                 null,
-                "If the email exists, a verification link has been sent."
+                "If the email exists, a verification link has been sent.",
+                HttpStatusCode.Accepted
             );
             #endregion
 

@@ -7,3 +7,12 @@ export const signup = async (data) => {
     return null;
   }
 };
+
+export const resendVerificationEmail = async (data) => {
+  try {
+    return await makeRequest("POST", "/Auth/resend-verification", data);
+  } catch (error) {
+    console.error("Error resend verification email:", error);
+    return null;
+  }
+}
