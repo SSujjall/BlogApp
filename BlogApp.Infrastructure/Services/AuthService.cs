@@ -74,6 +74,18 @@ namespace BlogApp.Infrastructure.Services
             });
         }
 
+        public async Task<string> GenerateEmailVerificationToken(ResendVerificationDTO model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null || user.EmailConfirmed)
+            {
+                return null;
+            }
+
+            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
         public async Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);

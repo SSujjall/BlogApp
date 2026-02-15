@@ -27,7 +27,9 @@ const Signup = () => {
     });
   };
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+
     const payload = {
       username: values.username,
       email: values.email,
@@ -64,7 +66,10 @@ const Signup = () => {
         />
       </Link>
 
-      <form className="border shadow-md p-4 rounded-lg sm:min-w-96 transition-transform">
+      <form
+        onSubmit={handleSignup}
+        className="border shadow-md p-4 rounded-lg sm:min-w-96 transition-transform"
+      >
         <h1 className="text-3xl text-center mb-5">Signup</h1>
         <CommonInputField
           type={"text"}
@@ -76,7 +81,7 @@ const Signup = () => {
           value={values.username}
         />
         <CommonInputField
-          type={"text"}
+          type={"email"}
           icon={"mail"}
           placeholder={"Email"}
           classProp={"py-3 mb-3"}
@@ -112,13 +117,13 @@ const Signup = () => {
         <Button
           text="Signup"
           className={"bg-black text-white hover:bg-gray-700 w-full py-3 mt-5"}
-          onClick={handleSignup}
+          onClick={'submit'}
           disabled={isLoading}
           isLoading={isLoading}
         />
-        {isLoading && (
+        {/* {isLoading && (
           <div className="h-5 w-5 border-4 m-auto mt-2 border-t-black rounded-full animate-spin"></div>
-        )}
+        )} */}
 
         <p className="mt-3">
           Already have an account?&nbsp;

@@ -8,6 +8,7 @@ namespace BlogApp.Application.Interface.IServices
     public interface IAuthService
     {
         Task<ApiResponse<RegisterResponseDTO>> RegisterUser(RegisterDTO registerDto);
+        Task<string> GenerateEmailVerificationToken(ResendVerificationDTO model);
         Task<ApiResponse<LoginResponseDTO>> LoginUser(LoginDTO loginDto);
         Task<ApiResponse<string>> ConfirmEmailVerification(string token, string email);
         Task<ApiResponse<ForgotPasswordResponseDTO>> GenerateForgotPasswordLink(string email);

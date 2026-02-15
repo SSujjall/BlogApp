@@ -13,3 +13,7 @@ export const showErrorToast = (message) => {
 export const showWarningToast = (message) => {
   toast.warning(message);
 }
+
+export const closeAllToasts = () => {
+  toast.dismiss();
+}

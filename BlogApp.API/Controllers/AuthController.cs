@@ -54,6 +54,41 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [EnableRateLimiting("WritePolicy")]
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendEmailVerification([FromBody] ResendVerificationDTO model)
+        {
+            var token = await _authService.GenerateEmailVerificationToken(model);
+
+            // Always send same HTTP response for security
+            if (token != null)
+            {
+                var verificationLink = Url.Action(
+                    nameof(ConfirmEmail),
+                    "Auth",
+                    new { token, email = model.Email },
+                    Request.Scheme
+                );
+                var emailMessage = new EmailMessage(
+                    new[] { model.Email },
+                    "Resend Email Confirmation",
+                    $"Click to verify your email: {verificationLink}"
+                );
+                _emailQueue.QueueEmail(emailMessage);
+            }
+
+            #region Dummy Response for Securiy
+            var dummyRes = ApiResponse<string>.Success(
+                null,
+                "If the email exists, a verification link has been sent.",
+                HttpStatusCode.Accepted
+            );
+            #endregion
+
+            // Always return Accepted for security reason
+            return Accepted(dummyRes);
+        }
+
         [EnableRateLimiting("ReadPolicy")]
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)

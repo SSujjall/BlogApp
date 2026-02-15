@@ -46,7 +46,9 @@ const Login = () => {
     });
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     const payload = {
       username: values.username,
       password: values.password,
@@ -62,11 +64,24 @@ const Login = () => {
         showSuccessToast(apiResponse.message);
       } else {
         let errorMessage = apiResponse.message;
+        const isUnverifiedEmail = apiResponse.errors?.UnverifiedEmail ? true : false;
+
         if (apiResponse.errors) {
-          const errorMessages = Object.values(apiResponse.errors).join(" ");
-          errorMessage = `${apiResponse.message}. ${errorMessages}`;
+          if (isUnverifiedEmail) {
+            showErrorToast(
+              <span
+                className="cursor-pointer"
+                onClick={() => navigate("/resend-verification")}
+              >
+              Email not verified. Cick here to resend.
+              </span>
+            );
+          } else {
+            const errorMessages = Object.values(apiResponse.errors).join(" ");
+            errorMessage = `${apiResponse.message}. ${errorMessages}`;
+            showErrorToast(errorMessage);
+          }
         }
-        showErrorToast(errorMessage);
       }
     } catch {
       showErrorToast("Error Logging In");
@@ -99,7 +114,10 @@ const Login = () => {
         />
       </Link>
 
-      <form className="border shadow-md p-4 rounded-lg sm:min-w-96 transition-transform">
+      <form
+        onSubmit={handleLogin}
+        className="border shadow-md p-4 rounded-lg sm:min-w-96 transition-transform"
+      >
         <h1 className="text-3xl text-center mb-5">Login</h1>
         <CommonInputField
           type={"text"}
@@ -135,8 +153,8 @@ const Login = () => {
           </Link>
         </div>
 
-        <Button 
-          onClick={handleLogin}
+        <Button
+          onClick={'submit'}
           disabled={isLoading}
           className={"bg-black text-white rounded hover:bg-gray-700 w-full py-3 mt-5 flex items-center justify-center"}
           text={isLoading ? "Logging in..." : "Login"}
