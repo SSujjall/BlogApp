@@ -183,6 +183,7 @@ const Login = () => {
             onError={() => console.log("Google Login Failed")}
             logo_alignment="center"
             auto_select={false}
+            width={"100%"}
           />
         </GoogleOAuthProvider>
       </form>
