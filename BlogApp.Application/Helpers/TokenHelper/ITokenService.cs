@@ -12,6 +12,6 @@ namespace BlogApp.Application.Helpers.TokenHelper
     {
         Task<string> GenerateJwtToken(Users user);
         Task<string> GenerateRefreshToken();
-        Task<ClaimsPrincipal?> GetTokenPrincipal(string token);
+        ClaimsPrincipal? GetTokenPrincipal(string token);
     }
 }
