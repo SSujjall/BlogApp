@@ -3,6 +3,7 @@ using BlogApp.Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace BlogApp.Infrastructure.Persistence.Contexts
 {
@@ -25,6 +26,15 @@ namespace BlogApp.Infrastructure.Persistence.Contexts
 
             // Seeding User role to DB
             DbSeeder.SeedUserRole(builder);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            // Ignore the EF Core warning about dynamic HasData values (like GUIDs)
+            optionsBuilder.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId.PendingModelChangesWarning));
         }
 
         public DbSet<Users> Users { get; set; }

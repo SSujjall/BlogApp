@@ -34,7 +34,7 @@ namespace BlogApp.Infrastructure.Redis_Cache.Service
         {
             try
             {
-                var invalidationMsg = JsonSerializer.Deserialize<CacheInvalidationMessage>(msg);
+                var invalidationMsg = JsonSerializer.Deserialize<CacheInvalidationMessage>((string)msg);
                 _distributedCache.Remove(invalidationMsg.Key);
             }
             catch (Exception ex)
