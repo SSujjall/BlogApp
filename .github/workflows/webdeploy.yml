@@ -3,7 +3,7 @@ name: BlogApp CI/CD Pipeline
 on:
   push:
     branches:
-      - feature/update-to-dotnet-10  # Trigger on push to this branch
+      - master  # Trigger on push to this branch
 
 jobs:
   build_and_deploy:
