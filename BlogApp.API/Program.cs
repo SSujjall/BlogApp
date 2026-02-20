@@ -1,20 +1,21 @@
-using System.Net;
-using BlogApp.Infrastructure.DI;
-using System.Text;
-using System.Text.Json;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using BlogApp.Domain.Configs;
-using CloudinaryDotNet;
-using BlogApp.Application.Helpers.EmailService.Config;
 using BlogApp.Application.Helpers.CloudinaryService.Config;
-using BlogApp.Application.Mappings;
-using Microsoft.AspNetCore.Authentication.Google;
+using BlogApp.Application.Helpers.EmailService.Config;
 using BlogApp.Application.Helpers.GoogleAuthService.Config;
 using BlogApp.Application.Helpers.HelperModels;
-using Microsoft.AspNetCore.RateLimiting;
+using BlogApp.Application.Mappings;
+using BlogApp.Domain.Configs;
+using BlogApp.Infrastructure.DI;
 using BlogApp.Infrastructure.Middlewares;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,9 +58,12 @@ builder.Services.AddAuthentication(options =>
 
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/json";
-
+                var error = new Dictionary<string, string>
+                {
+                    { "Unauthorized", "Invalid or missing auth token." }
+                };
                 var result = JsonSerializer.Serialize(
-                    ApiResponse<string>.Failed(null, "Unauthorized: Token is missing or invalid", HttpStatusCode.Unauthorized)
+                    ApiResponse<string>.Failed(error, "Unable to access", HttpStatusCode.Unauthorized)
                 );
 
                 return context.Response.WriteAsync(result);
@@ -68,9 +72,12 @@ builder.Services.AddAuthentication(options =>
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 context.Response.ContentType = "application/json";
-
+                var error = new Dictionary<string, string>
+                {
+                    { "Forbidden", "You don’t have permission." }
+                };
                 var result = JsonSerializer.Serialize(
-                    ApiResponse<string>.Failed(null, "Forbidden: You don’t have permission", HttpStatusCode.Forbidden)
+                    ApiResponse<string>.Failed(error, "Unable to access", HttpStatusCode.Forbidden)
                 );
 
                 return context.Response.WriteAsync(result);
@@ -88,31 +95,24 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(); // THIS IS NEEDED FOR [AUTHORIZE] to WORK!!!!!!!!!!!
 
 // Automapper Config
-builder.Services.AddAutoMapper(typeof(ReactionMappingProfile));
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile(typeof(UserMappingProfile));
+});
 
 #region Swagger configuration
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(opts =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BlogApp.API", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    opts.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme.",
         Type = SecuritySchemeType.Http,
-        Scheme = "bearer"
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    opts.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
     });
 });
 #endregion
