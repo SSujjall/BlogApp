@@ -1,12 +1,14 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
+﻿using BlogApp.Application.Exceptions;
 using BlogApp.Domain.Configs;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace BlogApp.Application.Helpers.TokenHelper
 {
@@ -54,8 +56,10 @@ namespace BlogApp.Application.Helpers.TokenHelper
             return await Task.FromResult(Convert.ToBase64String(randomNumber));
         }
 
-        public async Task<ClaimsPrincipal?> GetTokenPrincipal(string token)
+        public ClaimsPrincipal? GetTokenPrincipal(string token)
         {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -64,29 +68,41 @@ namespace BlogApp.Application.Helpers.TokenHelper
                 ValidAudience = _jwtConfig.ValidAudience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Secret)),
                 ValidateLifetime = false, // Don't validate expiration, we check expiration manually
+
+                // Enforce algorithm here instead of manual check
+                ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
             };
-
-            return await Task.Run(() =>
+            
+            try
             {
-                try
-                {
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    SecurityToken securityToken;
-                    ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
-                    var jwtToken = securityToken as JwtSecurityToken;
+                var principal = tokenHandler.ValidateToken(
+                    token,
+                    tokenValidationParameters,
+                    out var validateJwtToken
+                );
 
-                    if (jwtToken == null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        return null;
-                    }
-
-                    return principal;
-                }
-                catch
+                if (validateJwtToken is not JwtSecurityToken jwtToken)
                 {
                     return null;
                 }
-            });
+
+                return principal;
+            }
+            catch (SecurityTokenException ex)
+            {
+                var message = ex switch
+                {
+                    SecurityTokenExpiredException => "Access token has expired.",
+                    SecurityTokenInvalidSignatureException => "Token signature is invalid.",
+                    SecurityTokenInvalidAudienceException => "Token audience is invalid.",
+                    SecurityTokenInvalidIssuerException => "Token issuer is invalid.",
+                    _ => "Token validation failed."
+                };
+                throw new ServiceException(
+                    new Dictionary<string, string> { { "Token", message } },
+                    HttpStatusCode.Unauthorized
+                );
+            }
         }
     }
 }
