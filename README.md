@@ -2,7 +2,7 @@
 
 This is a full-stack Blog Application built using the following technologies:
 
-- **Backend**: .NET 8 Web API with Entity Framework Core, Dapper, and ADO.NET
+- **Backend**: .NET 10 Web API with Entity Framework Core, Dapper, and ADO.NET
 - **Frontend**: React with Vite, Tailwind CSS, and Axios
 
 ## Features
@@ -21,7 +21,7 @@ Before running the application, ensure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (LTS recommended)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- [.NET SDK 8](https://dotnet.microsoft.com/)
+- [.NET SDK 10](https://dotnet.microsoft.com/)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 
 ---
