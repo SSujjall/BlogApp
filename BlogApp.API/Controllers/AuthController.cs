@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.DTOs;
+using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.EmailService.Model;
 using BlogApp.Application.Helpers.EmailService.Service;
 using BlogApp.Application.Helpers.GoogleAuthService.Model;
@@ -195,7 +196,10 @@ namespace BlogApp.API.Controllers
             var userId = User.FindFirst("UserId")?.Value;
             if (userId == null)
             {
-                return Unauthorized();
+                throw new ServiceException(
+                    new Dictionary<string, string> { { "Unauthorized", "User is not authorized" } },
+                    HttpStatusCode.Unauthorized
+                );
             }
 
             var response = await _authService.LogoutUser(userId);

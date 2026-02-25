@@ -39,6 +39,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetUserById(string userId)
         {
@@ -57,7 +58,7 @@ namespace BlogApp.API.Controllers
             var userId = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized("User not authorized.");
+                throw new UnauthorizedAccessException("User is not authorized.");
             }
 
             model.UserId = userId;
@@ -76,7 +77,7 @@ namespace BlogApp.API.Controllers
             var userId = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized("User not authorized.");
+                throw new UnauthorizedAccessException("User is not authorized.");
             }
 
             model.UserId = userId;
