@@ -2,7 +2,7 @@
 {
     public enum PaymentProviderType
     {
-        Esewa,
-        Khalti
+        Esewa = 1,
+        Khalti = 2
     }
 }
