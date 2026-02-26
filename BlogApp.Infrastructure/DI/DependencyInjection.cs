@@ -33,6 +33,8 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.Google;
+using BlogApp.Application.Interface.IServices.IPaymentService;
+using BlogApp.Infrastructure.Services.PaymentService;
 
 namespace BlogApp.Infrastructure.DI
 {
@@ -166,6 +168,7 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddScoped<IBlogReactionRepository, BlogReactionRepository>();
             services.AddScoped<ICommentReactionRepository, CommentReactionRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
             #endregion
 
             #region Register Services
@@ -182,6 +185,10 @@ namespace BlogApp.Infrastructure.DI
             services.AddSingleton<IBackgroundEmailQueue, BackgroundEmailQueue>();
             services.AddHostedService<EmailBackgroundService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
+            services.AddScoped<EsewaPaymentService>();
+            services.AddScoped<KhaltiPaymentService>();
             #endregion
 
             #region Register Redis Distributed Cache Instance

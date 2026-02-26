@@ -5,7 +5,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Helpers.TokenHelper;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Shared;
+using BlogApp.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Infrastructure.Services

@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Shared
+﻿namespace BlogApp.Domain.Enums
 {
     public enum UserRoles
     {

@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Shared;
+﻿using BlogApp.Domain.Enums;
 
 namespace BlogApp.Application.DTOs
 {

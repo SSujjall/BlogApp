@@ -1,6 +1,7 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Enums;
 using BlogApp.Domain.Shared;
 
 namespace BlogApp.Application.Interface.IServices

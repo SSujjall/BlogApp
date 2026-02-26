@@ -5,7 +5,7 @@ using BlogApp.Application.Helpers.GoogleAuthService.Model;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Helpers.TokenHelper;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Shared;
+using BlogApp.Domain.Enums;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
