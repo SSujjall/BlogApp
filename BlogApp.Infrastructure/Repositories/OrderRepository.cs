@@ -4,9 +4,9 @@ using BlogApp.Infrastructure.Persistence.Contexts;
 
 namespace BlogApp.Infrastructure.Repositories
 {
-    public class PaymentRepository : BaseRepository<Payments>, IPaymentRepository
+    public class OrderRepository : BaseRepository<Orders>, IOrderRepository
     {
-        public PaymentRepository(AppDbContext dbContext) : base(dbContext)
+        public OrderRepository(AppDbContext dbContext) : base(dbContext)
         {
         }
     }
