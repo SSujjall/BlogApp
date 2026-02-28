@@ -1,10 +1,10 @@
-﻿using BlogApp.Domain.Entities;
+﻿using BlogApp.Application.DTOs;
 
 namespace BlogApp.Application.Interface.IServices.IPaymentService
 {
     public interface IPaymentProvider
     {
-        Task<string> ProcessPaymentAsync(Payments payment);
+        Task<string> ProcessPaymentAsync(CreatePaymentDTO payment);
         Task<bool> VerifyPaymentAsync(string transactionId);
         Task<bool> RefundPaymentAsync(string transactionId);
     }

@@ -168,7 +168,11 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddScoped<IBlogReactionRepository, BlogReactionRepository>();
             services.AddScoped<ICommentReactionRepository, CommentReactionRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IPaymentLogsRepository, PaymentLogsRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            //services.AddScoped<IRefundsRepository, RefundsRepository>();
+            services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             #endregion
 
             #region Register Services
@@ -185,10 +189,13 @@ namespace BlogApp.Infrastructure.DI
             services.AddSingleton<IBackgroundEmailQueue, BackgroundEmailQueue>();
             services.AddHostedService<EmailBackgroundService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
             services.AddScoped<EsewaPaymentService>();
             services.AddScoped<KhaltiPaymentService>();
+            services.AddScoped<ISubscriptionService, SubscriptionService>();
+            //services.AddScoped<IRefundService, RefundService>();
             #endregion
 
             #region Register Redis Distributed Cache Instance

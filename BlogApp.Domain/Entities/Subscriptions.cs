@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BlogApp.Domain.Entities
 {
@@ -12,7 +13,9 @@ namespace BlogApp.Domain.Entities
         public string? Description { get; set; }
 
         // Navigation Property
+        [JsonIgnore]
         public virtual ICollection<Orders> Orders { get; set; } = new List<Orders>();
+        [JsonIgnore]
         public virtual ICollection<Users> Users { get; set; } = new List<Users>();
     }
 }

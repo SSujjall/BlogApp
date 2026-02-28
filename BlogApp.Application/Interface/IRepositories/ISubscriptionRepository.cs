@@ -2,7 +2,7 @@
 
 namespace BlogApp.Application.Interface.IRepositories
 {
-    public interface IPaymentRepository : IBaseRepository<Payments>
+    public interface ISubscriptionRepository : IBaseRepository<Subscriptions>
     {
     }
 }

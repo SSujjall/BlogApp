@@ -1,6 +1,8 @@
-﻿namespace BlogApp.Application.Interface.IRepositories
+﻿using BlogApp.Domain.Entities;
+
+namespace BlogApp.Application.Interface.IRepositories
 {
-    public interface IOrderRepository
+    public interface IOrderRepository : IBaseRepository<Orders>
     {
     }
 }
