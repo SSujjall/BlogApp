@@ -3,57 +3,56 @@ name: BlogApp CI/CD Pipeline
 on:
   push:
     branches:
-     # - master # Trigger the pipeline when code is pushed to the master branch
      - do-not-run-this-for-now
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       # Checkout the code from the repository
-#       - name: Checkout repository
-#         uses: actions/checkout@v2
+    steps:
+      # Checkout the code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-#       # Set up .NET SDK
-#       - name: Set up .NET SDK
-#         uses: actions/setup-dotnet@v2
-#         with:
-#           dotnet-version: "8.0.x"
+      # Set up .NET SDK
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "8.0.x"
 
-#       # Install EF Core Tools 8.0.6
-#       - name: Install EF Core Tools 8.0.6
-#         run: dotnet tool install --global dotnet-ef --version 8.0.6
+      # Install EF Core Tools 8.0.6
+      - name: Install EF Core Tools 8.0.6
+        run: dotnet tool install --global dotnet-ef --version 8.0.6
 
-#       # Verify dotnet-ef version
-#       - name: Verify dotnet-ef version
-#         run: dotnet ef --version
+      # Verify dotnet-ef version
+      - name: Verify dotnet-ef version
+        run: dotnet ef --version
 
-#       # Restore dependencies
-#       - name: Restore dependencies
-#         run: dotnet restore
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
 
-#       # Build the project
-#       - name: Build the project
-#         run: dotnet build --configuration Release
+      # Build the project
+      - name: Build the project
+        run: dotnet build --configuration Release
 
-#       # Publish the project
-#       - name: Publish the project
-#         run: dotnet publish --configuration Release --output ./publish
+      # Publish the project
+      - name: Publish the project
+        run: dotnet publish --configuration Release --output ./publish
 
-#       # Deploy to MonsterASP via FTP
-#       - name: Deploy to MonsterASP
-#         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-#         with:
-#           server: ${{ secrets.MONSTERASP_FTP_SERVER }}
-#           username: ${{ secrets.MONSTERASP_FTP_USER }}
-#           password: ${{ secrets.MONSTERASP_FTP_PASS }}
-#           local-dir: ./publish/
-#           server-dir: /wwwroot/
+      # Deploy to MonsterASP via FTP
+      - name: Deploy to MonsterASP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.MONSTERASP_FTP_SERVER }}
+          username: ${{ secrets.MONSTERASP_FTP_USER }}
+          password: ${{ secrets.MONSTERASP_FTP_PASS }}
+          local-dir: ./publish/
+          server-dir: /wwwroot/
 
-#       # Apply database migrations
-#       - name: Apply database migrations
-#         run: dotnet ef database update --configuration Release --no-build --project ./BlogApp.Infrastructure/BlogApp.Infrastructure.csproj
-#         env:
-#           ASPNETCORE_ENVIRONMENT: Production
-#           ConnectionStrings__BlogDB: ${{ secrets.MONSTERASP_DB_CONNECTION_STRING }}
+      # Apply database migrations
+      - name: Apply database migrations
+        run: dotnet ef database update --configuration Release --no-build --project ./BlogApp.Infrastructure/BlogApp.Infrastructure.csproj
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ConnectionStrings__BlogDB: ${{ secrets.MONSTERASP_DB_CONNECTION_STRING }}
