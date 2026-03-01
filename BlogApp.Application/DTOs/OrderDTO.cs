@@ -3,4 +3,9 @@
     public class CreateOrderDTO
     {
     }
+
+    public class UpdateOrderDTO
+    {
+
+    }
 }
