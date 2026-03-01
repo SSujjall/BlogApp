@@ -47,19 +47,67 @@ namespace BlogApp.Infrastructure.Services
             }
         }
 
-        public Task<ApiResponse<string>> DeleteSubscription(int id)
+        public async Task<ApiResponse<string>> DeleteSubscription(int id)
         {
-            throw new NotImplementedException();
+            var subscription = await _subsRepo.GetByIdAsync(id);
+            if (subscription == null)
+            {
+                return ApiResponse<string>.Failed(new() { { "NotFound", "Subscription not found." } }, "Failed to delete subscription", HttpStatusCode.NotFound);
+            }
+
+            await _subsRepo.Delete(subscription);
+            await _subsRepo.SaveChangesAsync();
+            return ApiResponse<string>.Success(null, "Subscription deleted successfully", HttpStatusCode.OK);
         }
 
-        public Task<ApiResponse<IEnumerable<Subscriptions>>> GetAllSubscriptions()
+        public async Task<ApiResponse<IEnumerable<Subscriptions>>> GetAllSubscriptions()
         {
-            throw new NotImplementedException();
+            var subscriptions = await _subsRepo.GetAllAsync(null);
+            return ApiResponse<IEnumerable<Subscriptions>>.Success(subscriptions, "Fetched all subscriptions", HttpStatusCode.OK, subscriptions.Count());
         }
 
-        public Task<ApiResponse<Subscriptions>> UpdateSubscription(UpdateSubscriptionDTO dto)
+        public async Task<ApiResponse<Subscriptions>> UpdateSubscription(UpdateSubscriptionDTO dto)
         {
-            throw new NotImplementedException();
+            var subscription = await _subsRepo.GetByIdAsync(dto.SubscriptionId);
+            if (subscription == null)
+            {
+                var errors = new Dictionary<string, string>
+                {
+                    { "NotFound", $"Subscription with ID {dto.SubscriptionId} not found." }
+                };
+                return ApiResponse<Subscriptions>.Failed(errors, "Subscription not found", HttpStatusCode.NotFound);
+            }
+
+            bool isUpdated = false;
+            if (dto.Name != null && subscription.Name != dto.Name)
+            {
+                subscription.Name = dto.Name;
+                isUpdated = true;
+            }
+            if (dto.Price.HasValue && subscription.Price != dto.Price.Value)
+            {
+                subscription.Price = dto.Price.Value;
+                isUpdated = true;
+            }
+            if (dto.DurationInMonths.HasValue && subscription.DurationInMonths != dto.DurationInMonths.Value)
+            {
+                subscription.DurationInMonths = dto.DurationInMonths.Value;
+                isUpdated = true;
+            }
+            if (dto.Description != null && subscription.Description != dto.Description)
+            {
+                subscription.Description = dto.Description;
+                isUpdated = true;
+            }
+
+            if (!isUpdated)
+            {
+                return ApiResponse<Subscriptions>.Failed(new() { { "UpdateError", "No changes detected" } }, "Failed to update", HttpStatusCode.BadRequest);
+            }
+
+            await _subsRepo.Update(subscription);
+            await _subsRepo.SaveChangesAsync();
+            return ApiResponse<Subscriptions>.Success(subscription, "Subscription updated successfully", HttpStatusCode.OK);
         }
     }
 }

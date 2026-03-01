@@ -36,7 +36,7 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
             {
                 SubscriptionId = 1,
                 Name = "Basic",
-                Price = 0.00f,
+                Price = 0.00m,
                 Description = "Default subscription with no benefits",
                 DurationInMonths = 0
             });
