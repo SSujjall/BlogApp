@@ -16,9 +16,9 @@ namespace BlogApp.Domain.Entities
         public int OrderId { get; set; }
 
         public decimal Amount { get; set; }
-        public PaymentStatus Status { get; set; }
+        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public PaymentProviderType Provider { get; set; }
-        public string ExternalTransactionId { get; set; }
+        public string? ExternalTransactionId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Property

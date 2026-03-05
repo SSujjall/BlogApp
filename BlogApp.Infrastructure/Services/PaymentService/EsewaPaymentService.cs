@@ -5,7 +5,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
 {
     public class EsewaPaymentService : IPaymentProvider
     {
-        public Task<string> ProcessPaymentAsync(CreatePaymentDTO payment)
+        public Task<string> ProcessPaymentAsync(PaymentRequestDTO dto)
         {
             throw new NotImplementedException();
         }

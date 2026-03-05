@@ -79,9 +79,17 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<IEnumerable<Orders>>.Success(userOrders, "User orders retrieved successfully", HttpStatusCode.OK);
         }
 
-        public async Task<ApiResponse<Orders>> GetOrderById(int id)
+        public async Task<ApiResponse<Orders>> GetOrderById(string userId, int id)
         {
             var order = await _orderRepo.GetByIdAsync(id);
+            if (order is null || order.UserId != userId)
+            {
+                return ApiResponse<Orders>.Failed(
+                    new() { { "OrderNotFound", $"No order found." } }, 
+                    "Failed to retrieve order", 
+                    HttpStatusCode.NotFound
+                );
+            }
             return ApiResponse<Orders>.Success(order, "Order retrieved successfully", HttpStatusCode.OK);
         }
 

@@ -58,5 +58,22 @@ namespace BlogApp.API.Controllers
             }
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("get/{id}")]
+        public async Task<IActionResult> GetOrderById(int id)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
+            }
+            var response = await _orderService.GetOrderById(userId, id);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
     }
 }

@@ -35,6 +35,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.Google;
 using BlogApp.Application.Interface.IServices.IPaymentService;
 using BlogApp.Infrastructure.Services.PaymentService;
+using BlogApp.Domain.GlobalConfigs;
 
 namespace BlogApp.Infrastructure.DI
 {
@@ -159,6 +160,9 @@ namespace BlogApp.Infrastructure.DI
             // .Configure is used because the values for config might change in the future
             var googleConfig = configuration.GetSection("Authentications:Google");
             services.Configure<GoogleConfig>(googleConfig);
+
+            // settings the values of payment configuration
+            services.Configure<EsewaConfig>(configuration.GetSection("PaymentConfigs:Esewa"));
             #endregion
 
             #region Register Repositories

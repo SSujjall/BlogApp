@@ -22,7 +22,13 @@ namespace BlogApp.API.Controllers
         [Authorize]
         public async Task<IActionResult> ProcessPayment([FromBody] CreatePaymentDTO reqModel)
         {
-            var response = await _paymentService.InitiatePayment(reqModel);
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
+            }
+
+            var response = await _paymentService.InitiatePayment(userId, reqModel);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new ServiceException(

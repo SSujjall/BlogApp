@@ -5,7 +5,7 @@ namespace BlogApp.Application.Interface.IServices.IPaymentService
 {
     public interface IPaymentService
     {
-        Task<ApiResponse<string>> InitiatePayment(CreatePaymentDTO dto);
+        Task<ApiResponse<string>> InitiatePayment(string userId, CreatePaymentDTO dto);
         Task<bool> VerifyPayment();
         Task<bool> RefundPayment();
     }
