@@ -197,6 +197,14 @@ namespace BlogApp.Infrastructure.Services
                 var errors = new Dictionary<string, string> { { "User", "Incorrect Email, user not found." } };
                 return ApiResponse<string>.Failed(errors, "User Not Found.");
             }
+            if (user.EmailConfirmed)
+            {
+                return ApiResponse<string>.Failed(
+                    new() { { "EmailAlreadyConfirmed", "Email is already confirmed" } }, 
+                    "Email Confirmation Failed.", 
+                    HttpStatusCode.Conflict
+                );
+            }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)

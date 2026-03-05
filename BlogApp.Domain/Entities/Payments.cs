@@ -15,7 +15,7 @@ namespace BlogApp.Domain.Entities
         [ForeignKey(nameof(Order))]
         public int OrderId { get; set; }
 
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         public PaymentStatus Status { get; set; }
         public PaymentProviderType Provider { get; set; }
         public string ExternalTransactionId { get; set; }

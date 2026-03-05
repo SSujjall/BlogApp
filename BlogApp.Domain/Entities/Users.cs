@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace BlogApp.Domain.Entities
 {
@@ -20,6 +21,7 @@ namespace BlogApp.Domain.Entities
         public virtual ICollection<CommentReaction> CommentReactions { get; set; } = new List<CommentReaction>();
         public virtual ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
         public virtual Subscriptions CurrentSubscription { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Orders> Orders { get; set; } = new List<Orders>();
         public virtual ICollection<Payments> Payments { get; set; } = new List<Payments>();
     }

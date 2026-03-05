@@ -6,10 +6,11 @@ namespace BlogApp.Application.Interface.IServices
 {
     public interface IOrderService
     {
-        Task<ApiResponse<Orders>> CreateOrder(CreateOrderDTO dto);
+        Task<ApiResponse<Orders>> CreateNewOrder(string userId, CreateOrderDTO dto);
         Task<ApiResponse<IEnumerable<Orders>>> GetAllOrders();
-         Task<ApiResponse<Orders>> GetOrderById(int id);
-         Task<ApiResponse<Orders>> UpdateOrder(UpdateOrderDTO dto);
-         Task<ApiResponse<string>> DeleteOrder(int id);
+        Task<ApiResponse<IEnumerable<Orders>>> GetOrdersByUserId(string userId);
+        Task<ApiResponse<Orders>> GetOrderById(int id);
+        Task<ApiResponse<Orders>> UpdateOrder(UpdateOrderDTO dto);
+        Task<ApiResponse<string>> DeleteOrder(int id);
     }
 }

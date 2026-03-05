@@ -12,7 +12,7 @@ namespace BlogApp.Domain.Entities
         [Required]
         [ForeignKey(nameof(Payment))]
         public int PaymentId { get; set; }
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         public PaymentStatus Status { get; set; }
         public string? RefundTransactionId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
