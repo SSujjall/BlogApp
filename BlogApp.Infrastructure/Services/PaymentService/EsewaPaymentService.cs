@@ -1,7 +1,7 @@
-﻿using Azure;
-using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Exceptions;
 using BlogApp.Application.Interface.IServices.IPaymentService;
+using BlogApp.Domain.Enums;
 using BlogApp.Domain.GlobalConfigs;
 using Microsoft.Extensions.Options;
 using System.Net;
@@ -16,8 +16,8 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         private readonly EsewaConfig _config;
         private readonly HttpClient _httpClient;
         public EsewaPaymentService(
-            IOptions<EsewaConfig> config
-            ,HttpClient httpClient
+            IOptions<EsewaConfig> config,
+            HttpClient httpClient
         )
         {
             _config = config.Value;
@@ -27,24 +27,21 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         public async Task<string> ProcessPaymentAsync(PaymentRequestDTO dto)
         {
             var transactionUuid = Guid.NewGuid().ToString();
-            var signature = GenerateSignature(
-                dto.TotalAmount,
-                transactionUuid,
-                _config.ProductCode
-            );
+            var message = $"total_amount={dto.TotalAmount},transaction_uuid={transactionUuid},product_code={_config.ProductCode}";
+            var signature = GenerateSignature(message);
 
             var esewaReqModel = new EsewaRequestDTO
             {
-                amount = "200",
+                amount = dto.TotalAmount.ToString(),
                 product_delivery_charge = "0",
                 product_service_charge = "0",
                 product_code = _config.ProductCode,
                 signed_field_names = "total_amount,transaction_uuid,product_code",
                 signature = signature,
-                success_url = "https://developer.esewa.com.np/success",
-                failure_url = "https://developer.esewa.com.np/failure",
+                success_url = _config.SuccessUrl,
+                failure_url = _config.FailureUrl,
                 tax_amount = "0",
-                total_amount = "200",
+                total_amount = dto.TotalAmount.ToString(),
                 transaction_uuid = transactionUuid
             };
 
@@ -69,10 +66,51 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             }
             else
             {
-                // If response is json S
+                // If response is json
                 responseBody = await apiResponse.Content.ReadAsStringAsync();
             }
             return responseBody;
+        }
+
+        public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
+        {
+            byte[] bytes = Convert.FromBase64String(data);
+            string decodedString = Encoding.UTF8.GetString(bytes);
+
+            var apiRes = JsonSerializer.Deserialize<EsewaResponseDTO>(decodedString);
+            if (apiRes == null)
+            {
+                throw new ServiceException(
+                    new() { { "InvalidResponse", "Invalid eSewa response data" } },
+                    HttpStatusCode.BadRequest
+                );
+            }
+
+            var message =
+                $"transaction_code={apiRes.transaction_code}," +
+                $"status={apiRes.status}," +
+                $"total_amount={apiRes.total_amount}," +
+                $"transaction_uuid={apiRes.transaction_uuid}," +
+                $"product_code={apiRes.product_code}";
+
+            var generatedSignature = GenerateSignature(message);
+            if (generatedSignature != apiRes.signature)
+            {
+                throw new ServiceException(
+                    new() { { "SignatureMismatch", "Invalid eSewa payment response" } },
+                    HttpStatusCode.BadRequest
+                );
+            }
+
+            return new PaymentVerificationResponseDTO
+            {
+                IsSuccess = apiRes.status.ToUpper() == EsewaResStatus.COMPLETE.ToString(),
+                TransactionId = apiRes.transaction_code,
+                TransactionUuid = apiRes.transaction_uuid,
+                Amount = apiRes.total_amount,
+                Status = apiRes.status,
+                RawResponse = decodedString
+            };
         }
 
         public Task<bool> RefundPaymentAsync(string transactionId)
@@ -80,15 +118,13 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             throw new NotImplementedException();
         }
 
-        public Task<bool> VerifyPaymentAsync(string transactionId)
+        public Task<object> StatusCheckAsync(string transactionId)
         {
             throw new NotImplementedException();
         }
 
-        private string GenerateSignature(decimal totalAmount, string transactionUuid, string productCode)
+        private string GenerateSignature(string message)
         {
-            var message = $"total_amount=200,transaction_uuid={transactionUuid},product_code={productCode}";
-
             var keyBytes = Encoding.UTF8.GetBytes(_config.SecretKey);
             var messageBytes = Encoding.UTF8.GetBytes(message);
 

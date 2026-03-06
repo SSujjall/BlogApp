@@ -93,9 +93,22 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<Orders>.Success(order, "Order retrieved successfully", HttpStatusCode.OK);
         }
 
-        public Task<ApiResponse<Orders>> UpdateOrder(UpdateOrderDTO dto)
+        public async Task<ApiResponse<Orders>> UpdateOrder(string userId, UpdateOrderDTO dto)
         {
-            throw new NotImplementedException(); // will be implemented when payment is implementd. This will be used for updating the order status after payment is successful.
+            var order = await _orderRepo.GetByIdAsync(dto.OrderId);
+            if (order is null || order.UserId != userId)
+            {
+                return ApiResponse<Orders>.Failed(
+                    new() { { "OrderNotFound", $"No order found." } },
+                    "Failed to retrieve order",
+                    HttpStatusCode.NotFound
+                );
+            }
+
+            order.Status = dto.Status;
+            await _orderRepo.SaveChangesAsync();
+
+            return ApiResponse<Orders>.Success(order, "Order updated successfully", HttpStatusCode.OK);
         }
     }
 }

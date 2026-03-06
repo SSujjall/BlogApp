@@ -10,12 +10,17 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             throw new NotImplementedException();
         }
 
-        public Task<bool> RefundPaymentAsync(string transactionId)
+        public Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> VerifyPaymentAsync(string transactionId)
+        public Task<object> StatusCheckAsync(string transactionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RefundPaymentAsync(string transactionId)
         {
             throw new NotImplementedException();
         }

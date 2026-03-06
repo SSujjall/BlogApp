@@ -6,7 +6,7 @@ using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Application.Interface.IServices.IPaymentService;
 using BlogApp.Domain.Entities;
-using CloudinaryDotNet;
+using BlogApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
@@ -93,9 +93,48 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             );
         }
 
-        public Task<bool> VerifyPayment()
+        public async Task<ApiResponse<bool>> VerifyPayment(string userId, VerifyPaymentDTO dto)
         {
-            throw new NotImplementedException();
+            // TODO: use transaction here as payment and order tables are being updated together,
+            // if payment verification is successful but order update fails, it will cause data inconsistency
+            var paymentProvider = _paymentFactory.GetPaymentProvider(dto.Provider);
+            var verificationResult = await paymentProvider.VerifyPaymentAsync(dto.Data);
+
+            if (!verificationResult.IsSuccess)
+            {
+                return ApiResponse<bool>.Failed(
+                    new() { { "PaymentVerification", "Payment verification failed" } },
+                    "Payment verification failed",
+                    HttpStatusCode.BadRequest
+                );
+            }
+
+            var payment = await _paymentRepo.FindSingleByConditionAsync(
+                x => x.ExternalTransactionId == verificationResult.TransactionUuid && x.UserId == userId
+            );
+            if (payment is null)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentNotFound", "Payment record not found" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+
+            payment.Status = PaymentStatus.Success;
+            await _paymentRepo.SaveChangesAsync();
+
+            var updateOrderModel = new UpdateOrderDTO
+            {
+                OrderId = payment.OrderId,
+                Status = OrderStatus.Completed,
+            };
+            var updatedOrder = await _orderService.UpdateOrder(userId, updateOrderModel);
+
+            return ApiResponse<bool>.Success(
+                true,
+                "Payment verified and order updated successfully",
+                HttpStatusCode.OK
+            );
         }
 
         public Task<bool> RefundPayment()
