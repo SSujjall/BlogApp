@@ -22,9 +22,9 @@ namespace BlogApp.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Property
-        public virtual Users User { get; set; } = new Users();
-        public virtual Orders Order { get; set; } = new Orders();
-        public virtual ICollection<Refunds> Refunds { get; set; } = new List<Refunds>();
-        public virtual ICollection<PaymentLogs> PaymentLogs { get; set; } = new List<PaymentLogs>();
+        public virtual Users User { get; set; }
+        public virtual Orders Order { get; set; }
+        public virtual ICollection<Refunds> Refunds { get; set; }
+        public virtual ICollection<PaymentLogs> PaymentLogs { get; set; }
     }
 }

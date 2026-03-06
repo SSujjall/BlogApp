@@ -17,6 +17,6 @@ namespace BlogApp.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Property
-        public virtual Payments Payment { get; set; } = new Payments();
+        public virtual Payments Payment { get; set; }
     }
 }

@@ -36,7 +36,8 @@ namespace BlogApp.Infrastructure.Services
                 {
                     UserName = registerDto.Username,
                     Email = registerDto.Email,
-                    SecurityStamp = Guid.NewGuid().ToString()
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    CurrentSubscriptionId = 1
                 };
                 #endregion
 

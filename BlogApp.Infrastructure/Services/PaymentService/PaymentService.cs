@@ -50,8 +50,9 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 var paymentModel = _mapper.Map<Payments>(dto);
                 paymentModel.UserId = userId;
                 paymentModel.Amount = orderRes.Data.Amount;
+                paymentModel.OrderId = dto.OrderId;
 
-                await _paymentRepo.AddAsync(paymentModel);
+                var x = await _paymentRepo.AddAsync(paymentModel);
                 await _paymentRepo.SaveChangesAsync();
             }
             catch (DbUpdateException) // Only catch database exceptions, let the global excception handler catch other exceptions
