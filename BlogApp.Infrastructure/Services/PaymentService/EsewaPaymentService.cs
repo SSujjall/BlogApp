@@ -26,8 +26,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
 
         public async Task<string> ProcessPaymentAsync(PaymentRequestDTO dto)
         {
-            var transactionUuid = Guid.NewGuid().ToString();
-            var message = $"total_amount={dto.TotalAmount},transaction_uuid={transactionUuid},product_code={_config.ProductCode}";
+            var message = $"total_amount={dto.TotalAmount},transaction_uuid={dto.ExternalTransactionId},product_code={_config.ProductCode}";
             var signature = GenerateSignature(message);
 
             var esewaReqModel = new EsewaRequestDTO
@@ -42,7 +41,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 failure_url = _config.FailureUrl,
                 tax_amount = "0",
                 total_amount = dto.TotalAmount.ToString(),
-                transaction_uuid = transactionUuid
+                transaction_uuid = dto.ExternalTransactionId
             };
 
             var json = JsonSerializer.Serialize(esewaReqModel);
@@ -91,7 +90,8 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 $"status={apiRes.status}," +
                 $"total_amount={apiRes.total_amount}," +
                 $"transaction_uuid={apiRes.transaction_uuid}," +
-                $"product_code={apiRes.product_code}";
+                $"product_code={apiRes.product_code}," +
+                $"signed_field_names={apiRes.signed_field_names}";
 
             var generatedSignature = GenerateSignature(message);
             if (generatedSignature != apiRes.signature)
@@ -107,7 +107,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 IsSuccess = apiRes.status.ToUpper() == EsewaResStatus.COMPLETE.ToString(),
                 TransactionId = apiRes.transaction_code,
                 TransactionUuid = apiRes.transaction_uuid,
-                Amount = apiRes.total_amount,
+                Amount = decimal.TryParse(apiRes.total_amount, out decimal amount) ? amount : 0,
                 Status = apiRes.status,
                 RawResponse = decodedString
             };

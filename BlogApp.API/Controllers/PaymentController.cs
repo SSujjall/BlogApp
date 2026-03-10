@@ -32,7 +32,7 @@ namespace BlogApp.API.Controllers
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new ServiceException(
-                    new Dictionary<string, string> { { "Payment", "Failed to initiate payment" } },
+                    response.Errors,
                     HttpStatusCode.InternalServerError);
             }
             return Ok(response);
@@ -47,14 +47,7 @@ namespace BlogApp.API.Controllers
             {
                 throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
             }
-
             var response = await _paymentService.VerifyPayment(userId, reqModel);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new ServiceException(
-                    new Dictionary<string, string> { { "Payment", "Failed to initiate payment" } },
-                    HttpStatusCode.InternalServerError);
-            }
             return Ok(response);
         }
     }

@@ -38,15 +38,16 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         public async Task<ApiResponse<string>> InitiatePayment(string userId, CreatePaymentDTO dto)
         {
             var orderRes = await _orderService.GetOrderById(userId, dto.OrderId);
-            if (orderRes.Data is null)
+            if (orderRes.Data is null || orderRes.Data.Status == OrderStatus.Completed)
             {
                 return ApiResponse<string>.Failed(
-                    new() { { "OrderNotFound", $"No order found" } },
+                    new() { { "OrderError", $"Order not found or already completed" } },
                     "Payment initiation failed",
                     HttpStatusCode.BadRequest
                 );
             }
 
+            var externalTxnId = Guid.NewGuid().ToString();
             #region Creating payment data and saving to database
             try
             {
@@ -54,6 +55,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 paymentModel.UserId = userId;
                 paymentModel.Amount = orderRes.Data.Amount;
                 paymentModel.OrderId = dto.OrderId;
+                paymentModel.ExternalTransactionId = externalTxnId;
 
                 var x = await _paymentRepo.AddAsync(paymentModel);
                 await _paymentRepo.SaveChangesAsync();
@@ -77,7 +79,8 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 SubscriptionId = orderRes.Data.SubscriptionId,
                 SubscriptionName = orderRes.Data.Subscription.Name,
                 OrderId = dto.OrderId,
-                TotalAmount = orderRes.Data.Amount
+                TotalAmount = orderRes.Data.Amount,
+                ExternalTransactionId = externalTxnId
             };
             #endregion
 
@@ -136,6 +139,13 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 {
                     throw new ServiceException(
                         updatedOrder.Errors,
+                        HttpStatusCode.BadRequest
+                    );
+                }
+                if (updatedOrder.Data.Status == OrderStatus.Completed)
+                {
+                    throw new ServiceException(
+                        new() { { "OrderStatusError", "Order already marked as completed and verified" } },
                         HttpStatusCode.BadRequest
                     );
                 }

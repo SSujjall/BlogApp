@@ -21,6 +21,7 @@ namespace BlogApp.Application.DTOs
         public string SubscriptionName { get; set; }
         public int OrderId { get; set; }
         public decimal TotalAmount { get; set; }
+        public string ExternalTransactionId { get; set; }
     }
 
     public class PaymentVerificationResponseDTO

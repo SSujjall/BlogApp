@@ -106,6 +106,7 @@ namespace BlogApp.Infrastructure.Services
             }
 
             order.Status = dto.Status;
+            order.UpdatedAt = dto.UpdatedAt;
             await _orderRepo.SaveChangesAsync();
 
             return ApiResponse<Orders>.Success(order, "Order updated successfully", HttpStatusCode.OK);
