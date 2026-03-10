@@ -18,18 +18,21 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         private readonly IPaymentProviderFactory _paymentFactory;
         private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
+        private readonly ITransactionService _txnService;
 
         public PaymentService(
             IPaymentRepository paymentRepo,
             IPaymentProviderFactory paymentFactory,
             IOrderService orderService,
-            IMapper mapper
+            IMapper mapper,
+            ITransactionService txnService
         )
         {
             _paymentRepo = paymentRepo;
             _paymentFactory = paymentFactory;
             _orderService = orderService;
             _mapper = mapper;
+            _txnService = txnService;
         }
 
         public async Task<ApiResponse<string>> InitiatePayment(string userId, CreatePaymentDTO dto)
@@ -95,46 +98,54 @@ namespace BlogApp.Infrastructure.Services.PaymentService
 
         public async Task<ApiResponse<bool>> VerifyPayment(string userId, VerifyPaymentDTO dto)
         {
-            // TODO: use transaction here as payment and order tables are being updated together,
-            // if payment verification is successful but order update fails, it will cause data inconsistency
-            var paymentProvider = _paymentFactory.GetPaymentProvider(dto.Provider);
-            var verificationResult = await paymentProvider.VerifyPaymentAsync(dto.Data);
-
-            if (!verificationResult.IsSuccess)
+            return await _txnService.ExecuteInTransactionAsync(async () =>
             {
-                return ApiResponse<bool>.Failed(
-                    new() { { "PaymentVerification", "Payment verification failed" } },
-                    "Payment verification failed",
-                    HttpStatusCode.BadRequest
+                var paymentProvider = _paymentFactory.GetPaymentProvider(dto.Provider);
+                var verificationResult = await paymentProvider.VerifyPaymentAsync(dto.Data);
+
+                if (!verificationResult.IsSuccess)
+                {
+                    return ApiResponse<bool>.Failed(
+                        new() { { "PaymentVerification", "Payment verification failed" } },
+                        "Payment verification failed",
+                        HttpStatusCode.BadRequest
+                    );
+                }
+
+                var payment = await _paymentRepo.FindSingleByConditionAsync(
+                    x => x.ExternalTransactionId == verificationResult.TransactionUuid && x.UserId == userId
                 );
-            }
+                if (payment is null)
+                {
+                    throw new ServiceException(
+                        new() { { "PaymentNotFound", "Payment record not found" } },
+                        HttpStatusCode.NotFound
+                    );
+                }
 
-            var payment = await _paymentRepo.FindSingleByConditionAsync(
-                x => x.ExternalTransactionId == verificationResult.TransactionUuid && x.UserId == userId
-            );
-            if (payment is null)
-            {
-                throw new ServiceException(
-                    new() { { "PaymentNotFound", "Payment record not found" } },
-                    HttpStatusCode.NotFound
+                payment.Status = PaymentStatus.Success;
+                await _paymentRepo.SaveChangesAsync();
+
+                var updateOrderModel = new UpdateOrderDTO
+                {
+                    OrderId = payment.OrderId,
+                    Status = OrderStatus.Completed,
+                };
+                var updatedOrder = await _orderService.UpdateOrder(userId, updateOrderModel);
+                if (updatedOrder.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new ServiceException(
+                        updatedOrder.Errors,
+                        HttpStatusCode.BadRequest
+                    );
+                }
+
+                return ApiResponse<bool>.Success(
+                    true,
+                    "Payment verified and order updated successfully",
+                    HttpStatusCode.OK
                 );
-            }
-
-            payment.Status = PaymentStatus.Success;
-            await _paymentRepo.SaveChangesAsync();
-
-            var updateOrderModel = new UpdateOrderDTO
-            {
-                OrderId = payment.OrderId,
-                Status = OrderStatus.Completed,
-            };
-            var updatedOrder = await _orderService.UpdateOrder(userId, updateOrderModel);
-
-            return ApiResponse<bool>.Success(
-                true,
-                "Payment verified and order updated successfully",
-                HttpStatusCode.OK
-            );
+            });
         }
 
         public Task<bool> RefundPayment()
