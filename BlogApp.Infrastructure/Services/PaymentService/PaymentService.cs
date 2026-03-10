@@ -124,7 +124,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 }
 
                 payment.Status = PaymentStatus.Success;
-                await _paymentRepo.SaveChangesAsync();
+                //await _paymentRepo.SaveChangesAsync(); // No need to call SaveChangesAsync here, it will be called at the end of the transaction in the transaction service
 
                 var updateOrderModel = new UpdateOrderDTO
                 {
