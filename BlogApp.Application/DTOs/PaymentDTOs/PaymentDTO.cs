@@ -1,6 +1,6 @@
 ﻿using BlogApp.Domain.Enums;
 
-namespace BlogApp.Application.DTOs
+namespace BlogApp.Application.DTOs.PaymentDTOs
 {
     public class CreatePaymentDTO
     {

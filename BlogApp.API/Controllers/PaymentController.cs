@@ -1,5 +1,5 @@
 ﻿using Azure;
-using BlogApp.Application.DTOs;
+using BlogApp.Application.DTOs.PaymentDTOs;
 using BlogApp.Application.Exceptions;
 using BlogApp.Application.Interface.IServices.IPaymentService;
 using Microsoft.AspNetCore.Authorization;
@@ -31,9 +31,7 @@ namespace BlogApp.API.Controllers
             var response = await _paymentService.InitiatePayment(userId, reqModel);
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                throw new ServiceException(
-                    response.Errors,
-                    HttpStatusCode.InternalServerError);
+                return StatusCode((int)response.StatusCode, response);
             }
             return Ok(response);
         }
@@ -48,6 +46,23 @@ namespace BlogApp.API.Controllers
                 throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
             }
             var response = await _paymentService.VerifyPayment(userId, reqModel);
+            return Ok(response);
+        }
+
+        [HttpGet("check-status/{paymentId}")]
+        [Authorize]
+        public async Task<IActionResult> StatusCheck(int paymentId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
+            }
+            var response = await _paymentService.CheckPaymentStatus(paymentId);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
             return Ok(response);
         }
     }

@@ -1,5 +1,6 @@
-﻿using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs.PaymentDTOs;
 using BlogApp.Application.Interface.IServices.IPaymentService;
+using BlogApp.Domain.Entities;
 
 namespace BlogApp.Infrastructure.Services.PaymentService
 {
@@ -15,7 +16,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             throw new NotImplementedException();
         }
 
-        public Task<object> StatusCheckAsync(string transactionId)
+        public Task<object> CheckStatusAsync(Payments payment)
         {
             throw new NotImplementedException();
         }

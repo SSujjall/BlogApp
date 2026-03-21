@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs.PaymentDTOs;
+using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Interface.IServices.IPaymentService
 {
@@ -6,7 +7,7 @@ namespace BlogApp.Application.Interface.IServices.IPaymentService
     {
         Task<string> ProcessPaymentAsync(PaymentRequestDTO dto);
         Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data);
-        Task<object> StatusCheckAsync(string transactionId);
+        Task<object> CheckStatusAsync(Payments payment);
         Task<bool> RefundPaymentAsync(string transactionId);
     }
 }

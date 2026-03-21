@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs;
+using BlogApp.Application.DTOs.PaymentDTOs;
 using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Mappings

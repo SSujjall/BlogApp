@@ -1,6 +1,7 @@
-﻿using BlogApp.Application.DTOs;
+﻿using BlogApp.Application.DTOs.PaymentDTOs;
 using BlogApp.Application.Exceptions;
 using BlogApp.Application.Interface.IServices.IPaymentService;
+using BlogApp.Domain.Entities;
 using BlogApp.Domain.Enums;
 using BlogApp.Domain.GlobalConfigs;
 using Microsoft.Extensions.Options;
@@ -118,9 +119,26 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             throw new NotImplementedException();
         }
 
-        public Task<object> StatusCheckAsync(string transactionId)
+        public async Task<object> CheckStatusAsync(Payments payment)
         {
-            throw new NotImplementedException();
+            var parameters = 
+                $"product_code={_config.ProductCode}&" +
+                $"total_amount={payment.Amount}&" +
+                $"transaction_uuid={payment.ExternalTransactionId}";
+
+            var statusCheckUrl = $"{_config.StatusCheckUrl}/?{parameters}";
+
+            var apiResponse = await _httpClient.GetAsync(statusCheckUrl);
+            if (!apiResponse.IsSuccessStatusCode)
+            {
+                throw new ServiceException(
+                    new() { { "EsewaStatusCheckError", "Failed to status check the payment" } },
+                    HttpStatusCode.InternalServerError
+                 );
+            }
+            var json = await apiResponse.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<EsewaCheckStatusResponseDTO>(json);
+            return result;
         }
 
         private string GenerateSignature(string message)

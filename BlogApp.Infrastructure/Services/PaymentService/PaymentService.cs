@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BlogApp.Application.DTOs;
+using BlogApp.Application.DTOs.PaymentDTOs;
 using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
@@ -156,6 +157,21 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                     HttpStatusCode.OK
                 );
             });
+        }
+
+        public async Task<ApiResponse<object>> CheckPaymentStatus(int paymentId)
+        {
+            var payment = await _paymentRepo.GetByIdAsync(paymentId);
+            if (payment is null)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentNotFound", "Payment record not found" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+            var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
+            var result = await paymentProvider.CheckStatusAsync(payment);
+            return ApiResponse<object>.Success(result, "Status fetched successfully");
         }
 
         public Task<bool> RefundPayment()
