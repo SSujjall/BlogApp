@@ -6,5 +6,6 @@
         public string InitiateUrl { get; set; }
         public string LookupUrl { get; set; }
         public string WebsiteUrl { get; set; }
+        public string ReturnUrl { get; set; }
     }
 }

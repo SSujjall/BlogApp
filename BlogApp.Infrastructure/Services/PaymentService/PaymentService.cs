@@ -58,7 +58,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 paymentModel.OrderId = dto.OrderId;
                 paymentModel.ExternalTransactionId = externalTxnId;
 
-                var x = await _paymentRepo.AddAsync(paymentModel);
+                await _paymentRepo.AddAsync(paymentModel);
                 await _paymentRepo.SaveChangesAsync();
             }
             catch (DbUpdateException) // Only catch database exceptions, let the global excception handler catch other exceptions
