@@ -36,15 +36,23 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             _txnService = txnService;
         }
 
-        public async Task<ApiResponse<string>> InitiatePayment(string userId, CreatePaymentDTO dto)
+        public async Task<ApiResponse<PaymentInitiateResponseDTO>> InitiatePayment(string userId, CreatePaymentDTO dto)
         {
             var orderRes = await _orderService.GetOrderById(userId, dto.OrderId);
-            if (orderRes.Data is null || orderRes.Data.Status == OrderStatus.Completed)
+            if (orderRes.Data is null)
             {
-                return ApiResponse<string>.Failed(
-                    new() { { "OrderError", $"Order not found or already completed" } },
+                return ApiResponse<PaymentInitiateResponseDTO>.Failed(
+                    new() { { "OrderError", $"Order not found" } },
                     "Payment initiation failed",
                     HttpStatusCode.BadRequest
+                );
+            }
+            if (orderRes.Data.Status == OrderStatus.Completed)
+            {
+                return ApiResponse<PaymentInitiateResponseDTO>.Failed(
+                    new() { { "OrderError", $"Order already completed" } },
+                    "Payment initiation failed",
+                    HttpStatusCode.Conflict
                 );
             }
 
@@ -65,7 +73,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             var paymentResult = await paymentProvider.ProcessPaymentAsync(paymentReq);
             if (paymentResult == null || string.IsNullOrEmpty(paymentResult.RedirectUrl))
             {
-                return ApiResponse<string>.Failed(
+                return ApiResponse<PaymentInitiateResponseDTO>.Failed(
                     new() { { "Payment", "Failed to process payment" } },
                     "Payment initiation failed"
                 );
@@ -94,8 +102,8 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             }
             #endregion
 
-            return ApiResponse<string>.Success(
-                paymentResult.RedirectUrl,
+            return ApiResponse<PaymentInitiateResponseDTO>.Success(
+                paymentResult,
                 "Payment initiated successfully",
                 HttpStatusCode.OK
             );
@@ -121,7 +129,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 }
 
                 var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
-                var verificationResult = await paymentProvider.VerifyPaymentAsync(dto.Data);
+                var verificationResult = await paymentProvider.VerifyPaymentAsync(dto);
 
                 if (!verificationResult.IsSuccess)
                 {

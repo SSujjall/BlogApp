@@ -55,7 +55,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 throw new ServiceException(
                     new() { { "EsewaPaymentError", "Failed to initiate eSewa payment" } },
                     HttpStatusCode.InternalServerError
-                 );
+                );
             }
             var contentType = apiResponse.Content.Headers.ContentType?.MediaType;
             string responseBody;
@@ -78,9 +78,17 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             };
         }
 
-        public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
+        public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(VerifyPaymentDTO dto)
         {
-            byte[] bytes = Convert.FromBase64String(data);
+            if (string.IsNullOrEmpty(dto.Data))
+            {
+                throw new ServiceException(
+                    new() { { "EsewaVerifyError", "Data field is necessary for esewa payment verification" } },
+                    HttpStatusCode.InternalServerError
+                 );
+            }
+
+            byte[] bytes = Convert.FromBase64String(dto.Data);
             string decodedString = Encoding.UTF8.GetString(bytes);
 
             var apiRes = JsonSerializer.Deserialize<EsewaResponseDTO>(decodedString);

@@ -1,4 +1,5 @@
 ﻿using BlogApp.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace BlogApp.Application.DTOs.PaymentDTOs
 {
@@ -12,13 +13,15 @@ namespace BlogApp.Application.DTOs.PaymentDTOs
     {
         public string RedirectUrl { get; set; }
         public string ExternalTxnId { get; set; }
+
+        [JsonIgnore]
         public string RawResponse { get; set; }
     }
 
     public class VerifyPaymentDTO
     {
         public string ExternalTxnId { get; set; }
-        public string Data { get; set; }
+        public string? Data { get; set; }
     }
 
     public class PaymentRequestDTO

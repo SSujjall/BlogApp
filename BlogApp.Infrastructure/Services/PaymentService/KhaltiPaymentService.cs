@@ -78,9 +78,9 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             };
         }
 
-        public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
+        public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(VerifyPaymentDTO dto)
         {
-            var result = await CallKhaltiCheckStatus(data);
+            var result = await CallKhaltiCheckStatus(dto.ExternalTxnId); // here extTxnId is the pidx
 
             var isSuccess = result.status.Equals("Completed", StringComparison.OrdinalIgnoreCase);
             return new PaymentVerificationResponseDTO
@@ -121,7 +121,6 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             var json = JsonSerializer.Serialize(reqBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            _httpClient.DefaultRequestHeaders.Remove("Authorization");
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Key {_config.SecretKey}");
 
             var apiResponse = await _httpClient.PostAsync(_config.LookupUrl, content);
