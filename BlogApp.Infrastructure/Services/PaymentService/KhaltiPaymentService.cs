@@ -78,48 +78,65 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             };
         }
 
-        public Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
+        public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
         {
-            throw new NotImplementedException();
+            var result = await CallKhaltiCheckStatus(data);
+
+            var isSuccess = result.status.Equals("Completed", StringComparison.OrdinalIgnoreCase);
+            return new PaymentVerificationResponseDTO
+            {
+                IsSuccess = isSuccess,
+                TransactionId = result.transaction_id?.ToString(),
+                ExternalTxnId = result.pidx,
+                Amount = (decimal)result.total_amount / 100,
+                Status = result.status.ToUpper()
+            };
         }
 
         public async Task<PaymentCheckStatusResponseDTO> CheckStatusAsync(Payments payment)
         {
-            try
+            var result = await CallKhaltiCheckStatus(payment.ExternalTransactionId);
+            return new PaymentCheckStatusResponseDTO
             {
-                var reqBody = new
-                {
-                    pidx = payment.ExternalTransactionId
-                };
-
-                var json = JsonSerializer.Serialize(reqBody);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Key {_config.SecretKey}");
-
-                var apiResponse = await _httpClient.PostAsync(_config.LookupUrl, content);
-                var responseJson = await apiResponse.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<KhaltiCheckStatusResponseDTO>(responseJson);
-                return new PaymentCheckStatusResponseDTO
-                {
-                    ExternalTxnId = result.pidx.ToString(),
-                    Status = result.status.ToUpper(),
-                    TotalAmount = (decimal)result.total_amount / 100,
-                    RefTxnId = result.transaction_id?.ToString(),
-                };
-            } 
-            catch (Exception ex)
-            {
-                // _logger.log(ex);
-                throw new ServiceException(
-                    new() { { "EsewaStatusCheckError", "Failed to status check the payment" } },
-                    HttpStatusCode.InternalServerError
-                );
-            }
+                ExternalTxnId = result.pidx.ToString(),
+                Status = result.status.ToUpper(),
+                TotalAmount = (decimal)result.total_amount / 100,
+                RefTxnId = result.transaction_id?.ToString(),
+            };
         }
 
         public Task<bool> RefundPaymentAsync(string transactionId)
         {
             throw new NotImplementedException();
         }
+
+        #region Helper Methods
+        private async Task<KhaltiCheckStatusResponseDTO> CallKhaltiCheckStatus(string pidx)
+        {
+            var reqBody = new
+            {
+                pidx = pidx
+            };
+
+            var json = JsonSerializer.Serialize(reqBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Key {_config.SecretKey}");
+
+            var apiResponse = await _httpClient.PostAsync(_config.LookupUrl, content);
+            var responseJson = await apiResponse.Content.ReadAsStringAsync();
+            var responseDto = JsonSerializer.Deserialize<KhaltiCheckStatusResponseDTO>(responseJson);
+            if (responseDto == null)
+            {
+                throw new ServiceException(
+                    new() { { "EsewaStatusCheckError", "Failed to parse Khalti status response" } },
+                    HttpStatusCode.InternalServerError
+                );
+            }
+
+            return responseDto;
+        }
+        #endregion
     }
 }

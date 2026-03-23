@@ -113,16 +113,11 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             {
                 IsSuccess = apiRes.status.ToUpper() == EsewaResStatus.COMPLETE.ToString(),
                 TransactionId = apiRes.transaction_code,
-                TransactionUuid = apiRes.transaction_uuid,
+                ExternalTxnId = apiRes.transaction_uuid,
                 Amount = decimal.TryParse(apiRes.total_amount, out decimal amount) ? amount : 0,
-                Status = apiRes.status,
+                Status = apiRes.status.ToUpper(),
                 RawResponse = decodedString
             };
-        }
-
-        public Task<bool> RefundPaymentAsync(string transactionId)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<PaymentCheckStatusResponseDTO> CheckStatusAsync(Payments payment)
@@ -151,6 +146,11 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 TotalAmount = result.total_amount,
                 RefTxnId = result.ref_id.ToString(),
             };
+        }
+
+        public Task<bool> RefundPaymentAsync(string transactionId)
+        {
+            throw new NotImplementedException();
         }
 
         private string GenerateSignature(string message)

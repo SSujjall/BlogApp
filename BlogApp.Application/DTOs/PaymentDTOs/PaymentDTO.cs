@@ -17,7 +17,7 @@ namespace BlogApp.Application.DTOs.PaymentDTOs
 
     public class VerifyPaymentDTO
     {
-        public PaymentProviderType Provider { get; set; }
+        public string ExternalTxnId { get; set; }
         public string Data { get; set; }
     }
 
@@ -35,7 +35,7 @@ namespace BlogApp.Application.DTOs.PaymentDTOs
     {
         public bool IsSuccess { get; set; }
         public string TransactionId { get; set; }
-        public string TransactionUuid { get; set; }
+        public string ExternalTxnId { get; set; }
         public decimal Amount { get; set; }
         public string Status { get; set; }
         public string RawResponse { get; set; }

@@ -105,7 +105,22 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         {
             return await _txnService.ExecuteInTransactionAsync(async () =>
             {
-                var paymentProvider = _paymentFactory.GetPaymentProvider(dto.Provider);
+                var payment = await _paymentRepo.FindSingleByConditionAsync(
+                    x => x.ExternalTransactionId == dto.ExternalTxnId && x.UserId == userId
+                );
+                if (payment is null)
+                {
+                    throw new ServiceException(
+                        new() { { "PaymentNotFound", "Payment record not found" } },
+                        HttpStatusCode.NotFound
+                    );
+                }
+                if (payment.Status == PaymentStatus.Success)
+                {
+                    return ApiResponse<bool>.Success(true, "Payment already verified", HttpStatusCode.OK);
+                }
+
+                var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
                 var verificationResult = await paymentProvider.VerifyPaymentAsync(dto.Data);
 
                 if (!verificationResult.IsSuccess)
@@ -116,20 +131,26 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                         HttpStatusCode.BadRequest
                     );
                 }
-
-                var payment = await _paymentRepo.FindSingleByConditionAsync(
-                    x => x.ExternalTransactionId == verificationResult.TransactionUuid && x.UserId == userId
-                );
-                if (payment is null)
+                if (verificationResult.ExternalTxnId != payment.ExternalTransactionId)
                 {
                     throw new ServiceException(
-                        new() { { "PaymentNotFound", "Payment record not found" } },
-                        HttpStatusCode.NotFound
+                        new() { { "TransactionMismatch", "Transaction mismatch" } },
+                        HttpStatusCode.BadRequest
                     );
                 }
 
                 payment.Status = PaymentStatus.Success;
                 //await _paymentRepo.SaveChangesAsync(); // No need to call SaveChangesAsync here, it will be called at the end of the transaction in the transaction service
+
+                // Check if order is already fullfilled, if yes then throw error
+                var order = await _orderService.GetOrderById(userId, payment.OrderId);
+                if (order.Data.Status == OrderStatus.Completed)
+                {
+                    throw new ServiceException(
+                        new() { { "OrderStatusError", "Order already marked as completed and verified" } },
+                        HttpStatusCode.BadRequest
+                    );
+                }
 
                 var updateOrderModel = new UpdateOrderDTO
                 {
@@ -141,13 +162,6 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 {
                     throw new ServiceException(
                         updatedOrder.Errors,
-                        HttpStatusCode.BadRequest
-                    );
-                }
-                if (updatedOrder.Data.Status == OrderStatus.Completed)
-                {
-                    throw new ServiceException(
-                        new() { { "OrderStatusError", "Order already marked as completed and verified" } },
                         HttpStatusCode.BadRequest
                     );
                 }
