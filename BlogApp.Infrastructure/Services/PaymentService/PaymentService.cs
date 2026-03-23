@@ -195,6 +195,9 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
             var result = await paymentProvider.CheckStatusAsync(payment);
             return ApiResponse<object>.Success(result, "Status fetched successfully");
+            // TODO: Update the order and payment status according to the check status.
+            // Scenario: Failure in payment in our side but is success in the khalti/esewa side, so we need to check status and see if the payment is succeded,
+            // if yes then update our DB accordingly
         }
 
         public Task<bool> RefundPayment()
