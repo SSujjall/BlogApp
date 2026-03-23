@@ -25,7 +25,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             _httpClient = httpClient;
         }
 
-        public async Task<string> ProcessPaymentAsync(PaymentRequestDTO dto)
+        public async Task<PaymentInitiateResponseDTO> ProcessPaymentAsync(PaymentRequestDTO dto)
         {
             var message = $"total_amount={dto.TotalAmount},transaction_uuid={dto.ExternalTransactionId},product_code={_config.ProductCode}";
             var signature = GenerateSignature(message);
@@ -69,7 +69,13 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 // If response is json
                 responseBody = await apiResponse.Content.ReadAsStringAsync();
             }
-            return responseBody;
+
+            return new PaymentInitiateResponseDTO
+            {
+                RedirectUrl = responseBody,
+                ExternalTxnId = dto.ExternalTransactionId, 
+                RawResponse = await apiResponse.Content.ReadAsStringAsync()
+            };
         }
 
         public async Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
@@ -119,7 +125,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             throw new NotImplementedException();
         }
 
-        public async Task<object> CheckStatusAsync(Payments payment)
+        public async Task<PaymentCheckStatusResponseDTO> CheckStatusAsync(Payments payment)
         {
             var parameters = 
                 $"product_code={_config.ProductCode}&" +
@@ -138,7 +144,13 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             }
             var json = await apiResponse.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<EsewaCheckStatusResponseDTO>(json);
-            return result;
+            return new PaymentCheckStatusResponseDTO
+            {
+                ExternalTxnId = result.transaction_uuid.ToString(),
+                Status = result.status.ToUpper(),
+                TotalAmount = result.total_amount,
+                RefTxnId = result.ref_id.ToString(),
+            };
         }
 
         private string GenerateSignature(string message)

@@ -163,6 +163,7 @@ namespace BlogApp.Infrastructure.DI
 
             // settings the values of payment configuration
             services.Configure<EsewaConfig>(configuration.GetSection("PaymentConfigs:Esewa"));
+            services.Configure<KhaltiConfig>(configuration.GetSection("PaymentConfigs:Khalti"));
             #endregion
 
             #region Register Repositories

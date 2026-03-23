@@ -4,7 +4,6 @@ using BlogApp.Application.Interface.IServices.IPaymentService;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.GlobalConfigs;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -24,7 +23,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             _httpClient = httpClient;
         }
 
-        public async Task<string> ProcessPaymentAsync(PaymentRequestDTO dto)
+        public async Task<PaymentInitiateResponseDTO> ProcessPaymentAsync(PaymentRequestDTO dto)
         {
             var khaltiReq = new KhaltiRequestDTO
             {
@@ -71,7 +70,12 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 );
             }
 
-            return mappedRes.payment_url;
+            return new PaymentInitiateResponseDTO
+            {
+                RedirectUrl = mappedRes.payment_url,
+                ExternalTxnId = mappedRes.pidx,
+                RawResponse = apiResContent
+            };
         }
 
         public Task<PaymentVerificationResponseDTO> VerifyPaymentAsync(string data)
@@ -79,9 +83,38 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             throw new NotImplementedException();
         }
 
-        public Task<object> CheckStatusAsync(Payments payment)
+        public async Task<PaymentCheckStatusResponseDTO> CheckStatusAsync(Payments payment)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var reqBody = new
+                {
+                    pidx = payment.ExternalTransactionId
+                };
+
+                var json = JsonSerializer.Serialize(reqBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Key {_config.SecretKey}");
+
+                var apiResponse = await _httpClient.PostAsync(_config.LookupUrl, content);
+                var responseJson = await apiResponse.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<KhaltiCheckStatusResponseDTO>(responseJson);
+                return new PaymentCheckStatusResponseDTO
+                {
+                    ExternalTxnId = result.pidx.ToString(),
+                    Status = result.status.ToUpper(),
+                    TotalAmount = (decimal)result.total_amount / 100,
+                    RefTxnId = result.transaction_id?.ToString(),
+                };
+            } 
+            catch (Exception ex)
+            {
+                // _logger.log(ex);
+                throw new ServiceException(
+                    new() { { "EsewaStatusCheckError", "Failed to status check the payment" } },
+                    HttpStatusCode.InternalServerError
+                );
+            }
         }
 
         public Task<bool> RefundPaymentAsync(string transactionId)

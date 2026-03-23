@@ -8,6 +8,13 @@ namespace BlogApp.Application.DTOs.PaymentDTOs
         public PaymentProviderType Provider { get; set; }
     }
 
+    public class PaymentInitiateResponseDTO
+    {
+        public string RedirectUrl { get; set; }
+        public string ExternalTxnId { get; set; }
+        public string RawResponse { get; set; }
+    }
+
     public class VerifyPaymentDTO
     {
         public PaymentProviderType Provider { get; set; }
@@ -32,5 +39,13 @@ namespace BlogApp.Application.DTOs.PaymentDTOs
         public decimal Amount { get; set; }
         public string Status { get; set; }
         public string RawResponse { get; set; }
+    }
+
+    public class PaymentCheckStatusResponseDTO
+    {
+        public string ExternalTxnId { get; set; }
+        public string Status { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string RefTxnId { get; set; }
     }
 }

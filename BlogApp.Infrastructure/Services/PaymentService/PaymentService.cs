@@ -48,7 +48,29 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 );
             }
 
-            var externalTxnId = Guid.NewGuid().ToString();
+            var paymentProvider = _paymentFactory.GetPaymentProvider(dto.Provider);
+
+            #region payment req dto model mapping
+            var paymentReq = new PaymentRequestDTO
+            {
+                UserId = userId,
+                SubscriptionId = orderRes.Data.SubscriptionId,
+                SubscriptionName = orderRes.Data.Subscription.Name,
+                OrderId = dto.OrderId,
+                TotalAmount = orderRes.Data.Amount,
+                ExternalTransactionId = Guid.NewGuid().ToString(),
+            };
+            #endregion
+
+            var paymentResult = await paymentProvider.ProcessPaymentAsync(paymentReq);
+            if (paymentResult == null || string.IsNullOrEmpty(paymentResult.RedirectUrl))
+            {
+                return ApiResponse<string>.Failed(
+                    new() { { "Payment", "Failed to process payment" } },
+                    "Payment initiation failed"
+                );
+            }
+
             #region Creating payment data and saving to database
             try
             {
@@ -56,7 +78,9 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 paymentModel.UserId = userId;
                 paymentModel.Amount = orderRes.Data.Amount;
                 paymentModel.OrderId = dto.OrderId;
-                paymentModel.ExternalTransactionId = externalTxnId;
+
+                // use the externalTxnId from the returned result from payment
+                paymentModel.ExternalTransactionId = paymentResult.ExternalTxnId;
 
                 await _paymentRepo.AddAsync(paymentModel);
                 await _paymentRepo.SaveChangesAsync();
@@ -68,33 +92,10 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                     HttpStatusCode.InternalServerError
                 );
             }
-
             #endregion
 
-            var paymentProvider = _paymentFactory.GetPaymentProvider(dto.Provider);
-
-            #region payment req dto model mapping
-            var paymentReq = new PaymentRequestDTO
-            {
-                UserId = userId,
-                SubscriptionId = orderRes.Data.SubscriptionId,
-                SubscriptionName = orderRes.Data.Subscription.Name,
-                OrderId = dto.OrderId,
-                TotalAmount = orderRes.Data.Amount,
-                ExternalTransactionId = externalTxnId
-            };
-            #endregion
-
-            var paymentResult = await paymentProvider.ProcessPaymentAsync(paymentReq);
-            if (string.IsNullOrEmpty(paymentResult))
-            {
-                return ApiResponse<string>.Failed(
-                    new() { { "Payment", "Failed to process payment" } },
-                    "Payment initiation failed"
-                );
-            }
             return ApiResponse<string>.Success(
-                paymentResult,
+                paymentResult.RedirectUrl,
                 "Payment initiated successfully",
                 HttpStatusCode.OK
             );
