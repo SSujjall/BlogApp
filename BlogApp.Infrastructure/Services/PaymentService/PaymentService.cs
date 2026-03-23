@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs;
 using BlogApp.Application.DTOs.PaymentDTOs;
 using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.HelperModels;
@@ -18,6 +17,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         private readonly IPaymentRepository _paymentRepo;
         private readonly IPaymentProviderFactory _paymentFactory;
         private readonly IOrderService _orderService;
+        private readonly IOrderRepository _orderRepo;
         private readonly IMapper _mapper;
         private readonly ITransactionService _txnService;
 
@@ -25,6 +25,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             IPaymentRepository paymentRepo,
             IPaymentProviderFactory paymentFactory,
             IOrderService orderService,
+            IOrderRepository orderRepo,
             IMapper mapper,
             ITransactionService txnService
         )
@@ -32,6 +33,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             _paymentRepo = paymentRepo;
             _paymentFactory = paymentFactory;
             _orderService = orderService;
+            _orderRepo = orderRepo;
             _mapper = mapper;
             _txnService = txnService;
         }
@@ -86,6 +88,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 paymentModel.UserId = userId;
                 paymentModel.Amount = orderRes.Data.Amount;
                 paymentModel.OrderId = dto.OrderId;
+                paymentModel.PaymentUrl = paymentResult.RedirectUrl;
 
                 // use the externalTxnId from the returned result from payment
                 paymentModel.ExternalTransactionId = paymentResult.ExternalTxnId;
@@ -127,15 +130,21 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 {
                     return ApiResponse<bool>.Success(true, "Payment already verified", HttpStatusCode.OK);
                 }
+                if (payment.Status == PaymentStatus.Canceled || payment.Status == PaymentStatus.Failed)
+                {
+                    throw new ServiceException(
+                        new() { { "PaymentStatusError", "Payment cannot be verified" } }, 
+                        HttpStatusCode.BadRequest
+                    );
+                }
 
                 var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
                 var verificationResult = await paymentProvider.VerifyPaymentAsync(dto);
 
                 if (!verificationResult.IsSuccess)
                 {
-                    return ApiResponse<bool>.Failed(
+                    throw new ServiceException(
                         new() { { "PaymentVerification", "Payment verification failed" } },
-                        "Payment verification failed",
                         HttpStatusCode.BadRequest
                     );
                 }
@@ -151,27 +160,32 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 //await _paymentRepo.SaveChangesAsync(); // No need to call SaveChangesAsync here, it will be called at the end of the transaction in the transaction service
 
                 // Check if order is already fullfilled, if yes then throw error
-                var order = await _orderService.GetOrderById(userId, payment.OrderId);
-                if (order.Data.Status == OrderStatus.Completed)
+                var order = await _orderRepo.FindSingleByConditionAsync(
+                    o => o.OrderId == payment.OrderId && o.UserId == userId
+                );
+                if (order == null || 
+                    order.Status == OrderStatus.Completed ||
+                    order.Status == OrderStatus.Canceled
+                )
                 {
                     throw new ServiceException(
-                        new() { { "OrderStatusError", "Order already marked as completed and verified" } },
+                        new() { { "OrderStatusError", "Order not found or cannot be verified" } },
                         HttpStatusCode.BadRequest
                     );
                 }
 
-                var updateOrderModel = new UpdateOrderDTO
+                // Update order status
+                order.Status = OrderStatus.Completed;
+
+                var otherPaymentForSameOrderId = await _paymentRepo.FindAllByConditionAsync(
+                    p => p.OrderId == payment.OrderId 
+                        && p.PaymentId != payment.PaymentId
+                        && p.Status != PaymentStatus.Success
+                );
+
+                foreach (var paymentItem in otherPaymentForSameOrderId)
                 {
-                    OrderId = payment.OrderId,
-                    Status = OrderStatus.Completed,
-                };
-                var updatedOrder = await _orderService.UpdateOrder(userId, updateOrderModel);
-                if (updatedOrder.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new ServiceException(
-                        updatedOrder.Errors,
-                        HttpStatusCode.BadRequest
-                    );
+                    paymentItem.Status = PaymentStatus.Canceled;
                 }
 
                 return ApiResponse<bool>.Success(
@@ -203,6 +217,75 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         public Task<bool> RefundPayment()
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ApiResponse<IEnumerable<Payments>>> GetAllUserPayments(string userId)
+        {
+            var payments = await _paymentRepo.FindAllByConditionAsync(
+                x => x.UserId == userId
+            );
+            if (payments is null)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentNotFound", "Payment records not found" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+            return ApiResponse<IEnumerable<Payments>>.Success(payments, "Payments retrieved for user successfully");
+        }
+
+        public async Task<ApiResponse<Payments>> GetPaymentById(string userId, int paymentId)
+        {
+            var payment = await _paymentRepo.FindSingleByConditionAsync(
+                x => x.PaymentId == paymentId && x.UserId == userId
+            );
+            if (payment is null)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentNotFound", "Payment records not found" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+            return ApiResponse<Payments>.Success(payment, "Payments retrieved for user successfully");
+        }
+
+        public async Task<ApiResponse<IEnumerable<Payments>>> GetPaymentsOfAnOrder(string userId, int orderId)
+        {
+            var payments = await _paymentRepo.FindAllByConditionAsync(
+                x => x.UserId == userId && x.OrderId == orderId
+            );
+            if (payments is null)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentNotFound", "Payment records not found" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+            return ApiResponse<IEnumerable<Payments>>.Success(payments, "Payments retrieved for user successfully for specific order");
+        }
+
+        public async Task<ApiResponse<PaymentInitiateResponseDTO>> RetryPayment(string userId, int paymentId)
+        {
+            var payment = await _paymentRepo.FindSingleByConditionAsync(
+                x => x.PaymentId == paymentId && x.UserId == userId
+            );
+            if (payment is null || (payment.Status != PaymentStatus.Pending && payment.Status != PaymentStatus.Failed))
+            {
+                throw new ServiceException(
+                    new() { { "PaymentRetryError", "Payment records not found or already completed" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+
+            var data = new PaymentInitiateResponseDTO
+            {
+                RedirectUrl = payment.PaymentUrl,
+                ExternalTxnId = payment.ExternalTransactionId,
+            };
+            return ApiResponse<PaymentInitiateResponseDTO>.Success(
+                data,
+                "Retry initiated"
+            );
         }
     }
 }

@@ -30,8 +30,6 @@ const Sidebar = ({ visible, toggleSidebar }) => {
 
   const handleLogoutClick = async () => {
     try {
-      contextLogout();
-      
       const apiResponse = await logout();
       if (apiResponse.statusCode === 200) {
         navigate("/");
@@ -44,6 +42,8 @@ const Sidebar = ({ visible, toggleSidebar }) => {
         }
         showErrorToast(errorMessage);
       }
+
+      contextLogout();
     } catch (error) {
       console.error("Error during logout:", error);
     }

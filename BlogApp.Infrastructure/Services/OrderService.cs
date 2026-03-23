@@ -5,6 +5,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Enums;
 using System.Net;
 
 namespace BlogApp.Infrastructure.Services
@@ -13,7 +14,9 @@ namespace BlogApp.Infrastructure.Services
         IOrderRepository _orderRepo,
         ISubscriptionRepository _subsRepo,
         IUserRepository _userRepo,
-        IMapper _mapper
+        IPaymentRepository _paymentRepo,
+        IMapper _mapper,
+        ITransactionService _txnService
     ) : IOrderService
     {
         public async Task<ApiResponse<Orders>> CreateNewOrder(string userId, CreateOrderDTO dto)
@@ -110,6 +113,51 @@ namespace BlogApp.Infrastructure.Services
             await _orderRepo.SaveChangesAsync();
 
             return ApiResponse<Orders>.Success(order, "Order updated successfully", HttpStatusCode.OK);
+        }
+
+        public async Task<ApiResponse<string>> CancelOrder(string userId, int orderId)
+        {
+            return await _txnService.ExecuteInTransactionAsync(async () =>
+            {
+                var order = await _orderRepo.FindSingleByConditionAsync(
+                    o => o.OrderId == orderId
+                         && o.UserId == userId
+                         && o.Status != OrderStatus.Completed
+                         && o.Status != OrderStatus.Canceled
+                );
+
+                if (order == null)
+                {
+                    throw new ServiceException(
+                        new() { { "OrderNotFound", "Order not found or already processed" } },
+                        HttpStatusCode.NotFound
+                    );
+                }
+
+                // Update order
+                order.Status = OrderStatus.Canceled;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                // Cancel payments 
+                var payments = await _paymentRepo.FindAllByConditionAsync(
+                    x => x.OrderId == orderId
+                         && x.UserId == userId
+                         && x.Status != PaymentStatus.Success
+                );
+                foreach (var payment in payments)
+                {
+                    if (payment.Status != PaymentStatus.Canceled)
+                    {
+                        payment.Status = PaymentStatus.Canceled;
+                    }
+                }
+
+                return ApiResponse<string>.Success(
+                    null,
+                    "Order canceled successfully",
+                    HttpStatusCode.OK
+                );
+            });
         }
     }
 }

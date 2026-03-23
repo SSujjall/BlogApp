@@ -18,8 +18,8 @@ namespace BlogApp.API.Controllers
             _paymentService = paymentService;
         }
 
-        [HttpPost("initiate")]
         [Authorize]
+        [HttpPost("initiate")]
         public async Task<IActionResult> ProcessPayment([FromBody] CreatePaymentDTO reqModel)
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -36,8 +36,8 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("verify")]
         [Authorize]
+        [HttpPost("verify")]
         public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentDTO reqModel)
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -49,8 +49,8 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("check-status/{paymentId}")]
         [Authorize]
+        [HttpGet("check-status/{paymentId}")]
         public async Task<IActionResult> StatusCheck(int paymentId)
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -59,6 +59,40 @@ namespace BlogApp.API.Controllers
                 throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
             }
             var response = await _paymentService.CheckPaymentStatus(paymentId);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("retry/{paymentId}")]
+        public async Task<IActionResult> RetryPayment(int paymentId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
+            }
+            var response = await _paymentService.RetryPayment(userId, paymentId);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpGet("get-all/{orderId}")]
+        public async Task<IActionResult> GetPaymentsByOrderId(int orderId)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
+            }
+            var response = await _paymentService.GetPaymentsOfAnOrder(userId, orderId);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 return StatusCode((int)response.StatusCode, response);

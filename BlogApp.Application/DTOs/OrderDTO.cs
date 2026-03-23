@@ -13,4 +13,9 @@ namespace BlogApp.Application.DTOs
         public OrderStatus Status { get; set; }
         public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
     }
+
+    public class CancelOrderDto
+    {
+        public int OrderId { get; set; }
+    }
 }

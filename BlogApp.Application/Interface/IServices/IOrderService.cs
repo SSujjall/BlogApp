@@ -10,7 +10,8 @@ namespace BlogApp.Application.Interface.IServices
         Task<ApiResponse<IEnumerable<Orders>>> GetAllOrders();
         Task<ApiResponse<IEnumerable<Orders>>> GetOrdersByUserId(string userId);
         Task<ApiResponse<Orders>> GetOrderById(string userId, int id);
-        Task<ApiResponse<Orders>> UpdateOrder(string userId, UpdateOrderDTO dto);
+        Task<ApiResponse<Orders>> UpdateOrder(string userId, UpdateOrderDTO dto); // For use by other services
         Task<ApiResponse<string>> DeleteOrder(int id);
+        Task<ApiResponse<string>> CancelOrder(string userId, int orderId);
     }
 }

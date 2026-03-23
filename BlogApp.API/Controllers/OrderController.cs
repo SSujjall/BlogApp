@@ -75,5 +75,22 @@ namespace BlogApp.API.Controllers
             }
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpPost("cancel")]
+        public async Task<IActionResult> CancelOrder([FromBody] CancelOrderDto req)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
+            }
+            var response = await _orderService.CancelOrder(userId, req.OrderId);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response);
+            }
+            return Ok(response);
+        }
     }
 }
