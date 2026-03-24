@@ -22,12 +22,19 @@ const getMenuData =  (isAuthenticated) =>[
     type: "single",
   },
   isAuthenticated && {
+    icon: "workspace_premium",
+    name: "Subscriptions",
+    link: "/subscriptions",
+    type: "single",
+  },
+  isAuthenticated && {
     parentIcon: "settings",
     name: "Settings",
     type: "parent",
     children: [
       { icon: "account_circle", name: "Profile", link: "/user/profile" },
       { icon: "lock", name: "Password", link: "/user/password" },
+      { icon: "receipt_long", name: "Order History", link: "/settings/order-history" },
     ],
   },
 ].filter(Boolean);

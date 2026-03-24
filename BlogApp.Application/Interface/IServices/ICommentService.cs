@@ -1,6 +1,6 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Helpers.HelperModels;
-using BlogApp.Domain.Shared;
+using BlogApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;

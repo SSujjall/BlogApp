@@ -7,6 +7,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Enums;
 using BlogApp.Domain.Shared;
 using BlogApp.Infrastructure.Redis_Cache.Service;
 using System.Net;

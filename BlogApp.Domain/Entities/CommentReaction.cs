@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using BlogApp.Domain.Shared;
+using BlogApp.Domain.Enums;
 
 namespace BlogApp.Domain.Entities
 {

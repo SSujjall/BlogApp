@@ -45,5 +45,10 @@ namespace BlogApp.Infrastructure.Persistence.Contexts
         public DbSet<BlogReaction> BlogReactions { get; set; } = null!;
         public DbSet<CommentReaction> CommentReactions { get; set; } = null!;
         public DbSet<Notifications> Notifications { get; set; } = null!;
+        public DbSet<Subscriptions> Subscriptions { get; set; } = null!;
+        public DbSet<Orders> Orders { get; set; } = null!;
+        public DbSet<Payments> Payments { get; set; } = null!;
+        public DbSet<Refunds> Refunds { get; set; } = null!;
+        public DbSet<PaymentLogs> PaymentLogs { get; set; } = null!;
     }
 }

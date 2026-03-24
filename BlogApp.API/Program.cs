@@ -9,6 +9,8 @@ builder.Configuration.AddEnvironmentVariables();
 // Dependency Injection for DB Connection, Services and Repos.
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.AddHttpClient();
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

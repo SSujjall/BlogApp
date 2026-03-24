@@ -7,7 +7,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Shared;
+using BlogApp.Domain.Enums;
 
 namespace BlogApp.Infrastructure.Services
 {

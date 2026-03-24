@@ -5,7 +5,7 @@ using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Helpers.TokenHelper;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Shared;
+using BlogApp.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Infrastructure.Services
@@ -36,7 +36,8 @@ namespace BlogApp.Infrastructure.Services
                 {
                     UserName = registerDto.Username,
                     Email = registerDto.Email,
-                    SecurityStamp = Guid.NewGuid().ToString()
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    CurrentSubscriptionId = 1
                 };
                 #endregion
 
@@ -196,6 +197,14 @@ namespace BlogApp.Infrastructure.Services
             {
                 var errors = new Dictionary<string, string> { { "User", "Incorrect Email, user not found." } };
                 return ApiResponse<string>.Failed(errors, "User Not Found.");
+            }
+            if (user.EmailConfirmed)
+            {
+                return ApiResponse<string>.Failed(
+                    new() { { "EmailAlreadyConfirmed", "Email is already confirmed" } }, 
+                    "Email Confirmation Failed.", 
+                    HttpStatusCode.Conflict
+                );
             }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);

@@ -17,7 +17,7 @@ namespace BlogApp.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -284,6 +284,178 @@ namespace BlogApp.Infrastructure.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.Orders", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("SubscriptionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.PaymentLogs", b =>
+                {
+                    b.Property<int>("LogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RequestPayload")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponsePayload")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("LogId");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("PaymentLogs");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Payments", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Refunds", b =>
+                {
+                    b.Property<int>("RefundId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RefundId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RefundTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("RefundId");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("Refunds");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Subscriptions", b =>
+                {
+                    b.Property<int>("SubscriptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubscriptionId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DurationInMonths")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("SubscriptionId");
+
+                    b.ToTable("Subscriptions");
+
+                    b.HasData(
+                        new
+                        {
+                            SubscriptionId = 1,
+                            Description = "Default subscription with no benefits",
+                            DurationInMonths = 0,
+                            Name = "Basic",
+                            Price = 0.00m
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -313,22 +485,22 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2e9803a3-b500-44cf-a361-ec546b8550cd",
-                            ConcurrencyStamp = "2e9803a3-b500-44cf-a361-ec546b8550cd",
+                            Id = "bf610df8-18da-4f10-bbb2-f4667aee5427",
+                            ConcurrencyStamp = "bf610df8-18da-4f10-bbb2-f4667aee5427",
                             Name = "Superadmin",
                             NormalizedName = "SUPERADMIN"
                         },
                         new
                         {
-                            Id = "6412e810-0e11-452c-9574-e08c6914b137",
-                            ConcurrencyStamp = "6412e810-0e11-452c-9574-e08c6914b137",
+                            Id = "50e512b9-ae15-403a-8eb6-155e211d30fc",
+                            ConcurrencyStamp = "50e512b9-ae15-403a-8eb6-155e211d30fc",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d936edc5-7bed-4559-a62e-df3ec05e1c4c",
-                            ConcurrencyStamp = "d936edc5-7bed-4559-a62e-df3ec05e1c4c",
+                            Id = "de5eeb41-4885-4e91-9fbd-3ac39a0766a8",
+                            ConcurrencyStamp = "de5eeb41-4885-4e91-9fbd-3ac39a0766a8",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -497,8 +669,8 @@ namespace BlogApp.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "24a67db5-81c3-45ca-9ac0-79e84227503a",
-                            RoleId = "2e9803a3-b500-44cf-a361-ec546b8550cd"
+                            UserId = "07034e3e-80cf-4e84-9416-6be0d9c843b3",
+                            RoleId = "bf610df8-18da-4f10-bbb2-f4667aee5427"
                         });
                 });
 
@@ -525,30 +697,36 @@ namespace BlogApp.Infrastructure.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
+                    b.Property<int?>("CurrentSubscriptionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("RefreshTokenExpiry")
                         .HasColumnType("datetime2");
 
+                    b.HasIndex("CurrentSubscriptionId");
+
                     b.HasDiscriminator().HasValue("Users");
 
                     b.HasData(
                         new
                         {
-                            Id = "24a67db5-81c3-45ca-9ac0-79e84227503a",
+                            Id = "07034e3e-80cf-4e84-9416-6be0d9c843b3",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "42b53dea-6174-48dc-8ccf-2600ae001b95",
+                            ConcurrencyStamp = "9d307c92-d38d-4c46-8781-8374dfb0a824",
                             Email = "superadmin@blog.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "SUPERADMIN@BLOG.COM",
                             NormalizedUserName = "SUPERADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAELuBFMrnffXTf7iaoP0nWQHYppsutcrvhM78/f+Yu4Hd1TLQ1RtCCcZREHJyIUDC5g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHxJAH1GMvwnuoiOVgisjC1M5TXcZG7RBlM//AnJU1nQrKGam5WjEZzPUL8gbgFgNQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "accb7ccb-4f93-4ec8-8bb1-17e7449d9c79",
+                            SecurityStamp = "0b94672d-2c6c-49c1-afd6-0a38ab470a9d",
                             TwoFactorEnabled = false,
-                            UserName = "Superadmin"
+                            UserName = "Superadmin",
+                            CurrentSubscriptionId = 1
                         });
                 });
 
@@ -669,6 +847,66 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.Orders", b =>
+                {
+                    b.HasOne("BlogApp.Domain.Entities.Subscriptions", "Subscription")
+                        .WithMany("Orders")
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogApp.Domain.Entities.Users", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subscription");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.PaymentLogs", b =>
+                {
+                    b.HasOne("BlogApp.Domain.Entities.Payments", "Payment")
+                        .WithMany("PaymentLogs")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Payments", b =>
+                {
+                    b.HasOne("BlogApp.Domain.Entities.Orders", "Order")
+                        .WithMany("Payments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogApp.Domain.Entities.Users", "User")
+                        .WithMany("Payments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Refunds", b =>
+                {
+                    b.HasOne("BlogApp.Domain.Entities.Payments", "Payment")
+                        .WithMany("Refunds")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -720,6 +958,15 @@ namespace BlogApp.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.Users", b =>
+                {
+                    b.HasOne("BlogApp.Domain.Entities.Subscriptions", "CurrentSubscription")
+                        .WithMany("Users")
+                        .HasForeignKey("CurrentSubscriptionId");
+
+                    b.Navigation("CurrentSubscription");
+                });
+
             modelBuilder.Entity("BlogApp.Domain.Entities.Blogs", b =>
                 {
                     b.Navigation("Comments");
@@ -736,6 +983,25 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Navigation("Reactions");
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.Orders", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Payments", b =>
+                {
+                    b.Navigation("PaymentLogs");
+
+                    b.Navigation("Refunds");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Subscriptions", b =>
+                {
+                    b.Navigation("Orders");
+
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("BlogApp.Domain.Entities.Users", b =>
                 {
                     b.Navigation("BlogReactions");
@@ -747,6 +1013,10 @@ namespace BlogApp.Infrastructure.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

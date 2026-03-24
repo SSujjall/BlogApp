@@ -1,4 +1,5 @@
 ﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +16,8 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
             // seed superadmin role
             builder.Entity<IdentityRole>().HasData(new IdentityRole
             {
-                Name = BlogApp.Domain.Shared.UserRoles.Superadmin.ToString(),
-                NormalizedName = BlogApp.Domain.Shared.UserRoles.Superadmin.ToString().ToUpper(),
+                Name = UserRoles.Superadmin.ToString(),
+                NormalizedName = UserRoles.Superadmin.ToString().ToUpper(),
                 Id = superadminRoleId,
                 ConcurrencyStamp = superadminRoleId
             });
@@ -24,10 +25,20 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
             // seed admin role
             builder.Entity<IdentityRole>().HasData(new IdentityRole
             {
-                Name = BlogApp.Domain.Shared.UserRoles.Admin.ToString(),
-                NormalizedName = BlogApp.Domain.Shared.UserRoles.Admin.ToString().ToUpper(),
+                Name = UserRoles.Admin.ToString(),
+                NormalizedName = UserRoles.Admin.ToString().ToUpper(),
                 Id = adminRoleId,
                 ConcurrencyStamp = adminRoleId
+            });
+
+            // Seed default subscription
+            builder.Entity<Subscriptions>().HasData(new Subscriptions
+            {
+                SubscriptionId = 1,
+                Name = "Basic",
+                Price = 0.00m,
+                Description = "Default subscription with no benefits",
+                DurationInMonths = 0
             });
 
             // create new superadmin 
@@ -40,6 +51,7 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
                 NormalizedUserName = "SUPERADMIN",
                 EmailConfirmed = true,
                 SecurityStamp = Guid.NewGuid().ToString("D"),
+                CurrentSubscriptionId = 1
             };
 
             var passwordHash = new PasswordHasher<Users>();
@@ -120,6 +132,19 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
                 .WithMany()
                 .HasForeignKey(ch => ch.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Payment Configuration
+            builder.Entity<Payments>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Payments)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Payments>()
+                .HasOne(p => p.Order)
+                .WithMany(o => o.Payments)
+                .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public static void SeedUserRole(ModelBuilder builder)
@@ -129,8 +154,8 @@ namespace BlogApp.Infrastructure.Persistence.Seeders
             // seed user role
             builder.Entity<IdentityRole>().HasData(new IdentityRole
             {
-                Name = BlogApp.Domain.Shared.UserRoles.User.ToString(),
-                NormalizedName = BlogApp.Domain.Shared.UserRoles.User.ToString().ToUpper(),
+                Name = UserRoles.User.ToString(),
+                NormalizedName = UserRoles.User.ToString().ToUpper(),
                 Id = userRoleId,
                 ConcurrencyStamp = userRoleId
             });

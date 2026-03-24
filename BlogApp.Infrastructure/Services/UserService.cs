@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using BlogApp.Application.DTOs;
+using BlogApp.Application.Exceptions;
 using BlogApp.Application.Helpers.HelperModels;
 using BlogApp.Application.Interface.IRepositories;
 using BlogApp.Application.Interface.IServices;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using System.Net;
 
 namespace BlogApp.Infrastructure.Services
 {
@@ -109,6 +111,22 @@ namespace BlogApp.Infrastructure.Services
 
             errors = new Dictionary<string, string>() { { "User", "Internal error occured when updating user" } };
             return ApiResponse<UserProfileDTO>.Failed(errors, "User Update Failed.");
+        }
+
+        public async Task UpdateSubscription(string userId, int subscriptionId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user is null)
+            {
+                throw new ServiceException(
+                    new() { { "UserUpdateError", "User not found" } },
+                    HttpStatusCode.NotFound
+                );
+            }
+
+            user.CurrentSubscriptionId = subscriptionId;
+
+            // Note: SaveChangesAsync not called here — transaction in orchestrator commits everything at once
         }
     }
 }

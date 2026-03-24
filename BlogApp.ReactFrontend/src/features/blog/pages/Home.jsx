@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { getBlogs } from "../service/blogService";
 // import { showErrorToast } from "../../../common/utils/toastHelper";
 import Layout from "../../../components/layout/Layout";
@@ -13,6 +13,16 @@ const Home = () => {
   const [totalBlogs, setTotalBlogs] = useState(0);
   const { sortBy } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Handle payment gateway callbacks (eSewa sends ?data=, Khalti sends ?pidx=)
+  useEffect(() => {
+    const esewaData = searchParams.get("data");
+    const khaltiPidx = searchParams.get("pidx");
+    if (esewaData || khaltiPidx) {
+      navigate("/payments/result" + window.location.search, { replace: true });
+    }
+  }, []);
   const search = searchParams.get("search") || "";
   const pageSize = 10;
 

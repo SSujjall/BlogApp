@@ -33,6 +33,9 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.Google;
+using BlogApp.Application.Interface.IServices.IPaymentService;
+using BlogApp.Infrastructure.Services.PaymentService;
+using BlogApp.Domain.GlobalConfigs;
 
 namespace BlogApp.Infrastructure.DI
 {
@@ -157,6 +160,10 @@ namespace BlogApp.Infrastructure.DI
             // .Configure is used because the values for config might change in the future
             var googleConfig = configuration.GetSection("Authentications:Google");
             services.Configure<GoogleConfig>(googleConfig);
+
+            // settings the values of payment configuration
+            services.Configure<EsewaConfig>(configuration.GetSection("PaymentConfigs:Esewa"));
+            services.Configure<KhaltiConfig>(configuration.GetSection("PaymentConfigs:Khalti"));
             #endregion
 
             #region Register Repositories
@@ -166,6 +173,11 @@ namespace BlogApp.Infrastructure.DI
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddScoped<IBlogReactionRepository, BlogReactionRepository>();
             services.AddScoped<ICommentReactionRepository, CommentReactionRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IPaymentLogsRepository, PaymentLogsRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            //services.AddScoped<IRefundsRepository, RefundsRepository>();
+            services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             #endregion
 
             #region Register Services
@@ -182,6 +194,14 @@ namespace BlogApp.Infrastructure.DI
             services.AddSingleton<IBackgroundEmailQueue, BackgroundEmailQueue>();
             services.AddHostedService<EmailBackgroundService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IPaymentProviderFactory, PaymentProviderFactory>();
+            services.AddScoped<EsewaPaymentService>();
+            services.AddScoped<KhaltiPaymentService>();
+            services.AddScoped<ISubscriptionService, SubscriptionService>();
+            services.AddScoped<IPaymentOrchestrationService, PaymentOrchestrationService>();
+            //services.AddScoped<IRefundService, RefundService>();
             #endregion
 
             #region Register Redis Distributed Cache Instance
