@@ -200,6 +200,7 @@ namespace BlogApp.Infrastructure.DI
             services.AddScoped<EsewaPaymentService>();
             services.AddScoped<KhaltiPaymentService>();
             services.AddScoped<ISubscriptionService, SubscriptionService>();
+            services.AddScoped<IPaymentOrchestrationService, PaymentOrchestrationService>();
             //services.AddScoped<IRefundService, RefundService>();
             #endregion
 

@@ -102,15 +102,16 @@ const OrderHistory = () => {
                   <p className="font-semibold text-gray-900 truncate">
                     {order.subscription?.name ?? "Unknown Plan"}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Order #{order.orderId} &middot;{" "}
-                    {formatDate(order.createdAt)}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 mt-0.5">
                     {order.subscription?.durationInMonths === 0
                       ? "Lifetime"
                       : `${order.subscription?.durationInMonths} months`}
                   </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Order #{order.orderId} &middot;{" "}
+                    {formatDate(order.createdAt)}
+                  </p>
+                  
                 </div>
 
                 <div className="flex flex-col items-end gap-2 shrink-0">

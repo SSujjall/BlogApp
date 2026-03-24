@@ -5,6 +5,7 @@ using BlogApp.Domain.Entities;
 using BlogApp.Domain.GlobalConfigs;
 using Microsoft.Extensions.Options;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -21,6 +22,7 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         {
             _config = config.Value;
             _httpClient = httpClient;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Key", _config.SecretKey);
         }
 
         public async Task<PaymentInitiateResponseDTO> ProcessPaymentAsync(PaymentRequestDTO dto)
@@ -48,8 +50,6 @@ namespace BlogApp.Infrastructure.Services.PaymentService
 
             var json = JsonSerializer.Serialize(khaltiReq);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Key {_config.SecretKey}");
-
             var apiResponse = await _httpClient.PostAsync(_config.InitiateUrl, content);
             if (!apiResponse.IsSuccessStatusCode)
             {
@@ -120,9 +120,6 @@ namespace BlogApp.Infrastructure.Services.PaymentService
 
             var json = JsonSerializer.Serialize(reqBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Key {_config.SecretKey}");
-
             var apiResponse = await _httpClient.PostAsync(_config.LookupUrl, content);
             var responseJson = await apiResponse.Content.ReadAsStringAsync();
             var responseDto = JsonSerializer.Deserialize<KhaltiCheckStatusResponseDTO>(responseJson);

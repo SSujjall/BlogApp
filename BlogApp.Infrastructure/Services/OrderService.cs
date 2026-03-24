@@ -13,8 +13,6 @@ namespace BlogApp.Infrastructure.Services
     public class OrderService(
         IOrderRepository _orderRepo,
         ISubscriptionRepository _subsRepo,
-        IUserRepository _userRepo,
-        IPaymentRepository _paymentRepo,
         IMapper _mapper,
         ITransactionService _txnService
     ) : IOrderService
@@ -59,11 +57,6 @@ namespace BlogApp.Infrastructure.Services
             }
         }
 
-        public Task<ApiResponse<string>> DeleteOrder(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         // For admins only
         public async Task<ApiResponse<IEnumerable<Orders>>> GetAllOrders()
         {
@@ -96,68 +89,54 @@ namespace BlogApp.Infrastructure.Services
             return ApiResponse<Orders>.Success(order, "Order retrieved successfully", HttpStatusCode.OK);
         }
 
-        public async Task<ApiResponse<Orders>> UpdateOrder(string userId, UpdateOrderDTO dto)
+        public async Task<InternalOrderCancellationResultDTO> CancelOrder(string userId, int orderId)
         {
-            var order = await _orderRepo.GetByIdAsync(dto.OrderId);
-            if (order is null || order.UserId != userId)
+            var order = await _orderRepo.FindSingleByConditionAsync(
+                o => o.OrderId == orderId
+                        && o.UserId == userId
+                        && o.Status != OrderStatus.Completed
+                        && o.Status != OrderStatus.Canceled
+            );
+
+            if (order == null)
             {
-                return ApiResponse<Orders>.Failed(
-                    new() { { "OrderNotFound", $"No order found." } },
-                    "Failed to retrieve order",
+                throw new ServiceException(
+                    new() { { "OrderNotFound", "Order not found or already processed" } },
                     HttpStatusCode.NotFound
                 );
             }
 
-            order.Status = dto.Status;
-            order.UpdatedAt = dto.UpdatedAt;
-            await _orderRepo.SaveChangesAsync();
+            // Update order
+            order.Status = OrderStatus.Canceled;
+            order.UpdatedAt = DateTime.UtcNow;
 
-            return ApiResponse<Orders>.Success(order, "Order updated successfully", HttpStatusCode.OK);
+            return new InternalOrderCancellationResultDTO
+            {
+                OrderId = orderId,
+                UserId = userId
+            };
         }
 
-        public async Task<ApiResponse<string>> CancelOrder(string userId, int orderId)
+        public async Task CompleteOrder(string userId, int orderId)
         {
-            return await _txnService.ExecuteInTransactionAsync(async () =>
+            var order = await _orderRepo.FindSingleByConditionAsync(
+                o => o.OrderId == orderId && o.UserId == userId
+            );
+
+            if (order is null || order.Status == OrderStatus.Canceled)
             {
-                var order = await _orderRepo.FindSingleByConditionAsync(
-                    o => o.OrderId == orderId
-                         && o.UserId == userId
-                         && o.Status != OrderStatus.Completed
-                         && o.Status != OrderStatus.Canceled
+                throw new ServiceException(
+                    new() { { "OrderStatusError", "Order not found or cannot be completed" } },
+                    HttpStatusCode.BadRequest
                 );
+            }
 
-                if (order == null)
-                {
-                    throw new ServiceException(
-                        new() { { "OrderNotFound", "Order not found or already processed" } },
-                        HttpStatusCode.NotFound
-                    );
-                }
+            // Idempotent — already completed is fine, orchestrator handles this via AlreadyVerified
+            if (order.Status == OrderStatus.Completed) return;
 
-                // Update order
-                order.Status = OrderStatus.Canceled;
-                order.UpdatedAt = DateTime.UtcNow;
+            order.Status = OrderStatus.Completed;
 
-                // Cancel payments 
-                var payments = await _paymentRepo.FindAllByConditionAsync(
-                    x => x.OrderId == orderId
-                         && x.UserId == userId
-                         && x.Status != PaymentStatus.Success
-                );
-                foreach (var payment in payments)
-                {
-                    if (payment.Status != PaymentStatus.Canceled)
-                    {
-                        payment.Status = PaymentStatus.Canceled;
-                    }
-                }
-
-                return ApiResponse<string>.Success(
-                    null,
-                    "Order canceled successfully",
-                    HttpStatusCode.OK
-                );
-            });
+            // Note: SaveChangesAsync not called here — transaction in orchestrator commits everything at once
         }
     }
 }

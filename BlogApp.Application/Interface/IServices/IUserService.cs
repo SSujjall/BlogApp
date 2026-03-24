@@ -10,5 +10,6 @@ namespace BlogApp.Application.Interface.IServices
         Task<ApiResponse<string>> DeleteUser(string id);
         Task<ApiResponse<string>> ChangeUserPassword(UpdateUserPwDTO updateUserDTO);
         Task<ApiResponse<UserProfileDTO>> UpdateUserDetail(UserProfileReqDTO dto);
+        Task UpdateSubscription(string userId, int subscriptionId);
     }
 }

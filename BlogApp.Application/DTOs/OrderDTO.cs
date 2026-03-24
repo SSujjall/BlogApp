@@ -7,15 +7,14 @@ namespace BlogApp.Application.DTOs
         public int SubscriptionId { get; set; }
     }
 
-    public class UpdateOrderDTO
-    {
-        public int OrderId { get; set; }
-        public OrderStatus Status { get; set; }
-        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
-    }
-
     public class CancelOrderDto
     {
         public int OrderId { get; set; }
+    }
+
+    public class InternalOrderCancellationResultDTO
+    {
+        public int OrderId { get; set; }
+        public string UserId { get; set; }
     }
 }

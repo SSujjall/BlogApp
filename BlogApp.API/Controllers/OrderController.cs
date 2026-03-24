@@ -1,6 +1,7 @@
 ﻿using BlogApp.Application.DTOs;
 using BlogApp.Application.Exceptions;
 using BlogApp.Application.Interface.IServices;
+using BlogApp.Application.Interface.IServices.IPaymentService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -10,7 +11,8 @@ namespace BlogApp.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class OrderController(
-        IOrderService _orderService
+        IOrderService _orderService,
+        IPaymentOrchestrationService _orchestrationService
     ) : ControllerBase
     {
         [Authorize]
@@ -85,7 +87,9 @@ namespace BlogApp.API.Controllers
             {
                 throw new ServiceException(new() { { "Unauthorized", "User not authorized" } }, HttpStatusCode.Unauthorized);
             }
-            var response = await _orderService.CancelOrder(userId, req.OrderId);
+
+            // Routes to orchestration service — not OrderService directly
+            var response = await _orchestrationService.HandleOrderCancellation(userId, req.OrderId);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 return StatusCode((int)response.StatusCode, response);

@@ -9,7 +9,6 @@ namespace BlogApp.Application.Mappings
         public OrderMappingProfile()
         {
             CreateMap<Orders, CreateOrderDTO>().ReverseMap();
-            CreateMap<Orders, UpdateOrderDTO>().ReverseMap();
         }
     }
 }

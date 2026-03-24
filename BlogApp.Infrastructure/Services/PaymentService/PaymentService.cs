@@ -17,25 +17,19 @@ namespace BlogApp.Infrastructure.Services.PaymentService
         private readonly IPaymentRepository _paymentRepo;
         private readonly IPaymentProviderFactory _paymentFactory;
         private readonly IOrderService _orderService;
-        private readonly IOrderRepository _orderRepo;
         private readonly IMapper _mapper;
-        private readonly ITransactionService _txnService;
 
         public PaymentService(
             IPaymentRepository paymentRepo,
             IPaymentProviderFactory paymentFactory,
             IOrderService orderService,
-            IOrderRepository orderRepo,
-            IMapper mapper,
-            ITransactionService txnService
+            IMapper mapper
         )
         {
             _paymentRepo = paymentRepo;
             _paymentFactory = paymentFactory;
             _orderService = orderService;
-            _orderRepo = orderRepo;
             _mapper = mapper;
-            _txnService = txnService;
         }
 
         public async Task<ApiResponse<PaymentInitiateResponseDTO>> InitiatePayment(string userId, CreatePaymentDTO dto)
@@ -49,10 +43,10 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                     HttpStatusCode.BadRequest
                 );
             }
-            if (orderRes.Data.Status == OrderStatus.Completed)
+            if (orderRes.Data.Status == OrderStatus.Completed || orderRes.Data.Status == OrderStatus.Canceled)
             {
                 return ApiResponse<PaymentInitiateResponseDTO>.Failed(
-                    new() { { "OrderError", $"Order already completed" } },
+                    new() { { "OrderError", $"Order is no longer payable" } },
                     "Payment initiation failed",
                     HttpStatusCode.Conflict
                 );
@@ -112,88 +106,75 @@ namespace BlogApp.Infrastructure.Services.PaymentService
             );
         }
 
-        public async Task<ApiResponse<bool>> VerifyPayment(string userId, VerifyPaymentDTO dto)
+        public async Task<InternalPaymentVerificationResultDTO> VerifyPayment(string userId, VerifyPaymentDTO dto)
         {
-            return await _txnService.ExecuteInTransactionAsync(async () =>
+            var payment = await _paymentRepo.FindSingleByConditionAsync(
+                x => x.ExternalTransactionId == dto.ExternalTxnId && x.UserId == userId
+            );
+            if (payment is null)
             {
-                var payment = await _paymentRepo.FindSingleByConditionAsync(
-                    x => x.ExternalTransactionId == dto.ExternalTxnId && x.UserId == userId
+                throw new ServiceException(
+                    new() { { "PaymentNotFound", "Payment record not found" } },
+                    HttpStatusCode.NotFound
                 );
-                if (payment is null)
+            }
+            if (payment.Status == PaymentStatus.Success)
+            {
+                return new InternalPaymentVerificationResultDTO
                 {
-                    throw new ServiceException(
-                        new() { { "PaymentNotFound", "Payment record not found" } },
-                        HttpStatusCode.NotFound
-                    );
-                }
-                if (payment.Status == PaymentStatus.Success)
-                {
-                    return ApiResponse<bool>.Success(true, "Payment already verified", HttpStatusCode.OK);
-                }
-                if (payment.Status == PaymentStatus.Canceled || payment.Status == PaymentStatus.Failed)
-                {
-                    throw new ServiceException(
-                        new() { { "PaymentStatusError", "Payment cannot be verified" } }, 
-                        HttpStatusCode.BadRequest
-                    );
-                }
-
-                var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
-                var verificationResult = await paymentProvider.VerifyPaymentAsync(dto);
-
-                if (!verificationResult.IsSuccess)
-                {
-                    throw new ServiceException(
-                        new() { { "PaymentVerification", "Payment verification failed" } },
-                        HttpStatusCode.BadRequest
-                    );
-                }
-                if (verificationResult.ExternalTxnId != payment.ExternalTransactionId)
-                {
-                    throw new ServiceException(
-                        new() { { "TransactionMismatch", "Transaction mismatch" } },
-                        HttpStatusCode.BadRequest
-                    );
-                }
-
-                payment.Status = PaymentStatus.Success;
-                //await _paymentRepo.SaveChangesAsync(); // No need to call SaveChangesAsync here, it will be called at the end of the transaction in the transaction service
-
-                // Check if order is already fullfilled, if yes then throw error
-                var order = await _orderRepo.FindSingleByConditionAsync(
-                    o => o.OrderId == payment.OrderId && o.UserId == userId
+                    AlreadyVerified = false,
+                    OrderId = payment.OrderId,
+                    UserId = userId,
+                    SubscriptionId = payment.Order.SubscriptionId
+                };
+            }
+            if (payment.Status == PaymentStatus.Canceled || payment.Status == PaymentStatus.Failed)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentStatusError", "Payment cannot be verified" } }, 
+                    HttpStatusCode.BadRequest
                 );
-                if (order == null || 
-                    order.Status == OrderStatus.Completed ||
-                    order.Status == OrderStatus.Canceled
-                )
-                {
-                    throw new ServiceException(
-                        new() { { "OrderStatusError", "Order not found or cannot be verified" } },
-                        HttpStatusCode.BadRequest
-                    );
-                }
+            }
 
-                // Update order status
-                order.Status = OrderStatus.Completed;
+            var paymentProvider = _paymentFactory.GetPaymentProvider(payment.Provider);
+            var verificationResult = await paymentProvider.VerifyPaymentAsync(dto);
 
-                var otherPaymentForSameOrderId = await _paymentRepo.FindAllByConditionAsync(
-                    p => p.OrderId == payment.OrderId 
-                        && p.PaymentId != payment.PaymentId
-                        && p.Status != PaymentStatus.Success
+            if (!verificationResult.IsSuccess)
+            {
+                throw new ServiceException(
+                    new() { { "PaymentVerification", "Payment verification failed" } },
+                    HttpStatusCode.BadRequest
                 );
-
-                foreach (var paymentItem in otherPaymentForSameOrderId)
-                {
-                    paymentItem.Status = PaymentStatus.Canceled;
-                }
-
-                return ApiResponse<bool>.Success(
-                    true,
-                    "Payment verified and order updated successfully",
-                    HttpStatusCode.OK
+            }
+            if (verificationResult.ExternalTxnId != payment.ExternalTransactionId)
+            {
+                throw new ServiceException(
+                    new() { { "TransactionMismatch", "Transaction mismatch" } },
+                    HttpStatusCode.BadRequest
                 );
-            });
+            }
+
+            payment.Status = PaymentStatus.Success; // Update payment's status
+
+            var otherPaymentForSameOrderId = await _paymentRepo.FindAllByConditionAsync(
+                p => p.OrderId == payment.OrderId 
+                    && p.PaymentId != payment.PaymentId
+                    && p.Status != PaymentStatus.Success
+            );
+
+            // cancel the child payments for one order after a successful payment
+            foreach (var paymentItem in otherPaymentForSameOrderId)
+            {
+                paymentItem.Status = PaymentStatus.Canceled;
+            }
+
+            return new InternalPaymentVerificationResultDTO
+            {
+                AlreadyVerified = false,
+                OrderId = payment.OrderId,
+                UserId = userId,
+                SubscriptionId = payment.Order.SubscriptionId 
+            };
         }
 
         public async Task<ApiResponse<object>> CheckPaymentStatus(int paymentId)
@@ -286,6 +267,23 @@ namespace BlogApp.Infrastructure.Services.PaymentService
                 data,
                 "Retry initiated"
             );
+        }
+
+        public async Task CancelPaymentsForOrder(string userId, int orderId)
+        {
+            var payments = await _paymentRepo.FindAllByConditionAsync(
+                x => x.OrderId == orderId
+                     && x.UserId == userId
+                     && x.Status != PaymentStatus.Success
+                     && x.Status != PaymentStatus.Canceled
+            );
+
+            foreach (var payment in payments)
+            {
+                payment.Status = PaymentStatus.Canceled;
+            }
+
+            // Note: SaveChangesAsync not called here — orchestrator transaction commits everything
         }
     }
 }

@@ -51,4 +51,12 @@ namespace BlogApp.Application.DTOs.PaymentDTOs
         public decimal TotalAmount { get; set; }
         public string RefTxnId { get; set; }
     }
+
+    public class InternalPaymentVerificationResultDTO
+    {
+        public bool AlreadyVerified { get; set; }
+        public int OrderId { get; set; }
+        public string UserId { get; set; }
+        public int SubscriptionId { get; set; }
+    }
 }
